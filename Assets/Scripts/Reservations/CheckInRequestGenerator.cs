@@ -9,7 +9,7 @@ public static class CheckInRequestGenerator
 
         foreach (RoomData room in allRooms)
         {
-            if (room.state == RoomState.Libre)
+            if (room != null && room.state == RoomState.Libre)
                 freeRooms.Add(room);
         }
 
@@ -25,6 +25,8 @@ public static class CheckInRequestGenerator
         request.mealPlan = UnityEngine.Random.value > 0.5f
             ? MealPlan.Completo
             : MealPlan.SoloAlojamiento;
+
+        request.stayDays = Random.Range(1, 4);
 
         return request;
     }

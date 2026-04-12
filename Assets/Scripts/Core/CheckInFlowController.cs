@@ -134,7 +134,12 @@ public class CheckInFlowController : MonoBehaviour
         }
 
         selectedRoom.state = RoomState.Ocupada;
-        Debug.Log("Habitación asignada correctamente: " + selectedRoom.roomId);
+        selectedRoom.needsCleaning = false;
+        selectedRoom.reservedUntilDay = DayManager.Instance.CurrentDay + currentRequest.stayDays - 1;
+
+        Debug.Log("Habitación asignada correctamente: " + selectedRoom.roomId +
+                  " | Días: " + currentRequest.stayDays +
+                  " | Ocupada hasta el día: " + selectedRoom.reservedUntilDay);
 
         CloseCheckIn();
     }
