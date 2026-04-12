@@ -98,7 +98,7 @@ public class CheckInDialogueController : MonoBehaviour
         dialogueText.text = "";
         currentLineFull = lines[index];
 
-        Debug.Log("Mostrando línea: " + currentLineFull);
+        Debug.Log("Mostrando linea: " + currentLineFull);
 
         if (typingCo != null) StopCoroutine(typingCo);
         typingCo = StartCoroutine(TypeLine(currentLineFull));
@@ -119,7 +119,7 @@ public class CheckInDialogueController : MonoBehaviour
 
     private void EndDialogue()
     {
-        Debug.Log("Diálogo terminado.");
+        Debug.Log("Dialogo terminado.");
 
         IsDialogueActive = false;
         dialogueBox.SetActive(false);
@@ -132,7 +132,7 @@ public class CheckInDialogueController : MonoBehaviour
 
         if (allSprites == null || allSprites.Length == 0)
         {
-            Debug.LogWarning($"No encontré sprites en Resources/{customersResourcesPath}");
+            Debug.LogWarning($"No hay sprites en Resources/{customersResourcesPath}");
             return null;
         }
 
@@ -148,7 +148,7 @@ public class CheckInDialogueController : MonoBehaviour
 
         if (firstFrameSprites.Count == 0)
         {
-            Debug.LogWarning("No encontré sprites terminados en _0. Usaré el primero disponible.");
+            Debug.LogWarning("No hay sprites terminados en _0. Se va a usar el primero.");
             return allSprites[0];
         }
 

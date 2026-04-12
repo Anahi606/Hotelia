@@ -8,7 +8,8 @@ public enum RoomState
 {
     Libre,
     Ocupada,
-    Limpieza
+    Sucia,
+    Limpiando
 }
 
 public enum MealPlan
