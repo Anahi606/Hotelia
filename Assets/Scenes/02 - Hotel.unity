@@ -20333,6 +20333,50 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1.0196953, y: 1.5219374}
   m_EdgeRadius: 0
+--- !u!1 &242557573
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 242557575}
+  - component: {fileID: 242557574}
+  m_Layer: 0
+  m_Name: UIManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &242557574
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 242557573}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50b5f73f90c58ba49aacdd110b55e791, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIManager
+--- !u!4 &242557575
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 242557573}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 986.5, y: 540, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &267946729
 GameObject:
   m_ObjectHideFlags: 0
@@ -22276,6 +22320,7 @@ MonoBehaviour:
   - {fileID: 1825304331}
   - {fileID: 942595618}
   - {fileID: 1515709733}
+  playerMovement: {fileID: 0}
   roomButtons:
   - {fileID: 576153465}
   - {fileID: 590389475}
@@ -34770,3 +34815,4 @@ SceneRoots:
   - {fileID: 797364210}
   - {fileID: 1318671292}
   - {fileID: 1021113796}
+  - {fileID: 242557575}
