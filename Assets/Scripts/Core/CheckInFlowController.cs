@@ -22,6 +22,9 @@ public class CheckInFlowController : MonoBehaviour
     [Header("Rooms")]
     public RoomData[] allRooms;
 
+    [Header("Player")]
+    public PlayerMovement playerMovement;
+
     public bool IsCheckInActive { get; private set; }
 
     private CheckInRequest currentRequest;
@@ -46,6 +49,8 @@ public class CheckInFlowController : MonoBehaviour
         }
 
         IsCheckInActive = true;
+        UIManager.Instance?.RegisterPanelOpen();
+        playerMovement?.StopPlayer();
 
         if (checkInScreen != null) checkInScreen.SetActive(true);
         if (mapPanel != null) mapPanel.SetActive(false);
@@ -147,6 +152,7 @@ public class CheckInFlowController : MonoBehaviour
     public void CloseCheckIn()
     {
         IsCheckInActive = false;
+        UIManager.Instance?.RegisterPanelClose();
 
         if (checkInScreen != null) checkInScreen.SetActive(false);
         if (mapPanel != null) mapPanel.SetActive(false);
