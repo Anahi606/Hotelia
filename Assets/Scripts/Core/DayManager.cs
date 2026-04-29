@@ -39,6 +39,7 @@ public class DayManager : MonoBehaviour
             {
                 room.state = RoomState.Sucia;
                 room.needsCleaning = true;
+                room.ClearGuest();
 
                 Debug.Log("La habitación " + room.roomId + " terminó su reserva y ahora está sucia.");
             }

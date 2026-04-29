@@ -5,7 +5,7 @@ public class CheckInFlowController : MonoBehaviour
     [Header("Main Panels")]
     public GameObject checkInScreen;
     public GameObject mapPanel;
-    public GameObject reservationPanel;
+    //public GameObject reservationPanel;
     public GameObject resultPanel;
     public GameObject noRoomsPanel;
 
@@ -33,6 +33,13 @@ public class CheckInFlowController : MonoBehaviour
     [Header("Room Buttons")]
     public RoomButtonUI[] roomButtons;
 
+    [Header("STP")]
+    public GuestSegment selectedSegment;
+    public OfferType selectedOffer;
+
+    [Header("Result UI")]
+    public CheckInResultPanelUI resultPanelUI;
+
     public void StartCheckIn()
     {
         if (IsCheckInActive)
@@ -49,12 +56,11 @@ public class CheckInFlowController : MonoBehaviour
         }
 
         IsCheckInActive = true;
-        UIManager.Instance?.RegisterPanelOpen();
-        playerMovement?.StopPlayer();
+        playerMovement?.SetMovementEnabled(false);
 
         if (checkInScreen != null) checkInScreen.SetActive(true);
         if (mapPanel != null) mapPanel.SetActive(false);
-        if (reservationPanel != null) reservationPanel.SetActive(false);
+        //if (reservationPanel != null) reservationPanel.SetActive(false);
         if (resultPanel != null) resultPanel.SetActive(false);
         if (roomInfoPanel != null) roomInfoPanel.gameObject.SetActive(false);
 
@@ -64,6 +70,13 @@ public class CheckInFlowController : MonoBehaviour
         {
             Debug.Log("No se pudo generar una reserva válida.");
             IsCheckInActive = false;
+            playerMovement?.SetMovementEnabled(true);
+
+            if (checkInScreen != null) checkInScreen.SetActive(false);
+            if (mapPanel != null) mapPanel.SetActive(false);
+            if (resultPanel != null) resultPanel.SetActive(false);
+            if (roomInfoPanel != null) roomInfoPanel.gameObject.SetActive(false);
+
             return;
         }
 
@@ -138,27 +151,76 @@ public class CheckInFlowController : MonoBehaviour
             return;
         }
 
-        selectedRoom.state = RoomState.Ocupada;
-        selectedRoom.needsCleaning = false;
-        selectedRoom.reservedUntilDay = DayManager.Instance.CurrentDay + currentRequest.stayDays - 1;
+        selectedRoom.AssignGuest(currentRequest, DayManager.Instance.CurrentDay);
 
-        Debug.Log("Habitación asignada correctamente: " + selectedRoom.roomId +
-                  " | Días: " + currentRequest.stayDays +
-                  " | Ocupada hasta el día: " + selectedRoom.reservedUntilDay);
+        Debug.Log("Habitación asignada correctamente: " + selectedRoom.roomId);
 
-        CloseCheckIn();
+        selectedSegment = currentRequest.correctSegment;
+        selectedOffer = currentRequest.bestOffer;
+
+        bool segmentCorrect = selectedSegment == currentRequest.correctSegment;
+        bool offerCorrect = selectedOffer == currentRequest.bestOffer;
+
+        int satisfaction = 50;
+        int revenue = 100;
+
+        if (segmentCorrect) satisfaction += 20;
+        else satisfaction -= 10;
+
+        if (offerCorrect)
+        {
+            satisfaction += 20;
+            revenue += 50;
+        }
+        else
+        {
+            satisfaction -= 10;
+        }
+
+        KPIManager.Instance?.RegisterCheckInResult(segmentCorrect, offerCorrect, satisfaction, revenue);
+
+        if (mapPanel != null) mapPanel.SetActive(false);
+        if (roomInfoPanel != null) roomInfoPanel.gameObject.SetActive(false);
+
+        if (resultPanel != null && resultPanelUI != null)
+        {
+            resultPanel.SetActive(true);
+            resultPanelUI.Show(segmentCorrect, offerCorrect, satisfaction, revenue);
+
+            IsCheckInActive = false;
+            playerMovement?.SetMovementEnabled(true);
+
+            if (computerHighlight != null) computerHighlight.SetActive(false);
+            if (computerInteractable != null) computerInteractable.SetEnabled(false);
+
+            selectedRoom = null;
+        }
+        else
+        {
+            CloseCheckIn();
+        }
     }
 
     public void CloseCheckIn()
     {
+        Debug.Log("CloseCheckIn llamado");
+
         IsCheckInActive = false;
-        UIManager.Instance?.RegisterPanelClose();
 
         if (checkInScreen != null) checkInScreen.SetActive(false);
         if (mapPanel != null) mapPanel.SetActive(false);
+        if (resultPanel != null) resultPanel.SetActive(false);
         if (roomInfoPanel != null) roomInfoPanel.gameObject.SetActive(false);
+        if (noRoomsPanel != null) noRoomsPanel.SetActive(false);
+
+        if (computerHighlight != null) computerHighlight.SetActive(false);
+        if (computerInteractable != null) computerInteractable.SetEnabled(false);
 
         selectedRoom = null;
+
+        playerMovement?.SetMovementEnabled(true);
+
+        Debug.Log("Check-in cerrado por completo");
     }
 
     bool HasFreeRooms()
@@ -180,5 +242,25 @@ public class CheckInFlowController : MonoBehaviour
         if (room.bedCount < request.guestCount) return false;
 
         return true;
+    }
+
+    public void OpenReservationPanel()
+    {
+        if (checkInScreen != null) checkInScreen.SetActive(false);
+        if (mapPanel != null) mapPanel.SetActive(false);
+        if (roomInfoPanel != null) roomInfoPanel.gameObject.SetActive(false);
+        //if (reservationPanel != null) reservationPanel.SetActive(true);
+    }
+
+    public void SelectSegment(int segmentIndex)
+    {
+        selectedSegment = (GuestSegment)segmentIndex;
+        Debug.Log("Segmento seleccionado: " + selectedSegment);
+    }
+
+    public void SelectOffer(int offerIndex)
+    {
+        selectedOffer = (OfferType)offerIndex;
+        Debug.Log("Oferta seleccionada: " + selectedOffer);
     }
 }

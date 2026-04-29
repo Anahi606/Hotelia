@@ -1,12 +1,20 @@
+using UnityEngine;
+
 [System.Serializable]
 public class CheckInRequest
 {
+    [Header("Operativo")]
     public bool needsAccessibleRoom;
     public BedType bedType;
     public int guestCount;
     public MealPlan mealPlan;
     public int stayDays;
 
+    [Header("STP / Comercial")]
+    public GuestSegment correctSegment;
+    public OfferType bestOffer;
+    public string travelReason;
+    public int budgetLevel;
     public string[] GetDialogueLines()
     {
         string accesible = needsAccessibleRoom
@@ -25,6 +33,8 @@ public class CheckInRequest
             ? "Me quedaré 1 día."
             : "Me quedaré " + stayDays + " días.";
 
+        string motivo = "Vengo por " + travelReason + ".";
+
         return new string[]
         {
             "Hola, vengo a hacer check-in.",
@@ -33,6 +43,7 @@ public class CheckInRequest
             "Somos " + guestCount + " huésped" + (guestCount > 1 ? "es." : "."),
             comidas,
             dias,
+            motivo,
             "Gracias."
         };
     }

@@ -4,9 +4,11 @@ using UnityEngine.InputSystem;
 public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] private float moveSpeed = 5f;
+
     private Rigidbody2D rb;
     private Animator animator;
     private Vector2 moveInput;
+    private bool canMove = true;
 
     private void Awake()
     {
@@ -16,7 +18,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (UIManager.Instance != null && UIManager.Instance.IsAnyPanelOpen)
+        if (!canMove)
         {
             rb.linearVelocity = Vector2.zero;
             return;
@@ -27,8 +29,7 @@ public class PlayerMovement : MonoBehaviour
 
     public void Move(InputAction.CallbackContext context)
     {
-        //Si hay panel abierto forzar reset y salir...
-        if (UIManager.Instance != null && UIManager.Instance.IsAnyPanelOpen)
+        if (!canMove)
         {
             moveInput = Vector2.zero;
             rb.linearVelocity = Vector2.zero;
@@ -59,6 +60,16 @@ public class PlayerMovement : MonoBehaviour
         animator.SetFloat("InputX", 0f);
         animator.SetFloat("InputY", 0f);
     }
+
+    public void SetMovementEnabled(bool enabled)
+    {
+        canMove = enabled;
+
+        if (!canMove)
+        {
+            StopPlayer();
+        }
+    }
 }
 
-//Tengo sueño
+//Tengo sueño...
