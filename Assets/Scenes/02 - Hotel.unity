@@ -119,6 +119,50 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &4489350
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4489352}
+  - component: {fileID: 4489353}
+  m_Layer: 0
+  m_Name: SceneSystems
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4489352
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4489350}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 11.03827, y: 2.3805, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4489353
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4489350}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76525ef598a0f82429c7dfff2bd7a2ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
 --- !u!1 &15385623
 GameObject:
   m_ObjectHideFlags: 0
@@ -393,6 +437,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 90426687}
   m_CullTransparentMesh: 1
+--- !u!1 &123626797
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 123626798}
+  - component: {fileID: 123626799}
+  m_Layer: 0
+  m_Name: NPCEnter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &123626798
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 123626797}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.76, y: -0.11, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1741535507}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &123626799
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 123626797}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6428ef658d2373b49b857e304540a139, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerSpawnPoint
+  spawnId: RoomDoor_01
 --- !u!1 &153976458
 GameObject:
   m_ObjectHideFlags: 0
@@ -20389,6 +20478,7 @@ GameObject:
   - component: {fileID: 193829603}
   - component: {fileID: 193829605}
   - component: {fileID: 193829604}
+  - component: {fileID: 193829606}
   m_Layer: 0
   m_Name: Door02
   m_TagString: Untagged
@@ -20408,7 +20498,9 @@ Transform:
   m_LocalPosition: {x: 9, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1367499954}
+  - {fileID: 2045559920}
   m_Father: {fileID: 1021113796}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &193829604
@@ -20424,6 +20516,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   roomData: {fileID: 458417151}
+  npcExitSpawnPoint: {fileID: 1367499954}
 --- !u!61 &193829605
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -20470,6 +20563,73 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1.0196953, y: 1.5219374}
   m_EdgeRadius: 0
+--- !u!114 &193829606
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 193829602}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f51334e5e863f014abba02f8de381b78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NPCSceneExit
+  sourceArea: 1
+  destinationSceneName: 03 - Bedroom
+  destinationArea: 0
+  useExactDestinationPosition: 0
+  destinationPosition: {x: 0, y: 0, z: 0}
+  destinationSpawnId: 
+  onlyAssignedRoom: 1
+  roomId: 02
+  walkTarget: {fileID: 2045559920}
+--- !u!1 &240086729
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 240086730}
+  - component: {fileID: 240086731}
+  m_Layer: 0
+  m_Name: GuestSpawn_Hotel
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &240086730
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 240086729}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -6.12, y: 7.45, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1641959017}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &240086731
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 240086729}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 138700a1ee0654349871be7a0b615a71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GuestSpawnPoint
+  spawnId: HotelDefault
+  area: 1
 --- !u!1 &267946729
 GameObject:
   m_ObjectHideFlags: 0
@@ -20975,6 +21135,51 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   flowController: {fileID: 724221403}
+--- !u!1 &332969083
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 332969084}
+  - component: {fileID: 332969085}
+  m_Layer: 0
+  m_Name: NPCEnter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &332969084
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 332969083}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.74, y: -0.14, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 594959943}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &332969085
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 332969083}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6428ef658d2373b49b857e304540a139, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerSpawnPoint
+  spawnId: RoomDoor_04
 --- !u!1 &350345613
 GameObject:
   m_ObjectHideFlags: 0
@@ -21006,6 +21211,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ChangeScene
   sceneBuildIndex: 2
+  destinationPlayerSpawnId: 
+  useSelectedRoomDoorSpawn: 0
+  roomDoorSpawnPrefix: RoomDoor_
 --- !u!61 &350345615
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -21064,8 +21272,145 @@ Transform:
   m_LocalPosition: {x: -17.64138, y: 1.76172, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 350961476}
   m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &350961475
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 350961476}
+  - component: {fileID: 350961477}
+  - component: {fileID: 350961478}
+  m_Layer: 0
+  m_Name: PlayerSpawnPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &350961476
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 350961475}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 18.19, y: -12.13, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 350345616}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &350961477
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 350961475}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6428ef658d2373b49b857e304540a139, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerSpawnPoint
+  spawnId: HotelEntrance
+--- !u!114 &350961478
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 350961475}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 138700a1ee0654349871be7a0b615a71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GuestSpawnPoint
+  spawnId: HotelEntrance
+  area: 1
+--- !u!1 &359426525
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 359426526}
+  - component: {fileID: 359426527}
+  m_Layer: 0
+  m_Name: NPCEnter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &359426526
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 359426525}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.74, y: -0.08, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 430980717}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &359426527
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 359426525}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6428ef658d2373b49b857e304540a139, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerSpawnPoint
+  spawnId: RoomDoor_06
+--- !u!1 &363670001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 363670002}
+  m_Layer: 0
+  m_Name: NPCExitSpawn
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &363670002
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 363670001}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.76, y: -1.64, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1741535507}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &381680931
 GameObject:
@@ -21235,6 +21580,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   rooms:
   - roomId: 01
+    isAccessible: 0
+    bedType: 0
+    bedCount: 0
     state: 0
     needsCleaning: 0
     reservedUntilDay: 0
@@ -21243,7 +21591,11 @@ MonoBehaviour:
     currentMealPlan: 0
     currentGuestCount: 0
     hasGuestData: 0
+    hotelDoorSpawnId: 
   - roomId: 02
+    isAccessible: 0
+    bedType: 0
+    bedCount: 0
     state: 0
     needsCleaning: 0
     reservedUntilDay: 0
@@ -21252,7 +21604,11 @@ MonoBehaviour:
     currentMealPlan: 0
     currentGuestCount: 0
     hasGuestData: 0
+    hotelDoorSpawnId: 
   - roomId: 03
+    isAccessible: 0
+    bedType: 0
+    bedCount: 0
     state: 0
     needsCleaning: 0
     reservedUntilDay: 0
@@ -21261,7 +21617,11 @@ MonoBehaviour:
     currentMealPlan: 0
     currentGuestCount: 0
     hasGuestData: 0
+    hotelDoorSpawnId: 
   - roomId: 04
+    isAccessible: 0
+    bedType: 0
+    bedCount: 0
     state: 0
     needsCleaning: 0
     reservedUntilDay: 0
@@ -21270,7 +21630,11 @@ MonoBehaviour:
     currentMealPlan: 0
     currentGuestCount: 0
     hasGuestData: 0
+    hotelDoorSpawnId: 
   - roomId: 05
+    isAccessible: 0
+    bedType: 0
+    bedCount: 0
     state: 0
     needsCleaning: 0
     reservedUntilDay: 0
@@ -21279,7 +21643,11 @@ MonoBehaviour:
     currentMealPlan: 0
     currentGuestCount: 0
     hasGuestData: 0
+    hotelDoorSpawnId: 
   - roomId: 06
+    isAccessible: 0
+    bedType: 0
+    bedCount: 0
     state: 0
     needsCleaning: 0
     reservedUntilDay: 0
@@ -21288,6 +21656,8 @@ MonoBehaviour:
     currentMealPlan: 0
     currentGuestCount: 0
     hasGuestData: 0
+    hotelDoorSpawnId: 
+  currentRoomId: 01
 --- !u!4 &391532487
 Transform:
   m_ObjectHideFlags: 0
@@ -21314,6 +21684,7 @@ GameObject:
   - component: {fileID: 430980717}
   - component: {fileID: 430980719}
   - component: {fileID: 430980718}
+  - component: {fileID: 430980720}
   m_Layer: 0
   m_Name: Door06
   m_TagString: Untagged
@@ -21333,7 +21704,9 @@ Transform:
   m_LocalPosition: {x: 9.04, y: 10.059, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 526498446}
+  - {fileID: 359426526}
   m_Father: {fileID: 1021113796}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &430980718
@@ -21349,6 +21722,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   roomData: {fileID: 1515709733}
+  npcExitSpawnPoint: {fileID: 526498446}
 --- !u!61 &430980719
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -21395,6 +21769,27 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1.0196953, y: 1.5219374}
   m_EdgeRadius: 0
+--- !u!114 &430980720
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 430980716}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f51334e5e863f014abba02f8de381b78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NPCSceneExit
+  sourceArea: 1
+  destinationSceneName: 03 - Bedroom
+  destinationArea: 0
+  useExactDestinationPosition: 0
+  destinationPosition: {x: 0, y: 0, z: 0}
+  destinationSpawnId: 
+  onlyAssignedRoom: 1
+  roomId: 06
+  walkTarget: {fileID: 359426526}
 --- !u!1 &458417149
 GameObject:
   m_ObjectHideFlags: 0
@@ -21451,6 +21846,10 @@ MonoBehaviour:
   currentMealPlan: 0
   currentGuestCount: 0
   hasGuestData: 0
+  hasGuest: 0
+  guestPrefab: {fileID: 5417902229895961375, guid: 57e2d3bbd5a9b444fb8bd41b2915dbb7, type: 3}
+  guestCurrentArea: 0
+  hotelDoorSpawnId: 02
 --- !u!1 &495716515
 GameObject:
   m_ObjectHideFlags: 0
@@ -21588,6 +21987,99 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 495716515}
   m_CullTransparentMesh: 1
+--- !u!1 &502482385
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 502482388}
+  - component: {fileID: 502482387}
+  - component: {fileID: 502482386}
+  m_Layer: 0
+  m_Name: Area
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!61 &502482386
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 502482385}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: -2.1875343, y: 9.029324}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 43.01095, y: 32.26799}
+  m_EdgeRadius: 0
+--- !u!114 &502482387
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 502482385}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 709bc7e1797c3474daef78dd68f89b01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  area: 1
+  zoneId: HotelMain
+--- !u!4 &502482388
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 502482385}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 2.7956798, y: -7.6589403, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -21713,6 +22205,37 @@ MonoBehaviour:
       m_PostInfinity: 2
       m_RotationOrder: 4
   CustomBlends: {fileID: 0}
+--- !u!1 &526498445
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 526498446}
+  m_Layer: 0
+  m_Name: NPCExitSpawn
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &526498446
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 526498445}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.79, y: -1.77, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 430980717}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &558862289
 GameObject:
   m_ObjectHideFlags: 0
@@ -22100,6 +22623,7 @@ GameObject:
   - component: {fileID: 594959943}
   - component: {fileID: 594959945}
   - component: {fileID: 594959944}
+  - component: {fileID: 594959946}
   m_Layer: 0
   m_Name: Door04
   m_TagString: Untagged
@@ -22119,7 +22643,9 @@ Transform:
   m_LocalPosition: {x: -12.807, y: 10.059, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1982473485}
+  - {fileID: 332969084}
   m_Father: {fileID: 1021113796}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &594959944
@@ -22135,6 +22661,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   roomData: {fileID: 1825304331}
+  npcExitSpawnPoint: {fileID: 1982473485}
 --- !u!61 &594959945
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -22181,6 +22708,27 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1.0196953, y: 1.5219374}
   m_EdgeRadius: 0
+--- !u!114 &594959946
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 594959942}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f51334e5e863f014abba02f8de381b78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NPCSceneExit
+  sourceArea: 1
+  destinationSceneName: 03 - Bedroom
+  destinationArea: 0
+  useExactDestinationPosition: 0
+  destinationPosition: {x: 0, y: 0, z: 0}
+  destinationSpawnId: 
+  onlyAssignedRoom: 1
+  roomId: 04
+  walkTarget: {fileID: 332969084}
 --- !u!1 &641453347
 GameObject:
   m_ObjectHideFlags: 0
@@ -22389,6 +22937,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 657823290}
   m_CullTransparentMesh: 1
+--- !u!1 &700821637
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 700821639}
+  - component: {fileID: 700821638}
+  m_Layer: 0
+  m_Name: test
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &700821638
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 700821637}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df949c171df63c64cb0eb60306b29a24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+--- !u!4 &700821639
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 700821637}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 2.10675, y: 1.70318, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &724221398
 GameObject:
   m_ObjectHideFlags: 0
@@ -22528,6 +23120,7 @@ MonoBehaviour:
   selectedSegment: 0
   selectedOffer: 0
   resultPanelUI: {fileID: 1389490693}
+  guestNPCPrefabs: []
 --- !u!1 &769874587
 GameObject:
   m_ObjectHideFlags: 0
@@ -23923,6 +24516,8 @@ GameObject:
   - component: {fileID: 894998815}
   - component: {fileID: 894998816}
   - component: {fileID: 894998817}
+  - component: {fileID: 894998819}
+  - component: {fileID: 894998818}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -24242,6 +24837,36 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.9167566, y: 1.8376079}
   m_EdgeRadius: 0
+--- !u!114 &894998818
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 894998810}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed8b1ae4e4e52b34ea557c1c11e076fc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.2D.Animation.Runtime::UnityEngine.U2D.Animation.SpriteResolver
+  m_CategoryHash: 0
+  m_labelHash: 0
+  m_SpriteKey: 0
+  m_SpriteHash: 857177923
+--- !u!114 &894998819
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 894998810}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c29cff538c195c249b69c6f2236de67b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.2D.Animation.Runtime::UnityEngine.U2D.Animation.SpriteLibrary
+  m_Library: []
+  m_SpriteLibraryAsset: {fileID: 7108339969198208228, guid: 4a4c297a13fb8f042a20d6259e143cb1, type: 3}
 --- !u!1 &942595616
 GameObject:
   m_ObjectHideFlags: 0
@@ -24298,6 +24923,41 @@ MonoBehaviour:
   currentMealPlan: 0
   currentGuestCount: 0
   hasGuestData: 0
+  hasGuest: 0
+  guestPrefab: {fileID: 5417902229895961375, guid: 57e2d3bbd5a9b444fb8bd41b2915dbb7, type: 3}
+  guestCurrentArea: 0
+  hotelDoorSpawnId: 05
+--- !u!1 &960350618
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 960350619}
+  m_Layer: 0
+  m_Name: NPCExitSpawn
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &960350619
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 960350618}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.64, y: -1.7, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2130615139}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1021113795
 GameObject:
   m_ObjectHideFlags: 0
@@ -24852,6 +25512,55 @@ MonoBehaviour:
   currentMealPlan: 0
   currentGuestCount: 0
   hasGuestData: 0
+  hasGuest: 0
+  guestPrefab: {fileID: 5417902229895961375, guid: 57e2d3bbd5a9b444fb8bd41b2915dbb7, type: 3}
+  guestCurrentArea: 0
+  hotelDoorSpawnId: 03
+--- !u!1 &1059762315
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1059762316}
+  - component: {fileID: 1059762317}
+  m_Layer: 0
+  m_Name: NPCEnter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1059762316
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1059762315}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.81, y: -0.31, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1674876189}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1059762317
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1059762315}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6428ef658d2373b49b857e304540a139, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerSpawnPoint
+  spawnId: RoomDoor_05
 --- !u!1 &1084447135
 GameObject:
   m_ObjectHideFlags: 0
@@ -25406,6 +26115,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1104237341}
   m_CullTransparentMesh: 1
+--- !u!1 &1126566475
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1126566476}
+  m_Layer: 0
+  m_Name: NpcParent
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1126566476
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1126566475}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 6.47252, y: -6.9, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1162591145
 GameObject:
   m_ObjectHideFlags: 0
@@ -25680,6 +26420,86 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1171377292}
   m_CullTransparentMesh: 1
+--- !u!1 &1193861508
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1193861511}
+  - component: {fileID: 1193861510}
+  - component: {fileID: 1193861509}
+  m_Layer: 0
+  m_Name: HotelSystems
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1193861509
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1193861508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec42575149c9feb44912dc698a1ba1af, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GuestOffscreenSimulator
+  bedroomSceneName: 03 - Bedroom
+  hotelSceneName: 02 - Hotel
+  outsideSceneName: 04 - Outside
+  restaurantSceneName: 02 - Restaurant
+  outsideHotelEntranceSpawnId: Outside_HotelEntrance
+  outsideRestaurantEntranceSpawnId: Outside_RestaurantEntrance
+  restaurantEntranceSpawnId: RestaurantEntrance
+  hotelEntranceSpawnId: HotelEntrance
+  roomInsideSpawnId: RoomInside
+  minSecondsBeforeDecision: 10
+  minNextDecisionDelay: 10
+  maxNextDecisionDelay: 30
+  simulationInterval: 5
+  maxGuestsMovedPerCycle: 1
+  chanceBedroomToHotel: 1
+  chanceHotelToOutside: 0.25
+  chanceHotelToBedroom: 0.2
+  chanceOutsideToRestaurant: 0.3
+  chanceOutsideToHotel: 0.3
+  chanceRestaurantToOutside: 0.45
+  hotelFallbackPosition: {x: 0, y: 0, z: 0}
+  outsideEntrancePosition: {x: 0, y: 0, z: 0}
+  restaurantEntrancePosition: {x: 0, y: 0, z: 0}
+--- !u!114 &1193861510
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1193861508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d38cbbe1a1f086648a55fdc8afa6d1a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoomDoorRegistry
+--- !u!4 &1193861511
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1193861508}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 5.60753, y: 2.23413, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1246328298
 GameObject:
   m_ObjectHideFlags: 0
@@ -25964,6 +26784,107 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1249633963}
   m_CullTransparentMesh: 1
+--- !u!1 &1297888790
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1297888793}
+  - component: {fileID: 1297888792}
+  - component: {fileID: 1297888791}
+  m_Layer: 0
+  m_Name: OutsideTriggerNPC
+  m_TagString: Untagged
+  m_Icon: {fileID: -1412012063857583412, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1297888791
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1297888790}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f51334e5e863f014abba02f8de381b78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  sourceArea: 1
+  destinationSceneName: 04 - Outside
+  destinationArea: 2
+  useExactDestinationPosition: 0
+  destinationPosition: {x: 0, y: 0, z: 0}
+  destinationSpawnId: Outside_HotelEntrance
+  onlyAssignedRoom: 0
+  roomId: 
+  walkTarget: {fileID: 1918955902}
+--- !u!61 &1297888792
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1297888790}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 18.197603, y: -14.622622}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 3.0009499, y: 1.9619789}
+  m_EdgeRadius: 0
+--- !u!4 &1297888793
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1297888790}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -17.64138, y: 1.76172, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1918955902}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1318671288
 GameObject:
   m_ObjectHideFlags: 0
@@ -26822,6 +27743,82 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1365954798}
   m_CullTransparentMesh: 1
+--- !u!1 &1367499953
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1367499954}
+  m_Layer: 0
+  m_Name: NPCExitSpawn
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1367499954
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1367499953}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.76, y: -1.59, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 193829603}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1372969938
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1372969939}
+  - component: {fileID: 1372969940}
+  m_Layer: 0
+  m_Name: NPCExitSpawn
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1372969939
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1372969938}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.81, y: -1.69, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1674876189}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1372969940
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1372969938}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6428ef658d2373b49b857e304540a139, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerSpawnPoint
+  spawnId: RoomDoor_05
 --- !u!1 &1389490691
 GameObject:
   m_ObjectHideFlags: 0
@@ -27226,6 +28223,10 @@ MonoBehaviour:
   currentMealPlan: 0
   currentGuestCount: 0
   hasGuestData: 0
+  hasGuest: 0
+  guestPrefab: {fileID: 5417902229895961375, guid: 57e2d3bbd5a9b444fb8bd41b2915dbb7, type: 3}
+  guestCurrentArea: 0
+  hotelDoorSpawnId: 01
 --- !u!1 &1479454849
 GameObject:
   m_ObjectHideFlags: 0
@@ -27465,6 +28466,10 @@ MonoBehaviour:
   currentMealPlan: 0
   currentGuestCount: 0
   hasGuestData: 0
+  hasGuest: 0
+  guestPrefab: {fileID: 5417902229895961375, guid: 57e2d3bbd5a9b444fb8bd41b2915dbb7, type: 3}
+  guestCurrentArea: 0
+  hotelDoorSpawnId: 06
 --- !u!1 &1594600083
 GameObject:
   m_ObjectHideFlags: 0
@@ -27956,6 +28961,57 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1637156500}
   m_CullTransparentMesh: 1
+--- !u!1 &1641959015
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1641959017}
+  - component: {fileID: 1641959016}
+  m_Layer: 0
+  m_Name: GuestSceneSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1641959016
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1641959015}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d72a2d37596c8e459a7a978b7fae66e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GuestSceneSpawner
+  currentArea: 1
+  npcParent: {fileID: 1126566476}
+  defaultGuestPrefab: {fileID: 5417902229895961375, guid: 57e2d3bbd5a9b444fb8bd41b2915dbb7, type: 3}
+  playerReference: {fileID: 894998812}
+  matchPlayerScale: 1
+  manualNpcScale: {x: 1, y: 1, z: 1}
+--- !u!4 &1641959017
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1641959015}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 7.02678, y: -6.97, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 240086730}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1642065810
 GameObject:
   m_ObjectHideFlags: 0
@@ -28114,6 +29170,7 @@ GameObject:
   - component: {fileID: 1674876189}
   - component: {fileID: 1674876191}
   - component: {fileID: 1674876190}
+  - component: {fileID: 1674876192}
   m_Layer: 0
   m_Name: Door05
   m_TagString: Untagged
@@ -28133,7 +29190,9 @@ Transform:
   m_LocalPosition: {x: 0.04, y: 10.059, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1372969939}
+  - {fileID: 1059762316}
   m_Father: {fileID: 1021113796}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1674876190
@@ -28149,6 +29208,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   roomData: {fileID: 942595618}
+  npcExitSpawnPoint: {fileID: 1372969939}
 --- !u!61 &1674876191
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -28195,6 +29255,27 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1.0196953, y: 1.5219374}
   m_EdgeRadius: 0
+--- !u!114 &1674876192
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1674876188}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f51334e5e863f014abba02f8de381b78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NPCSceneExit
+  sourceArea: 1
+  destinationSceneName: 03 - Bedroom
+  destinationArea: 0
+  useExactDestinationPosition: 0
+  destinationPosition: {x: 0, y: 0, z: 0}
+  destinationSpawnId: 
+  onlyAssignedRoom: 1
+  roomId: 05
+  walkTarget: {fileID: 1059762316}
 --- !u!1 &1674977627
 GameObject:
   m_ObjectHideFlags: 0
@@ -28491,6 +29572,7 @@ GameObject:
   - component: {fileID: 1741535507}
   - component: {fileID: 1741535508}
   - component: {fileID: 1741535509}
+  - component: {fileID: 1741535510}
   m_Layer: 0
   m_Name: Door01
   m_TagString: Untagged
@@ -28510,7 +29592,9 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 363670002}
+  - {fileID: 123626798}
   m_Father: {fileID: 1021113796}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!61 &1741535508
@@ -28572,6 +29656,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   roomData: {fileID: 1457867155}
+  npcExitSpawnPoint: {fileID: 363670002}
+--- !u!114 &1741535510
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1741535506}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f51334e5e863f014abba02f8de381b78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NPCSceneExit
+  sourceArea: 1
+  destinationSceneName: 03 - Bedroom
+  destinationArea: 0
+  useExactDestinationPosition: 0
+  destinationPosition: {x: 0, y: 0, z: 0}
+  destinationSpawnId: 
+  onlyAssignedRoom: 1
+  roomId: 01
+  walkTarget: {fileID: 123626798}
 --- !u!1 &1744374903
 GameObject:
   m_ObjectHideFlags: 0
@@ -28717,6 +29823,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1744374903}
   m_CullTransparentMesh: 1
+--- !u!1 &1749475110
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1749475111}
+  - component: {fileID: 1749475112}
+  m_Layer: 0
+  m_Name: NPCEnter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1749475111
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1749475110}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.64, y: 0.04, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2130615139}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1749475112
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1749475110}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6428ef658d2373b49b857e304540a139, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerSpawnPoint
+  spawnId: RoomDoor_03
 --- !u!1 &1750540801
 GameObject:
   m_ObjectHideFlags: 0
@@ -28730,7 +29881,7 @@ GameObject:
   - component: {fileID: 1750540805}
   - component: {fileID: 1750540804}
   - component: {fileID: 1750540803}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Collision
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -35563,6 +36714,10 @@ MonoBehaviour:
   currentMealPlan: 0
   currentGuestCount: 0
   hasGuestData: 0
+  hasGuest: 0
+  guestPrefab: {fileID: 5417902229895961375, guid: 57e2d3bbd5a9b444fb8bd41b2915dbb7, type: 3}
+  guestCurrentArea: 0
+  hotelDoorSpawnId: 04
 --- !u!1 &1904731980
 GameObject:
   m_ObjectHideFlags: 0
@@ -35639,6 +36794,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1904731980}
   m_CullTransparentMesh: 1
+--- !u!1 &1918955901
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1918955902}
+  m_Layer: 0
+  m_Name: WalkTarget
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1918955902
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1918955901}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 18.15, y: -14.62, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1297888793}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1940262658
 GameObject:
   m_ObjectHideFlags: 0
@@ -35797,6 +36983,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1940262658}
   m_CullTransparentMesh: 1
+--- !u!1 &1982473484
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1982473485}
+  m_Layer: 0
+  m_Name: NPCExitSpawn
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1982473485
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1982473484}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.74, y: -1.72, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 594959943}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2015725665
 GameObject:
   m_ObjectHideFlags: 0
@@ -35934,6 +37151,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2015725665}
   m_CullTransparentMesh: 1
+--- !u!1 &2045559919
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2045559920}
+  - component: {fileID: 2045559921}
+  m_Layer: 0
+  m_Name: NPCEnter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2045559920
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2045559919}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.76, y: -0.11, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 193829603}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2045559921
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2045559919}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6428ef658d2373b49b857e304540a139, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerSpawnPoint
+  spawnId: RoomDoor_02
 --- !u!1 &2130615138
 GameObject:
   m_ObjectHideFlags: 0
@@ -35945,6 +37207,7 @@ GameObject:
   - component: {fileID: 2130615139}
   - component: {fileID: 2130615141}
   - component: {fileID: 2130615140}
+  - component: {fileID: 2130615142}
   m_Layer: 0
   m_Name: Door03
   m_TagString: Untagged
@@ -35964,7 +37227,9 @@ Transform:
   m_LocalPosition: {x: -20.838, y: 10.059, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 960350619}
+  - {fileID: 1749475111}
   m_Father: {fileID: 1021113796}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2130615140
@@ -35980,6 +37245,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   roomData: {fileID: 1058209421}
+  npcExitSpawnPoint: {fileID: 960350619}
 --- !u!61 &2130615141
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -36026,6 +37292,27 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1.0196953, y: 1.5219374}
   m_EdgeRadius: 0
+--- !u!114 &2130615142
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2130615138}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f51334e5e863f014abba02f8de381b78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NPCSceneExit
+  sourceArea: 1
+  destinationSceneName: 03 - Bedroom
+  destinationArea: 0
+  useExactDestinationPosition: 0
+  destinationPosition: {x: 0, y: 0, z: 0}
+  destinationSpawnId: 
+  onlyAssignedRoom: 1
+  roomId: 03
+  walkTarget: {fileID: 1749475111}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -36046,3 +37333,10 @@ SceneRoots:
   - {fileID: 1021113796}
   - {fileID: 769874589}
   - {fileID: 391532487}
+  - {fileID: 502482388}
+  - {fileID: 1193861511}
+  - {fileID: 1641959017}
+  - {fileID: 1126566476}
+  - {fileID: 700821639}
+  - {fileID: 1297888793}
+  - {fileID: 4489352}

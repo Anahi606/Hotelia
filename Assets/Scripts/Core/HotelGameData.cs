@@ -8,6 +8,14 @@ public class HotelGameData : MonoBehaviour
     [Header("Runtime Rooms")]
     public List<RoomRuntimeData> rooms = new List<RoomRuntimeData>();
 
+    [Header("Current Room Scene")]
+    public string currentRoomId = "01";
+
+    public void SetCurrentRoom(string roomId)
+    {
+        currentRoomId = roomId;
+    }
+
     private void Awake()
     {
         if (Instance == null)
@@ -70,7 +78,7 @@ public class HotelGameData : MonoBehaviour
         runtimeRoom.state = roomData.state;
         runtimeRoom.needsCleaning = roomData.needsCleaning;
         runtimeRoom.reservedUntilDay = roomData.reservedUntilDay;
-
+        runtimeRoom.hotelDoorSpawnId = roomData.hotelDoorSpawnId;
         runtimeRoom.currentGuestSegment = roomData.currentGuestSegment;
         runtimeRoom.currentOffer = roomData.currentOffer;
         runtimeRoom.currentMealPlan = roomData.currentMealPlan;
@@ -89,7 +97,7 @@ public class HotelGameData : MonoBehaviour
         roomData.state = runtimeRoom.state;
         roomData.needsCleaning = runtimeRoom.needsCleaning;
         roomData.reservedUntilDay = runtimeRoom.reservedUntilDay;
-
+        roomData.hotelDoorSpawnId = runtimeRoom.hotelDoorSpawnId;
         roomData.currentGuestSegment = runtimeRoom.currentGuestSegment;
         roomData.currentOffer = runtimeRoom.currentOffer;
         roomData.currentMealPlan = runtimeRoom.currentMealPlan;

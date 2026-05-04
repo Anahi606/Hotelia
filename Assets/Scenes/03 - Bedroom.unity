@@ -131,7 +131,7 @@ GameObject:
   - component: {fileID: 53912366}
   - component: {fileID: 53912365}
   - component: {fileID: 53912364}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: bedroomBigBeds_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -466,7 +466,7 @@ GameObject:
   - component: {fileID: 79610512}
   - component: {fileID: 79610511}
   - component: {fileID: 79610510}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: bedroomBeds_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -24019,7 +24019,7 @@ GameObject:
   - component: {fileID: 198666572}
   - component: {fileID: 198666571}
   - component: {fileID: 198666570}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: BedBase
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -24306,7 +24306,7 @@ GameObject:
   - component: {fileID: 223421543}
   - component: {fileID: 223421542}
   - component: {fileID: 223421541}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: CoverPlaced
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -24460,6 +24460,107 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!1 &235840870
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 235840873}
+  - component: {fileID: 235840872}
+  - component: {fileID: 235840871}
+  m_Layer: 0
+  m_Name: HotelTriggerNPC
+  m_TagString: Untagged
+  m_Icon: {fileID: -1412012063857583412, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &235840871
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 235840870}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f51334e5e863f014abba02f8de381b78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  sourceArea: 0
+  destinationSceneName: 02 - Hotel
+  destinationArea: 1
+  useExactDestinationPosition: 0
+  destinationPosition: {x: 0, y: 0, z: 0}
+  destinationSpawnId: 
+  onlyAssignedRoom: 0
+  roomId: 
+  walkTarget: {fileID: 1052253241}
+--- !u!61 &235840872
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 235840870}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 8.495489, y: -15.587774}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 2.8997707, y: 1.9619789}
+  m_EdgeRadius: 0
+--- !u!4 &235840873
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 235840870}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -17.64138, y: 1.76172, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1052253241}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &267392761
 GameObject:
   m_ObjectHideFlags: 0
@@ -24508,7 +24609,7 @@ GameObject:
   - component: {fileID: 311305785}
   - component: {fileID: 311305784}
   - component: {fileID: 311305787}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: BedSpotSmall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -24819,6 +24920,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   sceneBuildIndex: 1
+  destinationPlayerSpawnId: 
+  useSelectedRoomDoorSpawn: 1
+  roomDoorSpawnPrefix: RoomDoor_
 --- !u!1 &453076613
 GameObject:
   m_ObjectHideFlags: 0
@@ -25263,7 +25367,7 @@ GameObject:
   - component: {fileID: 555958056}
   - component: {fileID: 555958055}
   - component: {fileID: 555958054}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: CoverPlaced
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -25429,7 +25533,7 @@ GameObject:
   - component: {fileID: 569468435}
   - component: {fileID: 569468434}
   - component: {fileID: 569468433}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SheetsPlaced
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -25595,7 +25699,7 @@ GameObject:
   - component: {fileID: 571057388}
   - component: {fileID: 571057387}
   - component: {fileID: 571057386}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: BedSpotBig
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -25765,7 +25869,7 @@ GameObject:
   - component: {fileID: 595161262}
   - component: {fileID: 595161261}
   - component: {fileID: 595161260}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: CoverPlaced
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -25948,11 +26052,13 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 2108552851}
   - {fileID: 613222308}
   - {fileID: 1650979424}
   - {fileID: 1799072708}
   - {fileID: 316820918}
   - {fileID: 1506012662}
+  - {fileID: 1767625997}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &613222307
@@ -26000,6 +26106,52 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   size: {x: 23, y: 6.37}
+--- !u!1 &664753177
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 664753178}
+  - component: {fileID: 664753179}
+  m_Layer: 0
+  m_Name: GuestSpawn_Room
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &664753178
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 664753177}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -2.12, y: -1.4, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1682350271}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &664753179
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 664753177}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 138700a1ee0654349871be7a0b615a71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GuestSpawnPoint
+  spawnId: RoomInside
+  area: 0
 --- !u!1 &709396505
 GameObject:
   m_ObjectHideFlags: 0
@@ -26089,7 +26241,7 @@ GameObject:
   - component: {fileID: 712692240}
   - component: {fileID: 712692239}
   - component: {fileID: 712692238}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: PillowsPlaced
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -31847,6 +31999,7 @@ GameObject:
   - component: {fileID: 894998815}
   - component: {fileID: 894998816}
   - component: {fileID: 894998817}
+  - component: {fileID: 894998818}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -32166,6 +32319,20 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.9167566, y: 1.8376079}
   m_EdgeRadius: 0
+--- !u!114 &894998818
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 894998810}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4044454243209146a9e3dd580ee9a42, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::YSortOrder
+  spriteRenderer: {fileID: 894998811}
+  offset: 0
 --- !u!1 &900982766
 GameObject:
   m_ObjectHideFlags: 0
@@ -32178,7 +32345,7 @@ GameObject:
   - component: {fileID: 900982770}
   - component: {fileID: 900982769}
   - component: {fileID: 900982768}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: BedBase
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -32344,7 +32511,7 @@ GameObject:
   - component: {fileID: 990056028}
   - component: {fileID: 990056027}
   - component: {fileID: 990056026}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SheetsPlaced
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -32510,7 +32677,7 @@ GameObject:
   - component: {fileID: 1047618359}
   - component: {fileID: 1047618358}
   - component: {fileID: 1047618357}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: BedBase
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -32664,6 +32831,68 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!1 &1052253240
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1052253241}
+  m_Layer: 0
+  m_Name: WalkTarget
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1052253241
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1052253240}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 8.43, y: -15.1, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 235840873}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1180511940
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1180511941}
+  m_Layer: 0
+  m_Name: Npc
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1180511941
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1180511940}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 6.47252, y: -6.9, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1195745637
 GameObject:
   m_ObjectHideFlags: 0
@@ -32676,7 +32905,7 @@ GameObject:
   - component: {fileID: 1195745641}
   - component: {fileID: 1195745640}
   - component: {fileID: 1195745639}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: bedroomBeds_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -32842,7 +33071,7 @@ GameObject:
   - component: {fileID: 1253181860}
   - component: {fileID: 1253181859}
   - component: {fileID: 1253181858}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: PillowsPlaced
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -32996,6 +33225,66 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!1 &1261202530
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1261202532}
+  - component: {fileID: 1261202531}
+  m_Layer: 0
+  m_Name: GuestSystem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1261202531
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1261202530}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec42575149c9feb44912dc698a1ba1af, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  bedroomSceneName: 03 - Bedroom
+  hotelSceneName: 02 - Hotel
+  outsideSceneName: 03 - Outside
+  restaurantSceneName: 04 - Restaurant
+  minSecondsBeforeDecision: 10
+  minNextDecisionDelay: 10
+  maxNextDecisionDelay: 30
+  chanceBedroomToHotel: 0.45
+  chanceHotelToOutside: 0.25
+  chanceHotelToBedroom: 0.2
+  chanceOutsideToRestaurant: 0.3
+  chanceOutsideToHotel: 0.3
+  chanceRestaurantToOutside: 0.45
+  hotelFallbackPosition: {x: 0, y: 0, z: 0}
+  outsideEntrancePosition: {x: 0, y: 0, z: 0}
+  restaurantEntrancePosition: {x: 0, y: 0, z: 0}
+--- !u!4 &1261202532
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1261202530}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 9.20918, y: 4.99454, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1338240914
 GameObject:
   m_ObjectHideFlags: 0
@@ -33184,7 +33473,7 @@ GameObject:
   - component: {fileID: 1457891451}
   - component: {fileID: 1457891450}
   - component: {fileID: 1457891449}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: BedSpotSmall2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -33370,7 +33659,7 @@ GameObject:
   - component: {fileID: 1467274084}
   - component: {fileID: 1467274083}
   - component: {fileID: 1467274082}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: PillowsPlaced
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -33613,7 +33902,7 @@ GameObject:
   - component: {fileID: 1532343521}
   - component: {fileID: 1532343520}
   - component: {fileID: 1532343519}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SheetsPlaced
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -35476,6 +35765,57 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   size: {x: 12.08, y: 2.91}
+--- !u!1 &1682350270
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1682350271}
+  - component: {fileID: 1682350272}
+  m_Layer: 0
+  m_Name: GuestSceneSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1682350271
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1682350270}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 7.02678, y: -6.97, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 664753178}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1682350272
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1682350270}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d72a2d37596c8e459a7a978b7fae66e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GuestSceneSpawner
+  currentArea: 0
+  npcParent: {fileID: 1180511941}
+  defaultGuestPrefab: {fileID: 5417902229895961375, guid: 57e2d3bbd5a9b444fb8bd41b2915dbb7, type: 3}
+  playerReference: {fileID: 0}
+  matchPlayerScale: 1
+  manualNpcScale: {x: 1, y: 1, z: 1}
 --- !u!1 &1688103720
 GameObject:
   m_ObjectHideFlags: 0
@@ -35723,7 +36063,7 @@ GameObject:
   - component: {fileID: 1750540805}
   - component: {fileID: 1750540804}
   - component: {fileID: 1750540803}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Collision
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -44238,6 +44578,37 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!1 &1767625996
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1767625997}
+  m_Layer: 0
+  m_Name: Area_06
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1767625997
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1767625996}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 5.84, y: 10.64, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 612530531}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1799072707
 GameObject:
   m_ObjectHideFlags: 0
@@ -44283,6 +44654,99 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   size: {x: 12.08, y: 2.91}
+--- !u!1 &2108552850
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2108552851}
+  - component: {fileID: 2108552853}
+  - component: {fileID: 2108552852}
+  m_Layer: 0
+  m_Name: Area
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2108552851
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2108552850}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 5.45, y: -5.38, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 612530531}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!61 &2108552852
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2108552850}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: -1.696434, y: 8.613778}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 31.300083, y: 31.436895}
+  m_EdgeRadius: 0
+--- !u!114 &2108552853
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2108552850}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 709bc7e1797c3474daef78dd68f89b01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  area: 0
+  zoneId: RoomMain
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -44294,8 +44758,12 @@ SceneRoots:
   - {fileID: 1704989608}
   - {fileID: 1501581396}
   - {fileID: 330860977}
+  - {fileID: 235840873}
   - {fileID: 1338240915}
   - {fileID: 453076614}
   - {fileID: 223062036}
   - {fileID: 612530531}
   - {fileID: 1532641771}
+  - {fileID: 1682350271}
+  - {fileID: 1180511941}
+  - {fileID: 1261202532}

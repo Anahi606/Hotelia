@@ -40,6 +40,9 @@ public class CheckInFlowController : MonoBehaviour
     [Header("Result UI")]
     public CheckInResultPanelUI resultPanelUI;
 
+    [Header("Guest NPCs")]
+    public GameObject[] guestNPCPrefabs;
+
     public void StartCheckIn()
     {
         if (IsCheckInActive)
@@ -152,6 +155,7 @@ public class CheckInFlowController : MonoBehaviour
         }
 
         selectedRoom.AssignGuest(currentRequest, DayManager.Instance.CurrentDay);
+        AssignNPCToRoom(selectedRoom);
 
         Debug.Log("Habitación asignada correctamente: " + selectedRoom.roomId);
 
@@ -201,6 +205,23 @@ public class CheckInFlowController : MonoBehaviour
         }
     }
 
+    private void AssignNPCToRoom(RoomData room)
+    {
+        if (guestNPCPrefabs == null || guestNPCPrefabs.Length == 0)
+        {
+            Debug.LogWarning("No hay prefabs de NPC asignados en CheckInFlowController.");
+            return;
+        }
+
+        GameObject selectedGuestPrefab = guestNPCPrefabs[Random.Range(0, guestNPCPrefabs.Length)];
+
+        room.hasGuest = true;
+        room.guestPrefab = selectedGuestPrefab;
+        room.guestCurrentArea = GuestArea.Room;
+        room.hotelDoorSpawnId = "Door_" + room.roomId;
+
+        Debug.Log("NPC asignado a la habitación " + room.roomId);
+    }
     public void CloseCheckIn()
     {
         Debug.Log("CloseCheckIn llamado");

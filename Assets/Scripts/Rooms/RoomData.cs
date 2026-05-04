@@ -20,6 +20,12 @@ public class RoomData : MonoBehaviour
     public int currentGuestCount;
     public bool hasGuestData;
 
+    [Header("Guest NPC")]
+    public bool hasGuest;
+    public GameObject guestPrefab;
+    public GuestArea guestCurrentArea;
+    public string hotelDoorSpawnId;
+
     private void Start()
     {
         if (HotelGameData.Instance != null)
