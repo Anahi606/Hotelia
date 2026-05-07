@@ -32614,6 +32614,8 @@ GameObject:
   - component: {fileID: 894998815}
   - component: {fileID: 894998816}
   - component: {fileID: 894998817}
+  - component: {fileID: 894998819}
+  - component: {fileID: 894998818}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -32933,8 +32935,6 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.9167566, y: 1.8376079}
   m_EdgeRadius: 0
-<<<<<<< Updated upstream
-=======
 --- !u!114 &894998818
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -32965,7 +32965,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.2D.Animation.Runtime::UnityEngine.U2D.Animation.SpriteLibrary
   m_Library: []
   m_SpriteLibraryAsset: {fileID: 7108339969198208228, guid: 4a4c297a13fb8f042a20d6259e143cb1, type: 3}
->>>>>>> Stashed changes
 --- !u!1 &1004051094
 GameObject:
   m_ObjectHideFlags: 0

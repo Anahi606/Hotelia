@@ -16,14 +16,11 @@ GameObject:
   - component: {fileID: 5348898482322311783}
   - component: {fileID: 2192565259170485571}
   - component: {fileID: 924876288401489587}
-<<<<<<< Updated upstream
-=======
   - component: {fileID: 7144837772604468270}
   - component: {fileID: 2523312549524949715}
   - component: {fileID: 7628902014223696484}
   - component: {fileID: 7419671294628607512}
   - component: {fileID: 933392748332292411}
->>>>>>> Stashed changes
   m_Layer: 0
   m_Name: CustomerNPC
   m_TagString: Guest
@@ -40,8 +37,8 @@ Transform:
   m_GameObject: {fileID: 5417902229895961375}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 5.49, y: -3.18, z: 0}
-  m_LocalScale: {x: 1.4801872, y: 1.4801872, z: 1.4801872}
+  m_LocalPosition: {x: 5.5507, y: -3.3014, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -95,12 +92,12 @@ SpriteRenderer:
   m_SortingLayer: 3
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -4298345892085953899, guid: 281313337206a174f82629567db7d874, type: 3}
+  m_Sprite: {fileID: -3138396310083962553, guid: ee45e9993fe14fe42992867999de96ed, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1.9375}
+  m_Size: {x: 0.16, y: 0.32}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -166,17 +163,17 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.0027747452, y: -0.000000029802322}
+  m_Offset: {x: 0.029251099, y: -0.09147358}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1.9375}
-    newSize: {x: 1, y: 1.9375}
+    oldSize: {x: 1, y: 2}
+    newSize: {x: 0.16, y: 0.32}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.9167566, y: 1.8376079}
+  m_Size: {x: 1.1114168, y: 1.8960385}
   m_EdgeRadius: 0
 --- !u!114 &7215766671952023912
 MonoBehaviour:
@@ -217,9 +214,11 @@ MonoBehaviour:
   obstacleMask:
     serializedVersion: 2
     m_Bits: 8
-  collisionCheckSize: {x: 0.5, y: 0.5}
+  collisionCheckSize: {x: 0.7, y: 0.7}
   maxSearchIterations: 700
   nearbySearchRadius: 5
+  animator: {fileID: 0}
+  defaultLookDirection: {x: 0, y: -1}
 --- !u!114 &2192565259170485571
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -255,8 +254,6 @@ MonoBehaviour:
   chanceOutsideToHotel: 0.3
   chanceOutsideToRestaurant: 0.3
   chanceRestaurantToOutside: 0.4
-<<<<<<< Updated upstream
-=======
 --- !u!114 &7144837772604468270
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -350,4 +347,3 @@ MonoBehaviour:
   maxDistanceToPlayer: 6
   talkDistance: 1.2
   npcPortraitSprite: {fileID: 0}
->>>>>>> Stashed changes

@@ -1,5 +1,4 @@
 using UnityEngine;
-using TMPro;
 
 public class DayManager : MonoBehaviour
 {
@@ -7,14 +6,17 @@ public class DayManager : MonoBehaviour
 
     public int CurrentDay { get; private set; } = 1;
 
-    [Header("References")]
-    [SerializeField] private RoomData[] allRooms;
-    [SerializeField] private TextMeshProUGUI dayText;
+    private const string DayKey = "CurrentDay";
 
     private void Awake()
     {
         if (Instance == null)
+        {
             Instance = this;
+            DontDestroyOnLoad(gameObject);
+
+            CurrentDay = PlayerPrefs.GetInt(DayKey, 1);
+        }
         else
         {
             Destroy(gameObject);
@@ -22,26 +24,34 @@ public class DayManager : MonoBehaviour
         }
     }
 
-    private void Start()
-    {
-        UpdateUI();
-    }
-
     public void EndDay()
     {
         CurrentDay++;
 
-        foreach (RoomData room in allRooms)
+        PlayerPrefs.SetInt(DayKey, CurrentDay);
+        PlayerPrefs.Save();
+
+        UpdateRoomsForNewDay();
+
+        DayTextUI.UpdateAllDayTexts();
+
+        Debug.Log("Nuevo día: " + CurrentDay);
+    }
+
+    private void UpdateRoomsForNewDay()
+    {
+        if (HotelGameData.Instance == null)
+        {
+            Debug.LogWarning("No existe HotelGameData en escena.");
+            return;
+        }
+
+        foreach (RoomRuntimeData room in HotelGameData.Instance.rooms)
         {
             if (room == null) continue;
 
-            if (room.state == RoomState.Ocupada && !room.IsReservationActive(CurrentDay))
+            if (room.state == RoomState.Ocupada && !IsReservationActive(room))
             {
-<<<<<<< Updated upstream
-                room.state = RoomState.Sucia;
-                room.needsCleaning = true;
-                room.ClearGuest();
-=======
                 EndReservation(room);
             }
         }
@@ -50,7 +60,6 @@ public class DayManager : MonoBehaviour
     private void EndReservation(RoomRuntimeData room)
     {
         string npcId = "Guest_" + room.roomId;
->>>>>>> Stashed changes
 
         // 1. Borra la memoria del NPC para que no reaparezca luego.
         GuestNPCMemory.RemoveState(npcId);
@@ -89,13 +98,20 @@ public class DayManager : MonoBehaviour
                 Debug.Log("NPC visible de la habitación " + roomId + " destruido.");
             }
         }
-
-        UpdateUI();
     }
 
-    private void UpdateUI()
+    private bool IsReservationActive(RoomRuntimeData room)
     {
-        if (dayText != null)
-            dayText.text = "Día " + CurrentDay;
+        return CurrentDay <= room.reservedUntilDay;
+    }
+
+    public void ResetDays()
+    {
+        CurrentDay = 1;
+
+        PlayerPrefs.SetInt(DayKey, CurrentDay);
+        PlayerPrefs.Save();
+
+        DayTextUI.UpdateAllDayTexts();
     }
 }

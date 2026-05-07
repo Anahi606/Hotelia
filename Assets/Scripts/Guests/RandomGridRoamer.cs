@@ -31,26 +31,37 @@ public class RandomGridRoamer : MonoBehaviour
     public int maxSearchIterations = 900;
     public int nearbySearchRadius = 5;
 
+    [Header("Animation")]
+    [SerializeField] private Animator animator;
+    [SerializeField] private Vector2 defaultLookDirection = Vector2.down;
+
     private Rigidbody2D rb;
     private NPCRoamZone[] zones;
     private Coroutine roamRoutine;
     private Vector3 forcedDestination;
-<<<<<<< Updated upstream
-=======
     private Vector2 lastMoveDirection;
 
     private bool hasReachedPriorityDestination;
->>>>>>> Stashed changes
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+
+        if (animator == null)
+            animator = GetComponent<Animator>();
+
+        if (animator == null)
+            animator = GetComponentInChildren<Animator>();
+
+        lastMoveDirection = defaultLookDirection;
     }
 
     private void Start()
     {
         if (autoFindZones)
             FindZones();
+
+        SetWalkingAnimation(false, Vector2.zero);
 
         StartRoaming();
     }
@@ -156,7 +167,7 @@ public class RandomGridRoamer : MonoBehaviour
         {
             if (zones == null || zones.Length == 0)
             {
-                rb.linearVelocity = Vector2.zero;
+                StopMoving();
                 yield return new WaitForSeconds(1f);
                 continue;
             }
@@ -169,7 +180,7 @@ public class RandomGridRoamer : MonoBehaviour
 
                 if (zone == null)
                 {
-                    rb.linearVelocity = Vector2.zero;
+                    StopMoving();
                     yield return new WaitForSeconds(1f);
                     continue;
                 }
@@ -188,7 +199,7 @@ public class RandomGridRoamer : MonoBehaviour
                 }
                 else
                 {
-                    rb.linearVelocity = Vector2.zero;
+                    StopMoving();
                     yield return new WaitForSeconds(1f);
                     continue;
                 }
@@ -196,7 +207,7 @@ public class RandomGridRoamer : MonoBehaviour
 
             if (!TryGetRandomWalkableCell(zone, out Vector2Int targetCell))
             {
-                rb.linearVelocity = Vector2.zero;
+                StopMoving();
                 yield return new WaitForSeconds(1f);
                 continue;
             }
@@ -206,11 +217,70 @@ public class RandomGridRoamer : MonoBehaviour
             if (path != null && path.Count > 0)
                 yield return MoveAlongPath(path);
 
-            rb.linearVelocity = Vector2.zero;
+            StopMoving();
 
             float wait = Random.Range(minWaitTime, maxWaitTime);
             yield return new WaitForSeconds(wait);
         }
+    }
+
+    private IEnumerator MoveAlongPath(List<Vector2Int> path)
+    {
+        if (path == null || path.Count == 0)
+            yield break;
+
+        for (int i = 0; i < path.Count; i++)
+        {
+            Vector2 targetPosition = CellToWorld(path[i]);
+
+            while (Vector2.Distance(rb.position, targetPosition) > arrivalDistance)
+            {
+                Vector2 direction = (targetPosition - rb.position).normalized;
+
+                rb.linearVelocity = direction * moveSpeed;
+
+                SetWalkingAnimation(true, direction);
+
+                yield return new WaitForFixedUpdate();
+            }
+
+            rb.position = targetPosition;
+        }
+
+        StopMoving();
+    }
+
+    private void SetWalkingAnimation(bool walking, Vector2 direction)
+    {
+        if (animator == null)
+            return;
+
+        animator.SetBool("isWalking", walking);
+
+        if (walking)
+        {
+            lastMoveDirection = direction.normalized;
+
+            animator.SetFloat("InputX", lastMoveDirection.x);
+            animator.SetFloat("InputY", lastMoveDirection.y);
+            animator.SetFloat("LastInputX", lastMoveDirection.x);
+            animator.SetFloat("LastInputY", lastMoveDirection.y);
+        }
+        else
+        {
+            animator.SetFloat("InputX", 0f);
+            animator.SetFloat("InputY", 0f);
+            animator.SetFloat("LastInputX", lastMoveDirection.x);
+            animator.SetFloat("LastInputY", lastMoveDirection.y);
+        }
+    }
+
+    private void StopMoving()
+    {
+        if (rb != null)
+            rb.linearVelocity = Vector2.zero;
+
+        SetWalkingAnimation(false, Vector2.zero);
     }
 
     private NPCRoamZone GetZoneContainingNPC()
@@ -299,25 +369,6 @@ public class RandomGridRoamer : MonoBehaviour
 
         validCell = Vector2Int.zero;
         return false;
-    }
-
-    private IEnumerator MoveAlongPath(List<Vector2Int> path)
-    {
-        for (int i = 0; i < path.Count; i++)
-        {
-            Vector2 targetPosition = CellToWorld(path[i]);
-
-            while (Vector2.Distance(rb.position, targetPosition) > arrivalDistance)
-            {
-                Vector2 direction = (targetPosition - rb.position).normalized;
-                rb.linearVelocity = direction * moveSpeed;
-
-                yield return new WaitForFixedUpdate();
-            }
-
-            rb.linearVelocity = Vector2.zero;
-            rb.position = targetPosition;
-        }
     }
 
     private List<Vector2Int> FindPath(Vector2Int start, Vector2Int target, NPCRoamZone zone)
@@ -463,8 +514,7 @@ public class RandomGridRoamer : MonoBehaviour
 
     private void OnDisable()
     {
-        if (rb != null)
-            rb.linearVelocity = Vector2.zero;
+        StopMoving();
     }
 
     public void MoveToInteractionTarget(Vector3 destination)
