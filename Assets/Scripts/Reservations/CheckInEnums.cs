@@ -22,9 +22,7 @@ public enum GuestSegment
 {
     Pareja,
     Familiar,
-    Ejecutivo,
-    AdultoMayor,
-    Mochilero
+    Ejecutivo
 }
 
 public enum OfferType
@@ -32,7 +30,5 @@ public enum OfferType
     Ninguna,
     Romantico,
     Familiar,
-    Ejecutivo,
-    Desayuno,
-    TodoIncluido
+    Ejecutivo
 }

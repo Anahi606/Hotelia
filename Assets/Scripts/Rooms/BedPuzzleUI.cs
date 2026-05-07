@@ -27,8 +27,13 @@ public class BedPuzzleUI : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        if (Instance == null)
+            Instance = this;
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
 
         if (panel != null)
             panel.SetActive(false);
@@ -38,7 +43,11 @@ public class BedPuzzleUI : MonoBehaviour
     {
         if (bed == null) return;
         if (bed.IsCompleted) return;
-
+        if (RoomCleaningKPIManager.Instance == null || !RoomCleaningKPIManager.Instance.IsRoomDirty)
+        {
+            Debug.Log("La habitación no está sucia, no se puede tender la cama.");
+            return;
+        }
         currentBed = bed;
         expectedPiece = BedPieceType.Sheets;
 
@@ -61,9 +70,12 @@ public class BedPuzzleUI : MonoBehaviour
 
     public bool TryPlacePiece(DraggableBedPiece piece, Vector2 screenPosition)
     {
+        if (piece == null) return false;
         if (currentBed == null) return false;
-        if (piece.PieceType != expectedPiece) return false;
-        if (!currentBed.IsScreenPointOverDropTarget(screenPosition, worldCamera)) return false;
+        if (piece.PieceType != expectedPiece)
+            return false;
+        if (!currentBed.IsScreenPointOverDropTarget(screenPosition, worldCamera))
+            return false;
 
         currentBed.PlacePiece(piece.PieceType);
         piece.HidePiece();
@@ -84,6 +96,9 @@ public class BedPuzzleUI : MonoBehaviour
 
         if (expectedPiece == BedPieceType.Cover)
         {
+            if (RoomCleaningKPIManager.Instance != null)
+                RoomCleaningKPIManager.Instance.RegisterBedMade();
+
             ClosePanel();
             return true;
         }
@@ -93,9 +108,14 @@ public class BedPuzzleUI : MonoBehaviour
 
     private void ResetPieces()
     {
-        sheetsPiece.RestorePiece();
-        pillowsPiece.RestorePiece();
-        coverPiece.RestorePiece();
+        if (sheetsPiece != null)
+            sheetsPiece.RestorePiece();
+
+        if (pillowsPiece != null)
+            pillowsPiece.RestorePiece();
+
+        if (coverPiece != null)
+            coverPiece.RestorePiece();
     }
 
     private void UpdateText()

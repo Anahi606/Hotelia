@@ -148,6 +148,7 @@ public class GuestSceneSpawner : MonoBehaviour
             Debug.LogWarning("No has asignado Default Guest Prefab.");
             return;
         }
+
         Vector3 spawnPosition = Vector3.zero;
         bool hasSpawnPosition = false;
 
@@ -208,6 +209,8 @@ public class GuestSceneSpawner : MonoBehaviour
 
         ApplyNpcScale(guest);
 
+        ApplyGuestSpriteLibrary(guest, room);
+
         RandomGridRoamer roamer = guest.GetComponent<RandomGridRoamer>();
 
         if (roamer != null)
@@ -221,6 +224,34 @@ public class GuestSceneSpawner : MonoBehaviour
         {
             guestNPC.Initialize(room.roomId, currentArea);
         }
+    }
+
+    private void ApplyGuestSpriteLibrary(GameObject guest, RoomRuntimeData room)
+    {
+        if (guest == null || room == null)
+            return;
+
+        NPCSpriteLibraryApplier spriteApplier =
+            guest.GetComponent<NPCSpriteLibraryApplier>();
+
+        if (spriteApplier == null)
+        {
+            Debug.LogWarning(
+                "El prefab del NPC no tiene NPCSpriteLibraryApplier: " + guest.name
+            );
+            return;
+        }
+
+        if (string.IsNullOrEmpty(room.guestSpriteName))
+        {
+            Debug.LogWarning(
+                "La habitación " + room.roomId +
+                " no tiene guestSpriteName. No se aplicó SpriteLibrary."
+            );
+            return;
+        }
+
+        spriteApplier.ApplyFromSpriteName(room.guestSpriteName);
     }
 
     private void ApplyNpcScale(GameObject guest)

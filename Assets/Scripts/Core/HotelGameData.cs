@@ -42,10 +42,14 @@ public class HotelGameData : MonoBehaviour
             room.state = RoomState.Libre;
             room.needsCleaning = false;
             room.reservedUntilDay = -1;
+
             room.currentOffer = OfferType.Ninguna;
             room.currentMealPlan = MealPlan.SoloAlojamiento;
             room.currentGuestCount = 0;
             room.hasGuestData = false;
+
+            room.hotelDoorSpawnId = "";
+            room.guestSpriteName = "";
 
             rooms.Add(room);
         }
@@ -75,15 +79,22 @@ public class HotelGameData : MonoBehaviour
             rooms.Add(runtimeRoom);
         }
 
+        runtimeRoom.isAccessible = roomData.isAccessible;
+        runtimeRoom.bedType = roomData.bedType;
+        runtimeRoom.bedCount = roomData.bedCount;
+
         runtimeRoom.state = roomData.state;
         runtimeRoom.needsCleaning = roomData.needsCleaning;
         runtimeRoom.reservedUntilDay = roomData.reservedUntilDay;
-        runtimeRoom.hotelDoorSpawnId = roomData.hotelDoorSpawnId;
+
         runtimeRoom.currentGuestSegment = roomData.currentGuestSegment;
         runtimeRoom.currentOffer = roomData.currentOffer;
         runtimeRoom.currentMealPlan = roomData.currentMealPlan;
         runtimeRoom.currentGuestCount = roomData.currentGuestCount;
         runtimeRoom.hasGuestData = roomData.hasGuestData;
+
+        runtimeRoom.hotelDoorSpawnId = roomData.hotelDoorSpawnId;
+        runtimeRoom.guestSpriteName = roomData.guestSpriteName;
     }
 
     public void LoadRoomIntoRoomData(RoomData roomData)
@@ -97,11 +108,14 @@ public class HotelGameData : MonoBehaviour
         roomData.state = runtimeRoom.state;
         roomData.needsCleaning = runtimeRoom.needsCleaning;
         roomData.reservedUntilDay = runtimeRoom.reservedUntilDay;
-        roomData.hotelDoorSpawnId = runtimeRoom.hotelDoorSpawnId;
+
         roomData.currentGuestSegment = runtimeRoom.currentGuestSegment;
         roomData.currentOffer = runtimeRoom.currentOffer;
         roomData.currentMealPlan = runtimeRoom.currentMealPlan;
         roomData.currentGuestCount = runtimeRoom.currentGuestCount;
         roomData.hasGuestData = runtimeRoom.hasGuestData;
+
+        roomData.hotelDoorSpawnId = runtimeRoom.hotelDoorSpawnId;
+        roomData.guestSpriteName = runtimeRoom.guestSpriteName;
     }
 }

@@ -18,9 +18,12 @@ public class TrashSpawner : MonoBehaviour
     [SerializeField] private float minDistanceBetweenTrash = 0.7f;
 
     private readonly List<TrashItem> spawnedTrash = new List<TrashItem>();
+    public int TotalSpawnedTrash { get; private set; }
+
 
     public void SpawnTrash()
     {
+        TotalSpawnedTrash = 0;
         ClearTrash();
 
         if (trashPrefab == null || trashSprites == null || trashSprites.Length == 0 || spawnAreas == null || spawnAreas.Length == 0)
@@ -59,6 +62,7 @@ public class TrashSpawner : MonoBehaviour
             {
                 trashItem.Setup(this);
                 spawnedTrash.Add(trashItem);
+                TotalSpawnedTrash++;
             }
 
             usedPositions.Add(spawnPos);

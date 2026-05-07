@@ -14,4 +14,5 @@ public class RoomRuntimeData
     public int currentGuestCount;
     public bool hasGuestData;
     public string hotelDoorSpawnId;
+    public string guestSpriteName;
 }

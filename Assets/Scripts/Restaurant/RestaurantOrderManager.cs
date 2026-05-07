@@ -136,11 +136,6 @@ public class RestaurantOrderManager : MonoBehaviour
             case GuestSegment.Ejecutivo:
                 return "Almuerzo rápido";
 
-            case GuestSegment.AdultoMayor:
-                return "Menú ligero";
-
-            case GuestSegment.Mochilero:
-                return "Menú económico";
 
             default:
                 return "Plato del día";
@@ -154,9 +149,6 @@ public class RestaurantOrderManager : MonoBehaviour
         if (order.hasAllergy) score += 5;
         if (order.isUrgent) score += 4;
         if (order.isRoomService) score += 2;
-
-        if (order.segment == GuestSegment.Ejecutivo) score += 2;
-        if (order.segment == GuestSegment.AdultoMayor) score += 2;
 
         return score;
     }
@@ -264,6 +256,33 @@ public class RestaurantOrderManager : MonoBehaviour
 
         satisfaction = Mathf.Clamp(satisfaction, 0, 100);
         timeScore = Mathf.Clamp(timeScore, 0, 100);
+
+        int finalScore = Mathf.RoundToInt(
+            (satisfaction * 0.5f) +
+            (timeScore * 0.3f) +
+            ((100 - errors * 30) * 0.2f)
+        );
+
+        finalScore = Mathf.Clamp(finalScore, 0, 100);
+
+        MiniGameResultData result = new MiniGameResultData();
+
+        result.day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
+        result.minigameName = "Restaurante";
+        result.satisfaction = satisfaction;
+        result.revenue = revenue;
+        result.errors = errors;
+        result.timeScore = timeScore;
+        result.finalScore = finalScore;
+
+        result.stpSummary = "Priorización de pedidos según alergias, urgencia, room service y tipo de huésped.";
+
+        result.feedback = errors == 0
+            ? "Priorizaste correctamente los pedidos."
+            : "Revisa mejor las alergias, urgencias y pedidos a habitación.";
+
+        DailyResultsManager.Instance?.RegisterResult(result);
+
 
         if (gamePanel != null)
             gamePanel.SetActive(false);

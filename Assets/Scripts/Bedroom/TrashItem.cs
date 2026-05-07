@@ -33,6 +33,11 @@ public class TrashItem : MonoBehaviour
             trashSpawner.RemoveTrash(this);
         }
 
+        if (RoomCleaningKPIManager.Instance != null)
+        {
+            RoomCleaningKPIManager.Instance.RegisterTrashCleaned();
+        }
+
         Destroy(gameObject);
     }
 

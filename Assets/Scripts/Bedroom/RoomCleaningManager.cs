@@ -10,13 +10,28 @@ public class RoomCleaningManager : MonoBehaviour
     [Header("Trash")]
     [SerializeField] private TrashSpawner trashSpawner;
 
+    [Header("KPI")]
+    [SerializeField] private RoomCleaningKPIManager kpiManager;
+
+    private GameObject activeLayout;
+
     private void Start()
     {
         ActivateCorrectLayout();
 
-        if (RoomCleaningSession.selectedNeedsCleaning && trashSpawner != null)
+        BedSpot[] activeBeds = GetActiveLayoutBeds();
+
+        if (kpiManager != null)
         {
-            trashSpawner.SpawnTrash();
+            kpiManager.SetupCleaningRoom(
+                RoomCleaningSession.selectedNeedsCleaning,
+                trashSpawner,
+                activeBeds
+            );
+        }
+        else
+        {
+            Debug.LogWarning("No asignaste el RoomCleaningKPIManager en RoomCleaningManager.");
         }
     }
 
@@ -30,18 +45,32 @@ public class RoomCleaningManager : MonoBehaviour
 
         if (bedCount <= 1)
         {
-            if (layout1Bed != null) layout1Bed.SetActive(true);
+            activeLayout = layout1Bed;
         }
         else if (bedCount == 2)
         {
-            if (layout2Beds != null) layout2Beds.SetActive(true);
+            activeLayout = layout2Beds;
         }
         else
         {
-            if (layout3Beds != null) layout3Beds.SetActive(true);
+            activeLayout = layout3Beds;
         }
+
+        if (activeLayout != null)
+            activeLayout.SetActive(true);
 
         Debug.Log("Se activó layout para habitación " + RoomCleaningSession.selectedRoomId +
                   " con " + bedCount + " cama(s).");
+    }
+
+    private BedSpot[] GetActiveLayoutBeds()
+    {
+        if (activeLayout == null)
+        {
+            Debug.LogWarning("No hay layout activo para buscar camas.");
+            return new BedSpot[0];
+        }
+
+        return activeLayout.GetComponentsInChildren<BedSpot>(true);
     }
 }

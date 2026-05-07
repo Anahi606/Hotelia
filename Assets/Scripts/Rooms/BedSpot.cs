@@ -18,9 +18,9 @@ public class BedSpot : MonoBehaviour
 
     private void Start()
     {
-        if (sheetsPlaced != null) sheetsPlaced.SetActive(false);
+        /*if (sheetsPlaced != null) sheetsPlaced.SetActive(false);
         if (pillowsPlaced != null) pillowsPlaced.SetActive(false);
-        if (coverPlaced != null) coverPlaced.SetActive(false);
+        if (coverPlaced != null) coverPlaced.SetActive(false);*/
     }
 
     private void Update()
@@ -55,6 +55,18 @@ public class BedSpot : MonoBehaviour
                     dropTarget.enabled = false;
                 break;
         }
+    }
+
+    public void SetBedCompletedVisual(bool isCompleted)
+    {
+        completed = isCompleted;
+
+        if (sheetsPlaced != null) sheetsPlaced.SetActive(isCompleted);
+        if (pillowsPlaced != null) pillowsPlaced.SetActive(isCompleted);
+        if (coverPlaced != null) coverPlaced.SetActive(isCompleted);
+
+        if (dropTarget != null)
+            dropTarget.enabled = !isCompleted;
     }
 
     public bool IsScreenPointOverDropTarget(Vector2 screenPoint, Camera cam)

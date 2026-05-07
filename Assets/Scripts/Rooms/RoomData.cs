@@ -25,6 +25,7 @@ public class RoomData : MonoBehaviour
     public GameObject guestPrefab;
     public GuestArea guestCurrentArea;
     public string hotelDoorSpawnId;
+    public string guestSpriteName;
 
     private void Start()
     {
@@ -61,6 +62,12 @@ public class RoomData : MonoBehaviour
         currentMealPlan = MealPlan.SoloAlojamiento;
         currentGuestCount = 0;
         hasGuestData = false;
+
+        hasGuest = false;
+        guestPrefab = null;
+        guestCurrentArea = default;
+        hotelDoorSpawnId = "";
+        guestSpriteName = "";
 
         SaveToGameData();
     }
