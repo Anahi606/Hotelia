@@ -57,6 +57,14 @@ public class NPCVisibleTravelBrain : MonoBehaviour
 
     private void TryMakeTravelDecision()
     {
+        NPCTourismQuestionBrain tourismBrain = GetComponent<NPCTourismQuestionBrain>();
+
+        if (tourismBrain != null && tourismBrain.TryStartQuestionInteraction())
+        {
+            Debug.Log(npc.npcId + " priorizó pregunta turística antes de viajar.");
+            return;
+        }
+
         if (!TryChooseDestination(out GuestArea desiredDestination))
             return;
 

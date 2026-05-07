@@ -35,6 +35,12 @@ public class RandomGridRoamer : MonoBehaviour
     private NPCRoamZone[] zones;
     private Coroutine roamRoutine;
     private Vector3 forcedDestination;
+<<<<<<< Updated upstream
+=======
+    private Vector2 lastMoveDirection;
+
+    private bool hasReachedPriorityDestination;
+>>>>>>> Stashed changes
 
     private void Awake()
     {
@@ -247,6 +253,7 @@ public class RandomGridRoamer : MonoBehaviour
         return closestZone;
     }
 
+
     private bool TryGetRandomWalkableCell(NPCRoamZone zone, out Vector2Int cell)
     {
         Bounds bounds = zone.Bounds;
@@ -458,5 +465,118 @@ public class RandomGridRoamer : MonoBehaviour
     {
         if (rb != null)
             rb.linearVelocity = Vector2.zero;
+    }
+
+    public void MoveToInteractionTarget(Vector3 destination)
+    {
+        hasReachedPriorityDestination = false;
+
+        forcedDestination = destination;
+
+        if (roamRoutine != null)
+            StopCoroutine(roamRoutine);
+
+        roamRoutine = StartCoroutine(MoveToInteractionDestination());
+    }
+
+    public bool HasReachedInteractionTarget()
+    {
+        return hasReachedPriorityDestination;
+    }
+
+    public void ResumeNormalRoaming()
+    {
+        hasReachedPriorityDestination = false;
+
+        StartRoaming();
+    }
+
+    public void StopRoaming()
+    {
+        if (roamRoutine != null)
+        {
+            StopCoroutine(roamRoutine);
+            roamRoutine = null;
+        }
+
+        StopMoving();
+    }
+
+    public IEnumerator FollowTargetUntilClose(Transform target, float stopDistance, float timeout)
+    {
+        if (roamRoutine != null)
+        {
+            StopCoroutine(roamRoutine);
+            roamRoutine = null;
+        }
+
+        float timer = 0f;
+
+        while (target != null && timer < timeout)
+        {
+            float distance = Vector2.Distance(rb.position, target.position);
+
+            if (distance <= stopDistance)
+                break;
+
+            Vector2 direction = ((Vector2)target.position - rb.position).normalized;
+
+            rb.linearVelocity = direction * moveSpeed;
+            SetWalkingAnimation(true, direction);
+
+            timer += Time.fixedDeltaTime;
+            yield return new WaitForFixedUpdate();
+        }
+
+        StopMoving();
+    }
+
+    private IEnumerator MoveToInteractionDestination()
+    {
+        NPCRoamZone zone = GetZoneContainingNPC();
+
+        if (zone == null)
+        {
+            zone = GetClosestZoneToNPC();
+
+            if (zone == null)
+            {
+                Debug.LogWarning(gameObject.name + " no encontró zona para acercarse al player.");
+                yield break;
+            }
+
+            rb.position = zone.GetClosestPoint(rb.position);
+        }
+
+        Vector2 safeDestination = forcedDestination;
+
+        if (!zone.ContainsWorldPosition(safeDestination))
+            safeDestination = zone.GetClosestPoint(safeDestination);
+
+        Vector2Int startCell = WorldToCell(rb.position);
+        Vector2Int targetCell = WorldToCell(safeDestination);
+
+        if (!IsCellWalkable(targetCell, zone))
+        {
+            if (!TryFindNearbyWalkableCell(safeDestination, zone, out targetCell))
+            {
+                Debug.LogWarning(gameObject.name + " no encontró celda cerca del player.");
+                yield break;
+            }
+        }
+
+        List<Vector2Int> path = FindPath(startCell, targetCell, zone);
+
+        if (path != null && path.Count > 0)
+        {
+            yield return MoveAlongPath(path);
+        }
+        else
+        {
+            Debug.LogWarning(gameObject.name + " no encontró camino hacia el player.");
+        }
+
+        StopMoving();
+        hasReachedPriorityDestination = true;
     }
 }

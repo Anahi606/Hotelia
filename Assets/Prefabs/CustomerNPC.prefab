@@ -16,6 +16,14 @@ GameObject:
   - component: {fileID: 5348898482322311783}
   - component: {fileID: 2192565259170485571}
   - component: {fileID: 924876288401489587}
+<<<<<<< Updated upstream
+=======
+  - component: {fileID: 7144837772604468270}
+  - component: {fileID: 2523312549524949715}
+  - component: {fileID: 7628902014223696484}
+  - component: {fileID: 7419671294628607512}
+  - component: {fileID: 933392748332292411}
+>>>>>>> Stashed changes
   m_Layer: 0
   m_Name: CustomerNPC
   m_TagString: Guest
@@ -247,3 +255,99 @@ MonoBehaviour:
   chanceOutsideToHotel: 0.3
   chanceOutsideToRestaurant: 0.3
   chanceRestaurantToOutside: 0.4
+<<<<<<< Updated upstream
+=======
+--- !u!114 &7144837772604468270
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5417902229895961375}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c29cff538c195c249b69c6f2236de67b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.2D.Animation.Runtime::UnityEngine.U2D.Animation.SpriteLibrary
+  m_Library: []
+  m_SpriteLibraryAsset: {fileID: 7108339969198208228, guid: a612b9c9eafd4aa4290fabc3ebd91292, type: 3}
+--- !u!114 &2523312549524949715
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5417902229895961375}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed8b1ae4e4e52b34ea557c1c11e076fc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.2D.Animation.Runtime::UnityEngine.U2D.Animation.SpriteResolver
+  m_CategoryHash: 0.009161512
+  m_labelHash: 1.3868938e-33
+  m_SpriteKey: 0
+  m_SpriteHash: 857177923
+--- !u!114 &7628902014223696484
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5417902229895961375}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0cd7ea2e8050f84f9eac1c8dbb9d1a5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  spriteLibrary: {fileID: 7144837772604468270}
+  spriteResolver: {fileID: 2523312549524949715}
+  libraries:
+  - customerName: CustomerA
+    spriteLibraryAsset: {fileID: 7108339969198208228, guid: a612b9c9eafd4aa4290fabc3ebd91292, type: 3}
+  - customerName: CustomerB
+    spriteLibraryAsset: {fileID: 7108339969198208228, guid: 7d67cf0847842534c87672d22b675dd5, type: 3}
+  spawnIdleCategory: Idle
+  spawnIdleLabel: sprite_0
+--- !u!95 &7419671294628607512
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5417902229895961375}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 46e3d033058ca0d479d275446697e9b5, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &933392748332292411
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5417902229895961375}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb3c991dc5bb68a4c8ac132001217479, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  minCheckDelay: 20
+  maxCheckDelay: 40
+  questionChance: 1
+  minTimeBetweenQuestions: 3
+  maxTimeBetweenQuestions: 5
+  maxDistanceToPlayer: 6
+  talkDistance: 1.2
+  npcPortraitSprite: {fileID: 0}
+>>>>>>> Stashed changes
