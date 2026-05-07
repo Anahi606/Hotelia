@@ -14,6 +14,8 @@ public class EndDayBoardInteractable : MonoBehaviour
     {
         if (endDayPanel != null)
             endDayPanel.SetActive(false);
+        else
+            Debug.LogWarning("EndDayPanel no está asignado en EndDayBoardInteractable.");
 
         if (interactText != null)
             interactText.SetActive(false);
@@ -21,35 +23,46 @@ public class EndDayBoardInteractable : MonoBehaviour
 
     private void Update()
     {
-        if (playerInside && !panelOpen && Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
+        if (!playerInside) return;
+        if (panelOpen) return;
+
+        if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
         {
+            Debug.Log("E presionada dentro del trigger de fin de día.");
             OpenPanel();
         }
     }
 
     private void OpenPanel()
     {
-        if (endDayPanel != null)
-            endDayPanel.SetActive(true);
+        if (endDayPanel == null)
+        {
+            Debug.LogWarning("No se puede abrir EndDayPanel porque no está asignado.");
+            return;
+        }
+
+        endDayPanel.SetActive(true);
 
         if (interactText != null)
             interactText.SetActive(false);
 
         panelOpen = true;
+
+        Debug.Log("EndDayPanel abierto.");
     }
 
     public void ConfirmEndDay()
     {
-        if (DayManager.Instance != null)
+        ClosePanel();
+
+        if (DailySummaryUI.Instance != null)
         {
-            DayManager.Instance.EndDay();
+            DailySummaryUI.Instance.OpenSummary();
         }
         else
         {
-            Debug.LogWarning("No se encontró una instancia de DayManager en la escena.");
+            Debug.LogWarning("No se encontró DailySummaryUI en la escena.");
         }
-
-        ClosePanel();
     }
 
     public void CancelEndDay()
@@ -70,23 +83,31 @@ public class EndDayBoardInteractable : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
+        Debug.Log("Entró al trigger: " + other.name);
+
         if (other.CompareTag("Player"))
         {
             playerInside = true;
 
             if (interactText != null && !panelOpen)
                 interactText.SetActive(true);
+
+            Debug.Log("Player dentro del trigger de fin de día.");
         }
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
+        Debug.Log("Salió del trigger: " + other.name);
+
         if (other.CompareTag("Player"))
         {
             playerInside = false;
 
             if (interactText != null)
                 interactText.SetActive(false);
+
+            Debug.Log("Player salió del trigger de fin de día.");
         }
     }
 }
