@@ -38,13 +38,42 @@ public class RoomDoorInteractable : MonoBehaviour
     private void OpenRoomCleaningScene()
     {
         GuestNPCSceneSaver.SaveAllVisibleGuests();
+
+        if (HotelGameData.Instance == null)
+        {
+            Debug.LogWarning("No existe HotelGameData.");
+            return;
+        }
+
+        RoomRuntimeData runtimeRoom = HotelGameData.Instance.GetRoomById(roomData.roomId);
+
+        if (runtimeRoom == null)
+        {
+            Debug.LogWarning("No se encontró la habitación " + roomData.roomId + " en HotelGameData.");
+            return;
+        }
+
+        int currentDay = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
+
         PlayerSpawnMemory.SetNextSpawn("RoomInside");
-        RoomCleaningSession.selectedRoomId = roomData.roomId;
-        RoomCleaningSession.selectedBedCount = roomData.bedCount;
-        RoomCleaningSession.selectedBedType = roomData.bedType;
-        RoomCleaningSession.selectedNeedsCleaning = roomData.needsCleaning;
+
+        RoomCleaningSession.selectedRoomId = runtimeRoom.roomId;
+        RoomCleaningSession.selectedBedCount = runtimeRoom.bedCount;
+        RoomCleaningSession.selectedBedType = runtimeRoom.bedType;
+
+        RoomCleaningSession.selectedNeedsCleaning =
+            runtimeRoom.needsCleaning || runtimeRoom.state == RoomState.Sucia;
+
         RoomCleaningSession.selectedReservationStillActive =
-            roomData.IsReservationActive(DayManager.Instance.CurrentDay);
+            runtimeRoom.hasGuestData && runtimeRoom.reservedUntilDay >= currentDay;
+
+        Debug.Log("Entrando a habitación " + runtimeRoom.roomId +
+                  " / Día actual: " + currentDay +
+                  " / Reservado hasta: " + runtimeRoom.reservedUntilDay +
+                  " / Estado runtime: " + runtimeRoom.state +
+                  " / NeedsCleaning runtime: " + runtimeRoom.needsCleaning +
+                  " / Session Sucia: " + RoomCleaningSession.selectedNeedsCleaning +
+                  " / Reserva activa: " + RoomCleaningSession.selectedReservationStillActive);
 
         SceneManager.LoadScene("03 - Bedroom");
     }

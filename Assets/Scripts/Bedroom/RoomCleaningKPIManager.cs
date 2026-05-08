@@ -376,4 +376,10 @@ public class RoomCleaningKPIManager : MonoBehaviour
         int seconds = Mathf.CeilToInt(currentTime);
         timerText.text = seconds.ToString() + "s";
     }
+
+    public void CloseResultPanel()
+    {
+        if (resultPanel != null)
+            resultPanel.SetActive(false);
+    }
 }

@@ -92,12 +92,12 @@ SpriteRenderer:
   m_SortingLayer: 3
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -3138396310083962553, guid: ee45e9993fe14fe42992867999de96ed, type: 3}
+  m_Sprite: {fileID: -6127437868658617830, guid: ee45e9993fe14fe42992867999de96ed, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 0.16, y: 0.32}
+  m_Size: {x: 1, y: 2}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -168,7 +168,7 @@ BoxCollider2D:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
     oldSize: {x: 1, y: 2}
-    newSize: {x: 0.16, y: 0.32}
+    newSize: {x: 1, y: 2}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
@@ -267,7 +267,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.2D.Animation.Runtime::UnityEngine.U2D.Animation.SpriteLibrary
   m_Library: []
-  m_SpriteLibraryAsset: {fileID: 7108339969198208228, guid: a612b9c9eafd4aa4290fabc3ebd91292, type: 3}
+  m_SpriteLibraryAsset: {fileID: 7108339969198208228, guid: 58e277cfa36366d4eac8f2df96d373a8, type: 3}
 --- !u!114 &2523312549524949715
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -280,10 +280,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed8b1ae4e4e52b34ea557c1c11e076fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.2D.Animation.Runtime::UnityEngine.U2D.Animation.SpriteResolver
-  m_CategoryHash: 0.009161512
-  m_labelHash: 1.3868938e-33
+  m_CategoryHash: 1.8625731e-11
+  m_labelHash: 1.6102261e-15
   m_SpriteKey: 0
-  m_SpriteHash: 857177923
+  m_SpriteHash: 361952166
 --- !u!114 &7628902014223696484
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -300,9 +300,9 @@ MonoBehaviour:
   spriteResolver: {fileID: 2523312549524949715}
   libraries:
   - customerName: CustomerA
-    spriteLibraryAsset: {fileID: 7108339969198208228, guid: a612b9c9eafd4aa4290fabc3ebd91292, type: 3}
+    spriteLibraryAsset: {fileID: 7108339969198208228, guid: 58e277cfa36366d4eac8f2df96d373a8, type: 3}
   - customerName: CustomerB
-    spriteLibraryAsset: {fileID: 7108339969198208228, guid: 7d67cf0847842534c87672d22b675dd5, type: 3}
+    spriteLibraryAsset: {fileID: 7108339969198208228, guid: 448cb29a7de93ae45a27787c993e6c68, type: 3}
   spawnIdleCategory: Idle
   spawnIdleLabel: sprite_0
 --- !u!95 &7419671294628607512
