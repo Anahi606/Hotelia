@@ -30373,6 +30373,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 395394560}
+        m_TargetAssemblyTypeName: RestaurantOrderManager, Assembly-CSharp
+        m_MethodName: CloseRestaurant
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &527653978
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -32616,6 +32628,7 @@ GameObject:
   - component: {fileID: 894998817}
   - component: {fileID: 894998819}
   - component: {fileID: 894998818}
+  - component: {fileID: 894998820}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -32965,6 +32978,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.2D.Animation.Runtime::UnityEngine.U2D.Animation.SpriteLibrary
   m_Library: []
   m_SpriteLibraryAsset: {fileID: 7108339969198208228, guid: 4a4c297a13fb8f042a20d6259e143cb1, type: 3}
+--- !u!114 &894998820
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 894998810}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c34f66ffe2b378c40a73e32142d5c9fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerCharacterVisual
+  maleLibrary: {fileID: 7108339969198208228, guid: 4a4c297a13fb8f042a20d6259e143cb1, type: 3}
+  femaleLibrary: {fileID: 7108339969198208228, guid: 58e277cfa36366d4eac8f2df96d373a8, type: 3}
+  defaultCategory: Idle
+  defaultLabel: sprite_0
 --- !u!1 &1004051094
 GameObject:
   m_ObjectHideFlags: 0
@@ -33930,8 +33959,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -52.2, y: 2}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: 63.648632, y: -3.4683}
+  m_SizeDelta: {x: 431.6973, y: 116.2959}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1162181758
 MonoBehaviour:
@@ -34524,8 +34553,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -52.2, y: 2}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: 66.82271, y: -3.536}
+  m_SizeDelta: {x: 438.0453, y: 116.4313}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1407350645
 MonoBehaviour:
@@ -34661,8 +34690,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -52.2, y: 2}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: 64.60823, y: -1.8752}
+  m_SizeDelta: {x: 433.6166, y: 119.7529}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1422166667
 MonoBehaviour:

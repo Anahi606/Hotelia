@@ -26,6 +26,7 @@ public class DailyResultsManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
+
     public void RegisterResult(MiniGameResultData result)
     {
         if (result == null) return;
@@ -92,6 +93,27 @@ public class DailyResultsManager : MonoBehaviour
 
         if (wrapper != null && wrapper.results != null)
             allResults = wrapper.results;
+    }
+
+    public void ClearAllResultsInMemory()
+    {
+        todayResults.Clear();
+        allResults.Clear();
+
+        Debug.Log("Resultados diarios limpiados en memoria.");
+    }
+
+    public static void DeleteSavedResults()
+    {
+        PlayerPrefs.DeleteKey(ResultsKey);
+        PlayerPrefs.Save();
+
+        if (Instance != null)
+        {
+            Instance.ClearAllResultsInMemory();
+        }
+
+        Debug.Log("Historial de resultados eliminado completamente.");
     }
 
     [ContextMenu("Reset Saved Results")]

@@ -19,7 +19,7 @@ public class DailySummaryUI : MonoBehaviour
     [Header("Daily Charts")]
     [SerializeField] private BarChart scoreBarChart;
     [SerializeField] private PieChart errorsPieChart;
-    [SerializeField] private LineChart revenueLineChart;
+    [SerializeField] private BarChart revenueBarChart;
 
     [Header("All Days Dashboard Panel")]
     [SerializeField] private GameObject allDaysDashboardPanel;
@@ -66,6 +66,28 @@ public class DailySummaryUI : MonoBehaviour
             {
                 if (count <= 0) return 0;
                 return Mathf.RoundToInt(totalScore / (float)count);
+            }
+        }
+    }
+
+    private const int MaxDailyDashboardDays = 15;
+    private const int DaysPerGameMonth = 30;
+
+    private class PeriodSummaryData
+    {
+        public string label;
+        public int daysCount;
+        public int totalActivities;
+        public int totalRevenue;
+        public int totalErrors;
+        public int totalDailyAverageScore;
+
+        public int AverageScore
+        {
+            get
+            {
+                if (daysCount <= 0) return 0;
+                return Mathf.RoundToInt(totalDailyAverageScore / (float)daysCount);
             }
         }
     }
@@ -179,6 +201,7 @@ public class DailySummaryUI : MonoBehaviour
         if (generalSummaryText != null)
         {
             generalSummaryText.text =
+                "<b>KPI DEL DÍA</b>\n" +
                 "Rendimiento general: " + averageScore + "%\n" +
                 "Ingresos: $" + totalRevenue + "\n" +
                 "Errores: " + totalErrors + "\n" +
@@ -186,10 +209,18 @@ public class DailySummaryUI : MonoBehaviour
         }
 
         if (stpText != null)
-            stpText.text = stpSummary.TrimEnd();
+        {
+            stpText.text =
+                "<b>STP APLICADO</b>\n" +
+                stpSummary.TrimEnd();
+        }
 
         if (feedbackText != null)
-            feedbackText.text = feedbackSummary.TrimEnd();
+        {
+            feedbackText.text =
+                "<b>FEEDBACK</b>\n" +
+                feedbackSummary.TrimEnd();
+        }
     }
 
     private string GetShortSTP(SummaryData item)
@@ -232,18 +263,22 @@ public class DailySummaryUI : MonoBehaviour
     {
         if (allDaysButton == null) return;
 
+        int currentDay = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
+
         bool hasSavedHistory =
             DailyResultsManager.Instance != null &&
             DailyResultsManager.Instance.GetSavedHistory() != null &&
             DailyResultsManager.Instance.GetSavedHistory().Count > 0;
 
-        allDaysButton.SetActive(hasSavedHistory);
+        bool shouldShow = hasSavedHistory || currentDay > 1;
+
+        allDaysButton.SetActive(shouldShow);
     }
     private void UpdateCharts(List<SummaryData> summary)
     {
         UpdateScoreBarChart(summary);
         UpdateQualityPieChart(summary);
-        UpdateRevenueLineChart(summary);
+        UpdateRevenueBarChart(summary);
     }
 
     private void UpdateScoreBarChart(List<SummaryData> summary)
@@ -317,24 +352,24 @@ public class DailySummaryUI : MonoBehaviour
         errorsPieChart.RefreshChart();
     }
 
-    private void UpdateRevenueLineChart(List<SummaryData> summary)
+    private void UpdateRevenueBarChart(List<SummaryData> summary)
     {
-        if (revenueLineChart == null) return;
+        if (revenueBarChart == null) return;
 
-        ClearChartSeries(revenueLineChart);
+        ClearChartSeries(revenueBarChart);
 
-        SetChartTitle(revenueLineChart, "Ingresos por actividad ($)");
-        SetLegend(revenueLineChart, true);
+        SetChartTitle(revenueBarChart, "Ingresos por actividad ($)");
+        SetLegend(revenueBarChart, true);
 
         if (summary == null || summary.Count == 0)
         {
-            revenueLineChart.RefreshChart();
+            revenueBarChart.RefreshChart();
             return;
         }
 
         foreach (SummaryData item in summary)
         {
-            revenueLineChart.AddXAxisData(GetFullActivityName(item.name));
+            revenueBarChart.AddXAxisData(GetFullActivityName(item.name));
         }
 
         for (int i = 0; i < summary.Count; i++)
@@ -344,16 +379,21 @@ public class DailySummaryUI : MonoBehaviour
             string activityName = GetFullActivityName(item.name);
             string serieName = activityName + " ($" + item.totalRevenue + ")";
 
-            revenueLineChart.AddSerie<Line>(serieName);
+            revenueBarChart.AddSerie<Bar>(serieName);
 
             for (int j = 0; j < summary.Count; j++)
             {
                 int value = i == j ? item.totalRevenue : 0;
-                revenueLineChart.AddData(i, value, activityName + ": $" + item.totalRevenue);
+
+                revenueBarChart.AddData(
+                    i,
+                    value,
+                    activityName + ": $" + item.totalRevenue
+                );
             }
         }
 
-        revenueLineChart.RefreshChart();
+        revenueBarChart.RefreshChart();
     }
 
     private void ClearChartSeries(BaseChart chart)
@@ -399,31 +439,57 @@ public class DailySummaryUI : MonoBehaviour
     {
         Dictionary<int, DaySummaryData> data = new Dictionary<int, DaySummaryData>();
 
-        if (allResults == null)
-            return new List<DaySummaryData>();
+        int currentDay = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
+        int maxDay = currentDay;
 
-        foreach (MiniGameResultData result in allResults)
+        if (allResults != null)
         {
-            if (result == null) continue;
-
-            int day = result.day;
-
-            if (!data.ContainsKey(day))
+            foreach (MiniGameResultData result in allResults)
             {
-                data[day] = new DaySummaryData
-                {
-                    day = day,
-                    count = 0,
-                    totalScore = 0,
-                    totalRevenue = 0,
-                    totalErrors = 0
-                };
-            }
+                if (result == null) continue;
 
-            data[day].count++;
-            data[day].totalScore += result.finalScore;
-            data[day].totalRevenue += result.revenue;
-            data[day].totalErrors += result.errors;
+                if (result.day > maxDay)
+                    maxDay = result.day;
+            }
+        }
+
+        for (int day = 1; day <= maxDay; day++)
+        {
+            data[day] = new DaySummaryData
+            {
+                day = day,
+                count = 0,
+                totalScore = 0,
+                totalRevenue = 0,
+                totalErrors = 0
+            };
+        }
+
+        if (allResults != null)
+        {
+            foreach (MiniGameResultData result in allResults)
+            {
+                if (result == null) continue;
+
+                int day = result.day;
+
+                if (!data.ContainsKey(day))
+                {
+                    data[day] = new DaySummaryData
+                    {
+                        day = day,
+                        count = 0,
+                        totalScore = 0,
+                        totalRevenue = 0,
+                        totalErrors = 0
+                    };
+                }
+
+                data[day].count++;
+                data[day].totalScore += result.finalScore;
+                data[day].totalRevenue += result.revenue;
+                data[day].totalErrors += result.errors;
+            }
         }
 
         List<DaySummaryData> list = new List<DaySummaryData>(data.Values);
@@ -440,102 +506,223 @@ public class DailySummaryUI : MonoBehaviour
         if (daySummary == null || daySummary.Count == 0)
         {
             if (allDaysGeneralText != null)
-                allDaysGeneralText.text = "Sin datos históricos.";
+                allDaysGeneralText.text = "Sin días registrados.";
 
             return;
         }
+
+        List<PeriodSummaryData> periodSummary = BuildDashboardPeriodSummary(daySummary);
+
+        bool showingByMonths = daySummary.Count > MaxDailyDashboardDays;
 
         int totalScore = 0;
         int totalRevenue = 0;
         int totalErrors = 0;
         int totalActivities = 0;
 
-        foreach (DaySummaryData day in daySummary)
+        string detail = "";
+
+        foreach (PeriodSummaryData period in periodSummary)
         {
-            totalScore += day.AverageScore;
-            totalRevenue += day.totalRevenue;
-            totalErrors += day.totalErrors;
-            totalActivities += day.count;
+            totalScore += period.AverageScore;
+            totalRevenue += period.totalRevenue;
+            totalErrors += period.totalErrors;
+            totalActivities += period.totalActivities;
+
+            detail +=
+                period.label.Replace("\n", " ") +
+                " - Rendimiento: " + period.AverageScore + "%" +
+                " - Ingresos: $" + period.totalRevenue +
+                " - Errores: " + period.totalErrors +
+                " - Actividades: " + period.totalActivities +
+                "\n";
         }
 
-        int averageScore = Mathf.RoundToInt(totalScore / (float)daySummary.Count);
+        int averageScore = Mathf.RoundToInt(totalScore / (float)periodSummary.Count);
+
+        string modeText = showingByMonths
+            ? "Vista agrupada por meses del juego."
+            : "Vista diaria.";
 
         if (allDaysGeneralText != null)
         {
             allDaysGeneralText.text =
+                "<b>RESUMEN HISTÓRICO</b>\n" +
+                modeText + "\n" +
                 "Días registrados: " + daySummary.Count + "\n" +
                 "Rendimiento promedio: " + averageScore + "%\n" +
                 "Ingresos acumulados: $" + totalRevenue + "\n" +
                 "Errores acumulados: " + totalErrors + "\n" +
-                "Actividades totales: " + totalActivities;
+                "Actividades totales: " + totalActivities + "\n\n" +
+                "<b>DETALLE</b>\n" +
+                detail.TrimEnd();
         }
     }
 
     private void UpdateAllDaysCharts(List<DaySummaryData> daySummary)
     {
-        UpdateAllDaysKpiChart(daySummary);
-        UpdateAllDaysRevenueChart(daySummary);
-        UpdateAllDaysErrorsChart(daySummary);
+        List<PeriodSummaryData> periodSummary = BuildDashboardPeriodSummary(daySummary);
+
+        UpdateAllDaysKpiChart(periodSummary);
+        UpdateAllDaysRevenueChart(periodSummary);
+        UpdateAllDaysErrorsChart(periodSummary);
     }
 
-    private void UpdateAllDaysKpiChart(List<DaySummaryData> daySummary)
+    private void UpdateAllDaysKpiChart(List<PeriodSummaryData> periodSummary)
     {
         if (allDaysKpiLineChart == null) return;
 
-        allDaysKpiLineChart.ClearData();
+        ClearChartSeries(allDaysKpiLineChart);
 
         SetChartTitle(allDaysKpiLineChart, "Evolución del rendimiento (%)");
         SetLegend(allDaysKpiLineChart, false);
-        SetSerieName(allDaysKpiLineChart, 0, "Rendimiento");
 
-        foreach (DaySummaryData day in daySummary)
+        allDaysKpiLineChart.AddSerie<Line>("Rendimiento");
+
+        if (periodSummary == null || periodSummary.Count == 0)
         {
-            string label = "Día " + day.day;
-            allDaysKpiLineChart.AddXAxisData(label);
-            allDaysKpiLineChart.AddData(0, day.AverageScore, label + ": " + day.AverageScore + "%");
+            allDaysKpiLineChart.RefreshChart();
+            return;
+        }
+
+        foreach (PeriodSummaryData period in periodSummary)
+        {
+            allDaysKpiLineChart.AddXAxisData(period.label);
+            allDaysKpiLineChart.AddData(
+                0,
+                period.AverageScore,
+                period.label + ": " + period.AverageScore + "%"
+            );
         }
 
         allDaysKpiLineChart.RefreshChart();
     }
 
-    private void UpdateAllDaysRevenueChart(List<DaySummaryData> daySummary)
+    private void UpdateAllDaysRevenueChart(List<PeriodSummaryData> periodSummary)
     {
         if (allDaysRevenueBarChart == null) return;
 
-        allDaysRevenueBarChart.ClearData();
+        ClearChartSeries(allDaysRevenueBarChart);
 
-        SetChartTitle(allDaysRevenueBarChart, "Ingresos por día ($)");
+        SetChartTitle(allDaysRevenueBarChart, "Ingresos");
         SetLegend(allDaysRevenueBarChart, false);
-        SetSerieName(allDaysRevenueBarChart, 0, "Ingresos");
 
-        foreach (DaySummaryData day in daySummary)
+        allDaysRevenueBarChart.AddSerie<Bar>("Ingresos");
+
+        if (periodSummary == null || periodSummary.Count == 0)
         {
-            string label = "Día " + day.day;
-            allDaysRevenueBarChart.AddXAxisData(label);
-            allDaysRevenueBarChart.AddData(0, day.totalRevenue, label + ": $" + day.totalRevenue);
+            allDaysRevenueBarChart.RefreshChart();
+            return;
+        }
+
+        foreach (PeriodSummaryData period in periodSummary)
+        {
+            allDaysRevenueBarChart.AddXAxisData(period.label);
+            allDaysRevenueBarChart.AddData(
+                0,
+                period.totalRevenue,
+                period.label + " - Ingresos: $" + period.totalRevenue
+            );
         }
 
         allDaysRevenueBarChart.RefreshChart();
     }
 
-    private void UpdateAllDaysErrorsChart(List<DaySummaryData> daySummary)
+    private void UpdateAllDaysErrorsChart(List<PeriodSummaryData> periodSummary)
     {
         if (allDaysErrorsBarChart == null) return;
 
-        allDaysErrorsBarChart.ClearData();
+        ClearChartSeries(allDaysErrorsBarChart);
 
-        SetChartTitle(allDaysErrorsBarChart, "Errores por día");
+        SetChartTitle(allDaysErrorsBarChart, "Errores");
         SetLegend(allDaysErrorsBarChart, false);
-        SetSerieName(allDaysErrorsBarChart, 0, "Errores");
 
-        foreach (DaySummaryData day in daySummary)
+        allDaysErrorsBarChart.AddSerie<Bar>("Errores");
+
+        if (periodSummary == null || periodSummary.Count == 0)
         {
-            string label = "Día " + day.day;
-            allDaysErrorsBarChart.AddXAxisData(label);
-            allDaysErrorsBarChart.AddData(0, day.totalErrors, label + ": " + day.totalErrors + " errores");
+            allDaysErrorsBarChart.RefreshChart();
+            return;
+        }
+
+        foreach (PeriodSummaryData period in periodSummary)
+        {
+            allDaysErrorsBarChart.AddXAxisData(period.label);
+            allDaysErrorsBarChart.AddData(
+                0,
+                period.totalErrors,
+                period.label + " - Errores: " + period.totalErrors
+            );
         }
 
         allDaysErrorsBarChart.RefreshChart();
+    }
+
+    private List<PeriodSummaryData> BuildDashboardPeriodSummary(List<DaySummaryData> daySummary)
+    {
+        List<PeriodSummaryData> periodSummary = new List<PeriodSummaryData>();
+
+        if (daySummary == null || daySummary.Count == 0)
+            return periodSummary;
+
+        bool showByMonths = daySummary.Count > MaxDailyDashboardDays;
+
+        if (!showByMonths)
+        {
+            foreach (DaySummaryData day in daySummary)
+            {
+                periodSummary.Add(new PeriodSummaryData
+                {
+                    label = "Día " + day.day,
+                    daysCount = 1,
+                    totalActivities = day.count,
+                    totalRevenue = day.totalRevenue,
+                    totalErrors = day.totalErrors,
+                    totalDailyAverageScore = day.AverageScore
+                });
+            }
+
+            return periodSummary;
+        }
+
+        Dictionary<int, PeriodSummaryData> months = new Dictionary<int, PeriodSummaryData>();
+
+        foreach (DaySummaryData day in daySummary)
+        {
+            int monthNumber = ((day.day - 1) / DaysPerGameMonth) + 1;
+
+            if (!months.ContainsKey(monthNumber))
+            {
+                int startDay = ((monthNumber - 1) * DaysPerGameMonth) + 1;
+                int endDay = monthNumber * DaysPerGameMonth;
+
+                months[monthNumber] = new PeriodSummaryData
+                {
+                    label = "Mes " + monthNumber + "\nDía " + startDay + "-" + endDay,
+                    daysCount = 0,
+                    totalActivities = 0,
+                    totalRevenue = 0,
+                    totalErrors = 0,
+                    totalDailyAverageScore = 0
+                };
+            }
+
+            months[monthNumber].daysCount++;
+            months[monthNumber].totalActivities += day.count;
+            months[monthNumber].totalRevenue += day.totalRevenue;
+            months[monthNumber].totalErrors += day.totalErrors;
+            months[monthNumber].totalDailyAverageScore += day.AverageScore;
+        }
+
+        List<int> keys = new List<int>(months.Keys);
+        keys.Sort();
+
+        foreach (int key in keys)
+        {
+            periodSummary.Add(months[key]);
+        }
+
+        return periodSummary;
     }
 
     private string GetFullActivityName(string minigameName)

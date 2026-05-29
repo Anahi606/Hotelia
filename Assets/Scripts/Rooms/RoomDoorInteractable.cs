@@ -53,6 +53,17 @@ public class RoomDoorInteractable : MonoBehaviour
             return;
         }
 
+        if (runtimeRoom.bedCount <= 0)
+        {
+            runtimeRoom.isAccessible = roomData.isAccessible;
+            runtimeRoom.bedType = roomData.bedType;
+            runtimeRoom.bedCount = roomData.bedCount;
+
+            Debug.Log("Se corrigieron datos estáticos de habitación " + roomData.roomId +
+                      " desde RoomData. Camas: " + roomData.bedCount +
+                      " / Tipo cama: " + roomData.bedType);
+        }
+
         int currentDay = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
 
         PlayerSpawnMemory.SetNextSpawn("RoomInside");

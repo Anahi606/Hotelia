@@ -34176,6 +34176,7 @@ GameObject:
   - component: {fileID: 894998817}
   - component: {fileID: 894998819}
   - component: {fileID: 894998818}
+  - component: {fileID: 894998820}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -34525,6 +34526,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.2D.Animation.Runtime::UnityEngine.U2D.Animation.SpriteLibrary
   m_Library: []
   m_SpriteLibraryAsset: {fileID: 7108339969198208228, guid: 4a4c297a13fb8f042a20d6259e143cb1, type: 3}
+--- !u!114 &894998820
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 894998810}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c34f66ffe2b378c40a73e32142d5c9fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerCharacterVisual
+  maleLibrary: {fileID: 7108339969198208228, guid: 4a4c297a13fb8f042a20d6259e143cb1, type: 3}
+  femaleLibrary: {fileID: 7108339969198208228, guid: 58e277cfa36366d4eac8f2df96d373a8, type: 3}
+  defaultCategory: Idle
+  defaultLabel: sprite_0
 --- !u!1 &990056024
 GameObject:
   m_ObjectHideFlags: 0

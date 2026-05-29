@@ -1,9 +1,9 @@
 {
   "dependencies": {
     "com.monitor1394.xcharts": {
-      "version": "file:C:/Users/Usuario/Downloads/XCharts-master/XCharts-master",
+      "version": "file:XCharts",
       "depth": 0,
-      "source": "local",
+      "source": "embedded",
       "dependencies": {}
     },
     "com.unity.2d.animation": {

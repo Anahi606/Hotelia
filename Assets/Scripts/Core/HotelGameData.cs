@@ -5,6 +5,9 @@ public class HotelGameData : MonoBehaviour
 {
     public static HotelGameData Instance { get; private set; }
 
+    [Header("Player")]
+    public PlayerCharacterType selectedCharacter = PlayerCharacterType.None;
+
     [Header("Runtime Rooms")]
     public List<RoomRuntimeData> rooms = new List<RoomRuntimeData>();
 
@@ -22,12 +25,32 @@ public class HotelGameData : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+
+            LoadSavedGameDataIfExists();
+
             InitializeRoomsIfEmpty();
         }
         else
         {
             Destroy(gameObject);
         }
+    }
+
+    private void LoadSavedGameDataIfExists()
+    {
+        HotelSaveData saveData = HotelSaveSystem.LoadGame();
+
+        if (saveData == null)
+            return;
+
+        selectedCharacter = saveData.selectedCharacter;
+
+        if (saveData.rooms != null && saveData.rooms.Count > 0)
+        {
+            rooms = saveData.rooms;
+        }
+
+        Debug.Log("HotelGameData cargado. Personaje: " + selectedCharacter);
     }
 
     private void InitializeRoomsIfEmpty()
@@ -39,6 +62,10 @@ public class HotelGameData : MonoBehaviour
             RoomRuntimeData room = new RoomRuntimeData();
 
             room.roomId = i.ToString("00");
+            room.isAccessible = false;
+            room.bedType = BedType.Matrimonial;
+            room.bedCount = 0;
+
             room.state = RoomState.Libre;
             room.needsCleaning = false;
             room.reservedUntilDay = -1;
@@ -103,7 +130,25 @@ public class HotelGameData : MonoBehaviour
 
         RoomRuntimeData runtimeRoom = GetRoomById(roomData.roomId);
 
-        if (runtimeRoom == null) return;
+        if (runtimeRoom == null)
+        {
+            runtimeRoom = new RoomRuntimeData();
+            runtimeRoom.roomId = roomData.roomId;
+            rooms.Add(runtimeRoom);
+        }
+
+        if (runtimeRoom.bedCount <= 0)
+        {
+            runtimeRoom.isAccessible = roomData.isAccessible;
+            runtimeRoom.bedType = roomData.bedType;
+            runtimeRoom.bedCount = roomData.bedCount;
+        }
+        else
+        {
+            roomData.isAccessible = runtimeRoom.isAccessible;
+            roomData.bedType = runtimeRoom.bedType;
+            roomData.bedCount = runtimeRoom.bedCount;
+        }
 
         roomData.state = runtimeRoom.state;
         roomData.needsCleaning = runtimeRoom.needsCleaning;

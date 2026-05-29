@@ -6,8 +6,6 @@ public class DayManager : MonoBehaviour
 
     public int CurrentDay { get; private set; } = 1;
 
-    private const string DayKey = "CurrentDay";
-
     private void Awake()
     {
         if (Instance == null)
@@ -15,7 +13,7 @@ public class DayManager : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(gameObject);
 
-            CurrentDay = PlayerPrefs.GetInt(DayKey, 1);
+            LoadCurrentDayFromSave();
         }
         else
         {
@@ -24,14 +22,37 @@ public class DayManager : MonoBehaviour
         }
     }
 
+    private void LoadCurrentDayFromSave()
+    {
+        HotelSaveData saveData = HotelSaveSystem.LoadGame();
+
+        if (saveData != null && saveData.hasStartedGame)
+        {
+            CurrentDay = saveData.currentDay;
+        }
+        else
+        {
+            CurrentDay = 1;
+        }
+    }
+
     public void EndDay()
     {
+        if (DailyResultsManager.Instance != null)
+        {
+            DailyResultsManager.Instance.CommitTodayResults();
+        }
+
         CurrentDay++;
 
-        PlayerPrefs.SetInt(DayKey, CurrentDay);
-        PlayerPrefs.Save();
-
         UpdateRoomsForNewDay();
+
+        HotelSaveSystem.SaveEndOfDay();
+
+        if (DailyResultsManager.Instance != null)
+        {
+            DailyResultsManager.Instance.ClearTodayResults();
+        }
 
         DayTextUI.UpdateAllDayTexts();
 
@@ -61,17 +82,17 @@ public class DayManager : MonoBehaviour
     {
         string npcId = "Guest_" + room.roomId;
 
-        // 1. Borra la memoria del NPC para que no reaparezca luego.
+        //Borra la memoria del NPC para que no reaparezca luego.
         GuestNPCMemory.RemoveState(npcId);
 
-        // 2. Si el NPC está visible en la escena actual, lo destruye.
+        //Si el NPC está visible en la escena actual, lo destruye.
         DestroyVisibleGuest(room.roomId);
 
-        // 3. La habitación pasa a sucia.
+        //La habitación pasa a sucia.
         room.state = RoomState.Sucia;
         room.needsCleaning = true;
 
-        // 4. Limpia datos del huésped.
+        //Limpia datos del huésped.
         room.hasGuestData = false;
         room.currentGuestCount = 0;
         room.currentOffer = OfferType.Ninguna;
@@ -109,8 +130,7 @@ public class DayManager : MonoBehaviour
     {
         CurrentDay = 1;
 
-        PlayerPrefs.SetInt(DayKey, CurrentDay);
-        PlayerPrefs.Save();
+        HotelSaveSystem.SaveEndOfDay();
 
         DayTextUI.UpdateAllDayTexts();
     }
