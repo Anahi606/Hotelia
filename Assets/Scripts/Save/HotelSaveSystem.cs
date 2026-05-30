@@ -1,119 +1,114 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public static class HotelSaveSystem
 {
-    private const string SaveKey = "Hotelia_SaveData";
-    private const string SavedLevelKey = "SavedLevel";
-    private const string OldDayKey = "CurrentDay";
-    private const string DailyResultsKey = "Hotelia_DailyResults";
-
     public static bool HasSave()
     {
-        if (!PlayerPrefs.HasKey(SaveKey))
-            return false;
-
-        string json = PlayerPrefs.GetString(SaveKey);
-
-        if (string.IsNullOrEmpty(json))
-            return false;
-
-        HotelSaveData data = JsonUtility.FromJson<HotelSaveData>(json);
-
-        return data != null && data.hasStartedGame;
+        return HoteliaSQLiteManager.HasGameState();
     }
 
     public static void SaveNewCharacter(PlayerCharacterType characterType, string firstGameSceneName)
     {
-        HotelSaveData data = new HotelSaveData();
+        GameStateEntity gameState = new GameStateEntity
+        {
+            Id = 1,
+            HasStartedGame = true,
+            SelectedCharacter = (int)characterType,
+            CurrentDay = 1,
+            SavedSceneName = firstGameSceneName
+        };
 
-        data.hasStartedGame = true;
-        data.selectedCharacter = characterType;
-        data.currentDay = 1;
-        data.savedSceneName = firstGameSceneName;
+        HoteliaSQLiteManager.SaveGameState(gameState);
 
         if (HotelGameData.Instance != null)
         {
             HotelGameData.Instance.selectedCharacter = characterType;
-            data.rooms = HotelGameData.Instance.rooms;
+            HoteliaSQLiteManager.SaveRooms(HotelGameData.Instance.rooms);
         }
 
         if (DailyResultsManager.Instance != null)
         {
             DailyResultsManager.Instance.ClearTodayResults();
             DailyResultsManager.Instance.allResults.Clear();
-
-            data.allResults = DailyResultsManager.Instance.allResults;
         }
 
-        string json = JsonUtility.ToJson(data, true);
-
-        PlayerPrefs.SetString(SaveKey, json);
-        PlayerPrefs.SetString(SavedLevelKey, firstGameSceneName);
-        PlayerPrefs.Save();
-
-        Debug.Log("Nuevo personaje guardado:\n" + json);
+        Debug.Log("Nuevo personaje guardado en SQLite: " + characterType);
     }
 
     public static void SaveEndOfDay()
     {
-        HotelSaveData data = new HotelSaveData();
-
-        data.hasStartedGame = true;
+        string sceneName = "02 - Hotel";
 
         if (SceneManager.GetActiveScene() != null)
-            data.savedSceneName = SceneManager.GetActiveScene().name;
-        else
-            data.savedSceneName = "02 - Hotel";
+            sceneName = SceneManager.GetActiveScene().name;
+
+        int currentDay = 1;
+        PlayerCharacterType selectedCharacter = PlayerCharacterType.None;
 
         if (DayManager.Instance != null)
-            data.currentDay = DayManager.Instance.CurrentDay;
-        else
-            data.currentDay = 1;
+            currentDay = DayManager.Instance.CurrentDay;
+
+        if (HotelGameData.Instance != null)
+            selectedCharacter = HotelGameData.Instance.selectedCharacter;
+
+        GameStateEntity gameState = new GameStateEntity
+        {
+            Id = 1,
+            HasStartedGame = true,
+            SavedSceneName = sceneName,
+            CurrentDay = currentDay,
+            SelectedCharacter = (int)selectedCharacter
+        };
+
+        HoteliaSQLiteManager.SaveGameState(gameState);
 
         if (HotelGameData.Instance != null)
         {
-            data.selectedCharacter = HotelGameData.Instance.selectedCharacter;
-            data.rooms = HotelGameData.Instance.rooms;
+            HoteliaSQLiteManager.SaveRooms(HotelGameData.Instance.rooms);
         }
 
         if (DailyResultsManager.Instance != null)
         {
-            data.allResults = DailyResultsManager.Instance.allResults;
+            HoteliaSQLiteManager.SaveDailyResults(DailyResultsManager.Instance.todayResults);
         }
 
-        string json = JsonUtility.ToJson(data, true);
+        HoteliaSQLiteManager.SaveVisibleNpcStates();
 
-        PlayerPrefs.SetString(SaveKey, json);
-        PlayerPrefs.SetString(SavedLevelKey, data.savedSceneName);
-        PlayerPrefs.Save();
-
-        Debug.Log("Partida guardada al final del día:\n" + json);
+        Debug.Log("Partida guardada al final del día en SQLite.");
     }
 
     public static HotelSaveData LoadGame()
     {
-        if (!PlayerPrefs.HasKey(SaveKey))
+        GameStateEntity gameState = HoteliaSQLiteManager.LoadGameState();
+
+        if (gameState == null || !gameState.HasStartedGame)
             return null;
 
-        string json = PlayerPrefs.GetString(SaveKey);
+        HotelSaveData data = new HotelSaveData();
 
-        if (string.IsNullOrEmpty(json))
-            return null;
+        data.hasStartedGame = gameState.HasStartedGame;
+        data.savedSceneName = gameState.SavedSceneName;
+        data.currentDay = gameState.CurrentDay;
+        data.selectedCharacter = (PlayerCharacterType)gameState.SelectedCharacter;
 
-        HotelSaveData data = JsonUtility.FromJson<HotelSaveData>(json);
+        List<RoomRuntimeData> rooms = HoteliaSQLiteManager.LoadRooms();
+
+        if (rooms != null)
+            data.rooms = rooms;
+
+        List<MiniGameResultData> results = HoteliaSQLiteManager.LoadDailyResults();
+
+        if (results != null)
+            data.allResults = results;
 
         return data;
     }
 
     public static void DeleteSave()
     {
-        PlayerPrefs.DeleteKey(SaveKey);
-        PlayerPrefs.DeleteKey(SavedLevelKey);
-        PlayerPrefs.DeleteKey(OldDayKey);
-        PlayerPrefs.DeleteKey(DailyResultsKey);
-
-        PlayerPrefs.Save();
+        HoteliaSQLiteManager.DeleteAllSaveData();
 
         if (DailyResultsManager.Instance != null)
         {
@@ -127,6 +122,6 @@ public static class HotelSaveSystem
             HotelGameData.Instance.rooms.Clear();
         }
 
-        Debug.Log("Partida eliminada completamente.");
+        Debug.Log("Partida eliminada completamente desde SQLite.");
     }
 }

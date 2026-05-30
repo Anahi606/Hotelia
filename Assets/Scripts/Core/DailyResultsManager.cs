@@ -11,8 +11,6 @@ public class DailyResultsManager : MonoBehaviour
     [Header("Saved History - ONLY FINISHED DAYS")]
     public List<MiniGameResultData> allResults = new List<MiniGameResultData>();
 
-    private const string ResultsKey = "Hotelia_DailyResults";
-
     private void Awake()
     {
         if (Instance == null)
@@ -60,9 +58,7 @@ public class DailyResultsManager : MonoBehaviour
                 allResults.Add(result);
         }
 
-        SaveHistory();
-
-        Debug.Log("Día guardado. Resultados guardados: " + todayResults.Count);
+        Debug.Log("Resultados del día enviados al historial en memoria: " + todayResults.Count);
     }
 
     public void ClearTodayResults()
@@ -70,29 +66,16 @@ public class DailyResultsManager : MonoBehaviour
         todayResults.Clear();
     }
 
-    private void SaveHistory()
-    {
-        MiniGameResultDataList wrapper = new MiniGameResultDataList();
-        wrapper.results = allResults;
-
-        string json = JsonUtility.ToJson(wrapper, true);
-
-        PlayerPrefs.SetString(ResultsKey, json);
-        PlayerPrefs.Save();
-    }
-
     private void LoadSavedResults()
     {
         allResults.Clear();
 
-        if (!PlayerPrefs.HasKey(ResultsKey))
-            return;
+        List<MiniGameResultData> savedResults = HoteliaSQLiteManager.LoadDailyResults();
 
-        string json = PlayerPrefs.GetString(ResultsKey);
-        MiniGameResultDataList wrapper = JsonUtility.FromJson<MiniGameResultDataList>(json);
+        if (savedResults != null)
+            allResults = savedResults;
 
-        if (wrapper != null && wrapper.results != null)
-            allResults = wrapper.results;
+        Debug.Log("Resultados cargados desde SQLite: " + allResults.Count);
     }
 
     public void ClearAllResultsInMemory()
@@ -105,15 +88,12 @@ public class DailyResultsManager : MonoBehaviour
 
     public static void DeleteSavedResults()
     {
-        PlayerPrefs.DeleteKey(ResultsKey);
-        PlayerPrefs.Save();
-
         if (Instance != null)
         {
             Instance.ClearAllResultsInMemory();
         }
 
-        Debug.Log("Historial de resultados eliminado completamente.");
+        Debug.Log("Historial de resultados eliminado de memoria.");
     }
 
     [ContextMenu("Reset Saved Results")]
@@ -122,15 +102,6 @@ public class DailyResultsManager : MonoBehaviour
         todayResults.Clear();
         allResults.Clear();
 
-        PlayerPrefs.DeleteKey(ResultsKey);
-        PlayerPrefs.Save();
-
-        Debug.Log("Historial de resultados eliminado.");
+        Debug.Log("Historial de resultados eliminado de memoria.");
     }
-}
-
-[System.Serializable]
-public class MiniGameResultDataList
-{
-    public List<MiniGameResultData> results = new List<MiniGameResultData>();
 }

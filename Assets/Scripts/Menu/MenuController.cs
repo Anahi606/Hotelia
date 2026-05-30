@@ -12,10 +12,7 @@ public class MenuController : MonoBehaviour
 
     public void NewGameDialogYes()
     {
-        if (HotelSaveSystem.HasSave())
-        {
-            HotelSaveSystem.DeleteSave();
-        }
+        HotelSaveSystem.DeleteSave();
 
         SceneManager.LoadScene(_newGameLevel);
     }

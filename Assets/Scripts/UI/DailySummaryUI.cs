@@ -105,6 +105,8 @@ public class DailySummaryUI : MonoBehaviour
 
     public void OpenSummary()
     {
+        HotelGamePause.RequestPause();
+
         if (summaryPanel != null)
             summaryPanel.SetActive(true);
 
@@ -440,7 +442,10 @@ public class DailySummaryUI : MonoBehaviour
         Dictionary<int, DaySummaryData> data = new Dictionary<int, DaySummaryData>();
 
         int currentDay = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
-        int maxDay = currentDay;
+
+        int lastFinishedDay = Mathf.Max(0, currentDay - 1);
+
+        int maxDay = lastFinishedDay;
 
         if (allResults != null)
         {
@@ -452,6 +457,9 @@ public class DailySummaryUI : MonoBehaviour
                     maxDay = result.day;
             }
         }
+
+        if (maxDay <= 0)
+            return new List<DaySummaryData>();
 
         for (int day = 1; day <= maxDay; day++)
         {
@@ -520,22 +528,12 @@ public class DailySummaryUI : MonoBehaviour
         int totalErrors = 0;
         int totalActivities = 0;
 
-        string detail = "";
-
         foreach (PeriodSummaryData period in periodSummary)
         {
             totalScore += period.AverageScore;
             totalRevenue += period.totalRevenue;
             totalErrors += period.totalErrors;
             totalActivities += period.totalActivities;
-
-            detail +=
-                period.label.Replace("\n", " ") +
-                " - Rendimiento: " + period.AverageScore + "%" +
-                " - Ingresos: $" + period.totalRevenue +
-                " - Errores: " + period.totalErrors +
-                " - Actividades: " + period.totalActivities +
-                "\n";
         }
 
         int averageScore = Mathf.RoundToInt(totalScore / (float)periodSummary.Count);
@@ -553,9 +551,7 @@ public class DailySummaryUI : MonoBehaviour
                 "Rendimiento promedio: " + averageScore + "%\n" +
                 "Ingresos acumulados: $" + totalRevenue + "\n" +
                 "Errores acumulados: " + totalErrors + "\n" +
-                "Actividades totales: " + totalActivities + "\n\n" +
-                "<b>DETALLE</b>\n" +
-                detail.TrimEnd();
+                "Actividades totales: " + totalActivities;
         }
     }
 
@@ -794,5 +790,28 @@ public class DailySummaryUI : MonoBehaviour
 
         if (DailyResultsManager.Instance != null)
             DailyResultsManager.Instance.ClearTodayResults();
+
+        HotelGamePause.ReleasePause();
+    }
+
+    private void OnDisable()
+    {
+        if ((summaryPanel != null && summaryPanel.activeSelf) ||
+            (allDaysDashboardPanel != null && allDaysDashboardPanel.activeSelf))
+        {
+            HotelGamePause.ReleasePause();
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
+
+        if ((summaryPanel != null && summaryPanel.activeSelf) ||
+            (allDaysDashboardPanel != null && allDaysDashboardPanel.activeSelf))
+        {
+            HotelGamePause.ReleasePause();
+        }
     }
 }
