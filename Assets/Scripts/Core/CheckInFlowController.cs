@@ -58,6 +58,12 @@ public class CheckInFlowController : MonoBehaviour
     [Header("Guest NPCs")]
     public GameObject[] guestNPCPrefabs;
 
+    [Header("STP Buttons UI")]
+    [SerializeField] private Button[] segmentButtons;
+    [SerializeField] private Button[] offerButtons;
+
+    [SerializeField] private Color normalButtonColor = Color.white;
+    [SerializeField] private Color selectedButtonColor = new Color(1f, 1f, 1f, 0.55f);
 
     public void StartCheckIn()
     {
@@ -94,6 +100,8 @@ public class CheckInFlowController : MonoBehaviour
 
         segmentSelected = false;
         offerSelected = false;
+
+        ResetSTPButtonsVisual();
 
         dialogueFinished = false;
 
@@ -269,7 +277,7 @@ public class CheckInFlowController : MonoBehaviour
         }
 
         // Esto sí se bloquea: no puedes asignar una habitación ocupada o sucia.
-        if (selectedRoom.state != RoomState.Libre)
+        if (selectedRoom.state != RoomState.Available)
         {
             Debug.Log("La habitación no está disponible.");
             return;
@@ -484,6 +492,8 @@ public class CheckInFlowController : MonoBehaviour
         segmentSelected = false;
         offerSelected = false;
 
+        ResetSTPButtonsVisual();
+
         dialogueFinished = false;
 
         if (computerButton != null)
@@ -500,7 +510,7 @@ public class CheckInFlowController : MonoBehaviour
 
         foreach (RoomData room in allRooms)
         {
-            if (room != null && room.state == RoomState.Libre)
+            if (room != null && room.state == RoomState.Available)
                 return true;
         }
 
@@ -512,7 +522,7 @@ public class CheckInFlowController : MonoBehaviour
         if (room == null) return false;
         if (request == null) return false;
 
-        if (room.state != RoomState.Libre) return false;
+        if (room.state != RoomState.Available) return false;
         if (request.needsAccessibleRoom && !room.isAccessible) return false;
         if (request.bedType != room.bedType) return false;
         if (room.bedCount < request.guestCount) return false;
@@ -528,12 +538,13 @@ public class CheckInFlowController : MonoBehaviour
         if (roomInfoPanel != null) roomInfoPanel.gameObject.SetActive(false);
     }
 
-    // Estos botones SOLO seleccionan temporalmente.
-    // La selección real se confirma en ContinueSTPAndOpenMap().
+    //Estos botones solo seleccionan temporalmente. La selección real se confirma en ContinueSTPAndOpenMap().
     public void SelectSegment(int segmentIndex)
     {
         pendingSegment = (GuestSegment)segmentIndex;
         pendingSegmentSelected = true;
+
+        UpdateSegmentButtonsVisual(segmentIndex);
 
         Debug.Log("Segmento pendiente seleccionado: " + pendingSegment);
     }
@@ -543,7 +554,76 @@ public class CheckInFlowController : MonoBehaviour
         pendingOffer = (OfferType)offerIndex;
         pendingOfferSelected = true;
 
+        UpdateOfferButtonsVisual(offerIndex);
+
         Debug.Log("Oferta pendiente seleccionada: " + pendingOffer);
+    }
+
+    private void UpdateSegmentButtonsVisual(int selectedIndex)
+    {
+        if (segmentButtons == null) return;
+
+        for (int i = 0; i < segmentButtons.Length; i++)
+        {
+            if (segmentButtons[i] == null) continue;
+
+            Image buttonImage = segmentButtons[i].targetGraphic as Image;
+
+            if (buttonImage != null)
+            {
+                buttonImage.color = i == selectedIndex
+                    ? selectedButtonColor
+                    : normalButtonColor;
+            }
+        }
+    }
+
+    private void UpdateOfferButtonsVisual(int selectedIndex)
+    {
+        if (offerButtons == null) return;
+
+        for (int i = 0; i < offerButtons.Length; i++)
+        {
+            if (offerButtons[i] == null) continue;
+
+            Image buttonImage = offerButtons[i].targetGraphic as Image;
+
+            if (buttonImage != null)
+            {
+                buttonImage.color = i == selectedIndex
+                    ? selectedButtonColor
+                    : normalButtonColor;
+            }
+        }
+    }
+
+    private void ResetSTPButtonsVisual()
+    {
+        if (segmentButtons != null)
+        {
+            foreach (Button button in segmentButtons)
+            {
+                if (button == null) continue;
+
+                Image buttonImage = button.targetGraphic as Image;
+
+                if (buttonImage != null)
+                    buttonImage.color = normalButtonColor;
+            }
+        }
+
+        if (offerButtons != null)
+        {
+            foreach (Button button in offerButtons)
+            {
+                if (button == null) continue;
+
+                Image buttonImage = button.targetGraphic as Image;
+
+                if (buttonImage != null)
+                    buttonImage.color = normalButtonColor;
+            }
+        }
     }
 }
 

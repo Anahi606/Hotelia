@@ -9,7 +9,7 @@ public static class CheckInRequestGenerator
 
         foreach (RoomData room in allRooms)
         {
-            if (room != null && room.state == RoomState.Libre)
+            if (room != null && room.state == RoomState.Available)
             {
                 freeRooms.Add(room);
             }
@@ -25,31 +25,33 @@ public static class CheckInRequestGenerator
         request.needsAccessibleRoom = randomRoom.isAccessible;
         request.bedType = randomRoom.bedType;
         request.guestCount = UnityEngine.Random.Range(1, randomRoom.bedCount + 1);
+
         request.mealPlan = UnityEngine.Random.value > 0.5f
-            ? MealPlan.Completo
-            : MealPlan.SoloAlojamiento;
+            ? MealPlan.Full
+            : MealPlan.AccommodationOnly;
+
         request.stayDays = UnityEngine.Random.Range(1, 4);
 
-        if (randomRoom.bedType == BedType.Matrimonial && request.guestCount == 2)
+        if (randomRoom.bedType == BedType.Double && request.guestCount == 2)
         {
-            request.correctSegment = GuestSegment.Pareja;
-            request.travelReason = "una escapada romántica";
+            request.correctSegment = GuestSegment.Couple;
+            request.travelReason = "a romantic getaway";
             request.budgetLevel = 3;
-            request.bestOffer = OfferType.Romantico;
+            request.bestOffer = OfferType.Romantic;
         }
-        else if (randomRoom.bedType == BedType.Separadas && request.guestCount >= 2)
+        else if (randomRoom.bedType == BedType.Separate && request.guestCount >= 2)
         {
-            request.correctSegment = GuestSegment.Familiar;
-            request.travelReason = "vacaciones familiares";
+            request.correctSegment = GuestSegment.Family;
+            request.travelReason = "a family vacation";
             request.budgetLevel = 2;
-            request.bestOffer = OfferType.Familiar;
+            request.bestOffer = OfferType.Family;
         }
         else
         {
-            request.correctSegment = GuestSegment.Ejecutivo;
-            request.travelReason = "trabajo y reuniones";
+            request.correctSegment = GuestSegment.Executive;
+            request.travelReason = "work and meetings";
             request.budgetLevel = 2;
-            request.bestOffer = OfferType.Ejecutivo;
+            request.bestOffer = OfferType.Executive;
         }
 
         return request;

@@ -73,7 +73,7 @@ public class RoomDoorInteractable : MonoBehaviour
         RoomCleaningSession.selectedBedType = runtimeRoom.bedType;
 
         RoomCleaningSession.selectedNeedsCleaning =
-            runtimeRoom.needsCleaning || runtimeRoom.state == RoomState.Sucia;
+            runtimeRoom.needsCleaning || runtimeRoom.state == RoomState.Dirty;
 
         RoomCleaningSession.selectedReservationStillActive =
             runtimeRoom.hasGuestData && runtimeRoom.reservedUntilDay >= currentDay;

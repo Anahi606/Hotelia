@@ -245,14 +245,14 @@ public class RoomCleaningKPIManager : MonoBehaviour
 
         if (completedEverything)
         {
-            room.state = RoomState.Libre;
+            room.state = RoomState.Available;
             room.needsCleaning = false;
 
             Debug.Log("Habitación " + room.roomId + " quedó limpia y libre.");
         }
         else
         {
-            room.state = RoomState.Sucia;
+            room.state = RoomState.Dirty;
             room.needsCleaning = true;
 
             Debug.Log("Habitación " + room.roomId + " sigue sucia.");
@@ -300,38 +300,38 @@ public class RoomCleaningKPIManager : MonoBehaviour
             resultPanel.SetActive(true);
 
         if (titleText != null)
-            titleText.text = completedEverything ? "Habitación limpia" : "Limpieza incompleta";
+            titleText.text = completedEverything ? "Room cleaned" : "Incomplete cleaning";
 
         if (trashText != null)
-            trashText.text = "Basura recogida: " + cleanedTrash + "/" + totalTrash + " (" + trashScore + "%)";
+            trashText.text = "Trash collected: " + cleanedTrash + "/" + totalTrash + " (" + trashScore + "%)";
 
         if (bedsText != null)
-            bedsText.text = "Camas tendidas: " + madeBeds + "/" + totalBeds + " (" + bedScore + "%)";
+            bedsText.text = "Beds made: " + madeBeds + "/" + totalBeds + " (" + bedScore + "%)";
 
         if (errorsText != null)
         {
             errorsText.text =
-                "Errores: " + totalErrors +
-                "\nBasura pendiente: " + trashErrors +
-                "\nCamas sin tender: " + bedErrors;
+                "Errors: " + totalErrors +
+                "\nPending trash: " + trashErrors +
+                "\nUnmade beds: " + bedErrors;
         }
 
         if (scoreText != null)
-            scoreText.text = "Puntaje de limpieza: " + finalScore + "%";
+            scoreText.text = "Cleaning score: " + finalScore + "%";
 
         if (feedbackText != null)
         {
             if (completedEverything)
             {
-                feedbackText.text = "Excelente. La habitación quedó lista para el siguiente huésped.";
+                feedbackText.text = "Excellent. The room is ready for the next guest.";
             }
             else if (finalScore >= 70)
             {
-                feedbackText.text = "Buen intento, pero quedaron detalles pendientes.";
+                feedbackText.text = "Good attempt, but some details are still pending.";
             }
             else
             {
-                feedbackText.text = "La habitación no quedó lista. Faltó recoger basura o tender camas.";
+                feedbackText.text = "The room is not ready. You still need to collect trash or make the beds.";
             }
         }
     }
@@ -351,7 +351,7 @@ public class RoomCleaningKPIManager : MonoBehaviour
         MiniGameResultData result = new MiniGameResultData();
 
         result.day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
-        result.minigameName = "Habitación";
+        result.minigameName = "Room";
 
         result.satisfaction = finalScore;
         result.revenue = 0;
@@ -360,11 +360,11 @@ public class RoomCleaningKPIManager : MonoBehaviour
         result.finalScore = finalScore;
 
         result.stpSummary =
-            "Servicio post-estadía: limpieza, orden y preparación de la habitación para el siguiente huésped.";
+            "Post-stay service: cleaning, order, and room preparation for the next guest.";
 
         result.feedback = completedEverything
-            ? "La habitación quedó lista para el siguiente huésped."
-            : "Quedaron tareas pendientes de limpieza o cama.";
+            ? "The room is ready for the next guest."
+            : "Some cleaning or bed-making tasks are still pending.";
 
         DailyResultsManager.Instance.RegisterResult(result);
     }

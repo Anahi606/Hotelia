@@ -76,8 +76,14 @@ public class RandomGridRoamer : MonoBehaviour
 
     private void StartRoaming()
     {
+        if (!this || !isActiveAndEnabled || gameObject == null)
+            return;
+
         if (roamRoutine != null)
+        {
             StopCoroutine(roamRoutine);
+            roamRoutine = null;
+        }
 
         roamRoutine = StartCoroutine(RoamLoop());
     }
@@ -536,6 +542,9 @@ public class RandomGridRoamer : MonoBehaviour
 
     public void ResumeNormalRoaming()
     {
+        if (!this || !isActiveAndEnabled || gameObject == null)
+            return;
+
         hasReachedPriorityDestination = false;
 
         StartRoaming();
@@ -543,6 +552,9 @@ public class RandomGridRoamer : MonoBehaviour
 
     public void StopRoaming()
     {
+        if (!this || gameObject == null)
+            return;
+
         if (roamRoutine != null)
         {
             StopCoroutine(roamRoutine);

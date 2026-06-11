@@ -15,46 +15,46 @@ public class CheckInResultPanelUI : MonoBehaviour
     public void Show(bool segmentCorrect, bool offerCorrect, bool roomCorrect, int satisfaction, int revenue)
     {
         if (titleText != null)
-            titleText.text = "Resultado de la atención";
+            titleText.text = "Service Result";
 
         if (roomResultText != null)
             roomResultText.text = roomCorrect
-                ? "Habitación correcta"
-                : "Habitación incorrecta (-20 satisfacción)";
+                ? "Correct room"
+                : "Incorrect room (-20 satisfaction)";
 
         if (segmentResultText != null)
             segmentResultText.text = segmentCorrect
-                ? "STP correcto"
-                : "STP incorrecto (-15 satisfacción)";
+                ? "Correct STP"
+                : "Incorrect STP (-15 satisfaction)";
 
         if (offerResultText != null)
             offerResultText.text = offerCorrect
-                ? "Oferta correcta"
-                : "Oferta incorrecta (-15 satisfacción)";
+                ? "Correct offer"
+                : "Incorrect offer (-15 satisfaction)";
 
         if (satisfactionText != null)
-            satisfactionText.text = "Satisfacción del cliente: " + satisfaction + "%";
+            satisfactionText.text = "Customer satisfaction: " + satisfaction + "%";
 
         if (revenueText != null)
-            revenueText.text = "Ingreso: $" + revenue;
+            revenueText.text = "Revenue: $" + revenue;
 
         if (feedbackText != null)
         {
             if (roomCorrect && segmentCorrect && offerCorrect)
             {
-                feedbackText.text = "Excelente. Atendiste correctamente al huésped.";
+                feedbackText.text = "Excellent. You served the guest correctly.";
             }
             else if (!roomCorrect)
             {
-                feedbackText.text = "La habitación no cumplía con las necesidades del huésped.";
+                feedbackText.text = "The room did not meet the guest's needs.";
             }
             else if (!segmentCorrect)
             {
-                feedbackText.text = "La habitación estuvo bien, pero falló la segmentación STP.";
+                feedbackText.text = "The room was correct, but the STP segmentation was wrong.";
             }
             else if (!offerCorrect)
             {
-                feedbackText.text = "La habitación y el segmento estuvieron bien, pero la oferta no fue la adecuada.";
+                feedbackText.text = "The room and segment were correct, but the offer was not suitable.";
             }
         }
 

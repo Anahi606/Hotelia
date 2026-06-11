@@ -102,7 +102,7 @@ public class GuestSceneSpawner : MonoBehaviour
         }
 
         bool hasActiveGuest =
-            room.state == RoomState.Ocupada &&
+            room.state == RoomState.Occupied &&
             room.hasGuestData &&
             room.currentGuestCount > 0;
 
@@ -122,7 +122,7 @@ public class GuestSceneSpawner : MonoBehaviour
             if (room == null)
                 continue;
 
-            if (room.state != RoomState.Ocupada || !room.hasGuestData)
+            if (room.state != RoomState.Occupied || !room.hasGuestData)
                 continue;
 
             SpawnGuestFromRoom(room);

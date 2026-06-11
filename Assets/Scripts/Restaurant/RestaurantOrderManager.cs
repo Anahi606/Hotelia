@@ -92,10 +92,10 @@ public class RestaurantOrderManager : MonoBehaviour
         {
             if (room == null) continue;
 
-            if (room.state != RoomState.Ocupada) continue;
+            if (room.state != RoomState.Occupied) continue;
             if (!room.hasGuestData) continue;
 
-            if (room.currentMealPlan != MealPlan.Completo) continue;
+            if (room.currentMealPlan != MealPlan.Full) continue;
 
             RestaurantOrder order = CreateOrderFromRoom(room);
             activeOrders.Add(order);
@@ -127,18 +127,17 @@ public class RestaurantOrderManager : MonoBehaviour
     {
         switch (segment)
         {
-            case GuestSegment.Pareja:
-                return "Cena especial";
+            case GuestSegment.Couple:
+                return "Special dinner";
 
-            case GuestSegment.Familiar:
-                return "Menú familiar";
+            case GuestSegment.Family:
+                return "Family menu";
 
-            case GuestSegment.Ejecutivo:
-                return "Almuerzo rápido";
-
+            case GuestSegment.Executive:
+                return "Quick lunch";
 
             default:
-                return "Plato del día";
+                return "Dish of the day";
         }
     }
 
@@ -268,21 +267,20 @@ public class RestaurantOrderManager : MonoBehaviour
         MiniGameResultData result = new MiniGameResultData();
 
         result.day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
-        result.minigameName = "Restaurante";
+        result.minigameName = "Restaurant";
         result.satisfaction = satisfaction;
         result.revenue = revenue;
         result.errors = errors;
         result.timeScore = timeScore;
         result.finalScore = finalScore;
 
-        result.stpSummary = "Priorización de pedidos según alergias, urgencia, room service y tipo de huésped.";
+        result.stpSummary = "Order prioritization based on allergies, urgency, room service, and guest type.";
 
         result.feedback = errors == 0
-            ? "Priorizaste correctamente los pedidos."
-            : "Revisa mejor las alergias, urgencias y pedidos a habitación.";
+            ? "You prioritized the orders correctly."
+            : "Review allergies, urgent orders, and room service requests more carefully.";
 
         DailyResultsManager.Instance?.RegisterResult(result);
-
 
         if (gamePanel != null)
             gamePanel.SetActive(false);
@@ -309,6 +307,7 @@ public class RestaurantOrderManager : MonoBehaviour
         {
             if (selectedOrders[i] == correctOrder[i])
                 correct++;
+            ;
         }
 
         return correct;

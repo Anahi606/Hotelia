@@ -19,19 +19,19 @@ public class RoomInfoPanelUI : MonoBehaviour
         flowController = controller;
 
         if (roomTitleText != null)
-            roomTitleText.text = "Habitación " + room.roomId;
+            roomTitleText.text = "Room " + room.roomId;
 
         if (bedTypeText != null)
-            bedTypeText.text = "Tipo: " + room.bedType;
+            bedTypeText.text = "Type: " + room.bedType;
 
         if (bedCountText != null)
-            bedCountText.text = "Camas: " + room.bedCount;
+            bedCountText.text = "Beds: " + room.bedCount;
 
         if (accessibleText != null)
-            accessibleText.text = room.isAccessible ? "Accesible: Sí" : "Accesible: No";
+            accessibleText.text = room.isAccessible ? "Accessible: Yes" : "Accessible: No";
 
         if (stateText != null)
-            stateText.text = "Estado: " + room.state;
+            stateText.text = "Status: " + GetRoomStateName(room.state);
 
         gameObject.SetActive(true);
     }
@@ -48,5 +48,23 @@ public class RoomInfoPanelUI : MonoBehaviour
         flowController.SelectRoom(currentRoom);
         flowController.ConfirmRoomSelection();
         gameObject.SetActive(false);
+    }
+
+    private string GetRoomStateName(RoomState state)
+    {
+        switch (state)
+        {
+            case RoomState.Available:
+                return "Available";
+
+            case RoomState.Occupied:
+                return "Occupied";
+
+            case RoomState.Dirty:
+                return "Needs cleaning";
+
+            default:
+                return state.ToString();
+        }
     }
 }

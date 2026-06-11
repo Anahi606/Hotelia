@@ -63,15 +63,15 @@ public class HotelGameData : MonoBehaviour
 
             room.roomId = i.ToString("00");
             room.isAccessible = false;
-            room.bedType = BedType.Matrimonial;
+            room.bedType = BedType.Double;
             room.bedCount = 0;
 
-            room.state = RoomState.Libre;
+            room.state = RoomState.Available;
             room.needsCleaning = false;
             room.reservedUntilDay = -1;
 
-            room.currentOffer = OfferType.Ninguna;
-            room.currentMealPlan = MealPlan.SoloAlojamiento;
+            //room.currentOffer = OfferType.None;
+            room.currentMealPlan = MealPlan.AccommodationOnly;
             room.currentGuestCount = 0;
             room.hasGuestData = false;
 

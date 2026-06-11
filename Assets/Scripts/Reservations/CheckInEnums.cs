@@ -1,34 +1,33 @@
 public enum BedType
 {
-    Matrimonial,
-    Separadas
+    Double,
+    Separate
 }
 
 public enum RoomState
 {
-    Libre,
-    Ocupada,
-    Sucia,
-    Limpiando
+    Available,
+    Occupied,
+    Dirty,
+    Cleaning
 }
 
 public enum MealPlan
 {
-    SoloAlojamiento,
-    Completo
+    AccommodationOnly,
+    Full
 }
 
 public enum GuestSegment
 {
-    Pareja,
-    Familiar,
-    Ejecutivo
+    Couple,
+    Family,
+    Executive
 }
 
 public enum OfferType
 {
-    Ninguna,
-    Romantico,
-    Familiar,
-    Ejecutivo
+    Romantic,
+    Family,
+    Executive
 }

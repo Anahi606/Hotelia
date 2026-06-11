@@ -42,7 +42,7 @@ public class RoomData : MonoBehaviour
 
     public void AssignGuest(CheckInRequest request, int currentDay)
     {
-        state = RoomState.Ocupada;
+        state = RoomState.Occupied;
         needsCleaning = false;
         reservedUntilDay = currentDay + request.stayDays - 1;
 
@@ -58,8 +58,8 @@ public class RoomData : MonoBehaviour
     public void ClearGuest()
     {
         currentGuestSegment = default;
-        currentOffer = OfferType.Ninguna;
-        currentMealPlan = MealPlan.SoloAlojamiento;
+        //currentOffer = OfferType.None;
+        currentMealPlan = MealPlan.AccommodationOnly;
         currentGuestCount = 0;
         hasGuestData = false;
 

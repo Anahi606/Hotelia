@@ -71,7 +71,7 @@ public class DayManager : MonoBehaviour
         {
             if (room == null) continue;
 
-            if (room.state == RoomState.Ocupada && !IsReservationActive(room))
+            if (room.state == RoomState.Occupied && !IsReservationActive(room))
             {
                 EndReservation(room);
             }
@@ -89,14 +89,14 @@ public class DayManager : MonoBehaviour
         DestroyVisibleGuest(room.roomId);
 
         //La habitación pasa a sucia.
-        room.state = RoomState.Sucia;
+        room.state = RoomState.Dirty;
         room.needsCleaning = true;
 
         //Limpia datos del huésped.
         room.hasGuestData = false;
         room.currentGuestCount = 0;
-        room.currentOffer = OfferType.Ninguna;
-        room.currentMealPlan = MealPlan.SoloAlojamiento;
+        //room.currentOffer = OfferType.None;
+        room.currentMealPlan = MealPlan.AccommodationOnly;
         room.guestSpriteName = "";
         room.hotelDoorSpawnId = "";
 

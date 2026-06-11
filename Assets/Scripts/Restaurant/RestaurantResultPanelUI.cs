@@ -13,28 +13,28 @@ public class RestaurantResultPanelUI : MonoBehaviour
     public void Show(int satisfaction, int timeScore, int errors, int revenue)
     {
         if (resultTitleText != null)
-            resultTitleText.text = "Resumen del restaurante";
+            resultTitleText.text = "Restaurant Summary";
 
         if (satisfactionText != null)
-            satisfactionText.text = "Satisfacción: " + satisfaction + "%";
+            satisfactionText.text = "Satisfaction: " + satisfaction + "%";
 
         if (timeText != null)
-            timeText.text = "Tiempo de atención: " + timeScore + "%";
+            timeText.text = "Service time: " + timeScore + "%";
 
         if (errorsText != null)
-            errorsText.text = "Errores: " + errors;
+            errorsText.text = "Errors: " + errors;
 
         if (revenueText != null)
-            revenueText.text = "Ingresos: $" + revenue;
+            revenueText.text = "Revenue: $" + revenue;
 
         if (feedbackText != null)
         {
             if (errors == 0)
-                feedbackText.text = "Excelente. Priorizaste correctamente los pedidos.";
+                feedbackText.text = "Excellent. You prioritized the orders correctly.";
             else if (errors == 1)
-                feedbackText.text = "Bien, pero revisa mejor las urgencias y alergias.";
+                feedbackText.text = "Good job, but review urgency and allergies more carefully.";
             else
-                feedbackText.text = "Debes priorizar alergias, urgencias y room service.";
+                feedbackText.text = "You need to prioritize allergies, urgent orders, and room service.";
         }
 
         gameObject.SetActive(true);

@@ -43,11 +43,13 @@ public class BedPuzzleUI : MonoBehaviour
     {
         if (bed == null) return;
         if (bed.IsCompleted) return;
+
         if (RoomCleaningKPIManager.Instance == null || !RoomCleaningKPIManager.Instance.IsRoomDirty)
         {
             Debug.Log("La habitación no está sucia, no se puede tender la cama.");
             return;
         }
+
         currentBed = bed;
         expectedPiece = BedPieceType.Sheets;
 
@@ -72,8 +74,10 @@ public class BedPuzzleUI : MonoBehaviour
     {
         if (piece == null) return false;
         if (currentBed == null) return false;
+
         if (piece.PieceType != expectedPiece)
             return false;
+
         if (!currentBed.IsScreenPointOverDropTarget(screenPosition, worldCamera))
             return false;
 
@@ -125,13 +129,15 @@ public class BedPuzzleUI : MonoBehaviour
         switch (expectedPiece)
         {
             case BedPieceType.Sheets:
-                instructionText.text = "Arrastra la sábana a la cama";
+                instructionText.text = "Drag the sheets onto the bed";
                 break;
+
             case BedPieceType.Pillows:
-                instructionText.text = "Arrastra las almohadas a la cama";
+                instructionText.text = "Drag the pillows onto the bed";
                 break;
+
             case BedPieceType.Cover:
-                instructionText.text = "Arrastra el cobertor a la cama";
+                instructionText.text = "Drag the cover onto the bed";
                 break;
         }
     }

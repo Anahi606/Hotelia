@@ -290,7 +290,9 @@ public class DailySummaryUI : MonoBehaviour
         ClearChartSeries(scoreBarChart);
 
         SetChartTitle(scoreBarChart, "Puntaje por actividad (%)");
-        SetLegend(scoreBarChart, true);
+        SetLegend(scoreBarChart, false);
+
+        scoreBarChart.AddSerie<Bar>("Puntaje");
 
         if (summary == null || summary.Count == 0)
         {
@@ -300,23 +302,15 @@ public class DailySummaryUI : MonoBehaviour
 
         foreach (SummaryData item in summary)
         {
-            scoreBarChart.AddXAxisData(GetFullActivityName(item.name));
-        }
-
-        for (int i = 0; i < summary.Count; i++)
-        {
-            SummaryData item = summary[i];
-
             string activityName = GetFullActivityName(item.name);
-            string serieName = activityName + " (" + item.AverageScore + "%)";
 
-            scoreBarChart.AddSerie<Bar>(serieName);
+            scoreBarChart.AddXAxisData(activityName);
 
-            for (int j = 0; j < summary.Count; j++)
-            {
-                int value = i == j ? item.AverageScore : 0;
-                scoreBarChart.AddData(i, value, activityName + ": " + item.AverageScore + "%");
-            }
+            scoreBarChart.AddData(
+                0,
+                item.AverageScore,
+                activityName + ": " + item.AverageScore + "%"
+            );
         }
 
         scoreBarChart.RefreshChart();
@@ -361,7 +355,9 @@ public class DailySummaryUI : MonoBehaviour
         ClearChartSeries(revenueBarChart);
 
         SetChartTitle(revenueBarChart, "Ingresos por actividad ($)");
-        SetLegend(revenueBarChart, true);
+        SetLegend(revenueBarChart, false);
+
+        revenueBarChart.AddSerie<Bar>("Ingresos");
 
         if (summary == null || summary.Count == 0)
         {
@@ -371,28 +367,15 @@ public class DailySummaryUI : MonoBehaviour
 
         foreach (SummaryData item in summary)
         {
-            revenueBarChart.AddXAxisData(GetFullActivityName(item.name));
-        }
-
-        for (int i = 0; i < summary.Count; i++)
-        {
-            SummaryData item = summary[i];
-
             string activityName = GetFullActivityName(item.name);
-            string serieName = activityName + " ($" + item.totalRevenue + ")";
 
-            revenueBarChart.AddSerie<Bar>(serieName);
+            revenueBarChart.AddXAxisData(activityName);
 
-            for (int j = 0; j < summary.Count; j++)
-            {
-                int value = i == j ? item.totalRevenue : 0;
-
-                revenueBarChart.AddData(
-                    i,
-                    value,
-                    activityName + ": $" + item.totalRevenue
-                );
-            }
+            revenueBarChart.AddData(
+                0,
+                item.totalRevenue,
+                activityName + ": $" + item.totalRevenue
+            );
         }
 
         revenueBarChart.RefreshChart();

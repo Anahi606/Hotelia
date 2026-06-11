@@ -83,7 +83,7 @@ public class GuestOffscreenSimulator : MonoBehaviour
             if (room == null)
                 continue;
 
-            if (room.state != RoomState.Ocupada || !room.hasGuestData)
+            if (room.state != RoomState.Occupied || !room.hasGuestData)
                 continue;
 
             string npcId = "Guest_" + room.roomId;
