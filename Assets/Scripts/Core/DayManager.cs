@@ -49,6 +49,21 @@ public class DayManager : MonoBehaviour
 
         HotelSaveSystem.SaveEndOfDay();
 
+        if (PlayfabManager.IsLoggedInWithEmail && PlayfabManager.IsStudent)
+        {
+            PlayfabCloudSaveManager.UploadLocalSQLiteSaveToPlayFab(success =>
+            {
+                if (success)
+                    Debug.Log("Cloud save updated after ending day. Current day: " + CurrentDay);
+                else
+                    Debug.LogWarning("Cloud save was NOT updated after ending day.");
+            });
+        }
+        else
+        {
+            Debug.Log("Progress saved only locally. User is not logged in as a student.");
+        }
+
         if (DailyResultsManager.Instance != null)
         {
             DailyResultsManager.Instance.ClearTodayResults();

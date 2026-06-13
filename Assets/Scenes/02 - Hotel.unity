@@ -23536,10 +23536,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 283646792}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.16123313, y: 0.7247055}
-  m_AnchorMax: {x: 0.42870554, y: 0.75915754}
-  m_AnchoredPosition: {x: 455.53607, y: -99.91525}
-  m_SizeDelta: {x: 1134.788, y: 309.7469}
+  m_AnchorMin: {x: 0.11347975, y: 0.5123733}
+  m_AnchorMax: {x: 0.8964859, y: 0.77484244}
+  m_AnchoredPosition: {x: -2.4639282, y: -1.5079956}
+  m_SizeDelta: {x: 10.7878, y: 10.882601}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &172477902
 MonoBehaviour:
@@ -23588,8 +23588,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 46.3
-  m_fontSizeBase: 46.3
+  m_fontSize: 40.2
+  m_fontSizeBase: 40.2
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -34424,10 +34424,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1034852202}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.10300001, y: 0.52186304}
-  m_AnchorMax: {x: 0.8965068, y: 0.66856855}
-  m_AnchoredPosition: {x: -3.456604, y: -20}
-  m_SizeDelta: {x: -67.669, y: 19.303}
+  m_AnchorMin: {x: 0.11841104, y: 0.48186302}
+  m_AnchorMax: {x: 0.87600005, y: 0.59800005}
+  m_AnchoredPosition: {x: 2.043396, y: -1.2976999}
+  m_SizeDelta: {x: 9.3311, y: 0.17399979}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &477812587
 MonoBehaviour:
@@ -34476,8 +34476,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 46.3
-  m_fontSizeBase: 46.3
+  m_fontSize: 35.12
+  m_fontSizeBase: 35.12
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -46889,10 +46889,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1034852202}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.15664417, y: 0.6435685}
-  m_AnchorMax: {x: 0.8404589, y: 0.6815685}
-  m_AnchoredPosition: {x: 461, y: 115}
-  m_SizeDelta: {x: -752.31, y: 2}
+  m_AnchorMin: {x: 0.54267734, y: 0.6088631}
+  m_AnchorMax: {x: 0.87600005, y: 0.7695685}
+  m_AnchoredPosition: {x: 1.5, y: 3.8811493}
+  m_SizeDelta: {x: 10.690002, y: 0.2375946}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &960855980
 MonoBehaviour:
@@ -46941,15 +46941,15 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 46.3
-  m_fontSizeBase: 46.3
+  m_fontSize: 38.7
+  m_fontSizeBase: 38.7
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 1
   m_HorizontalAlignment: 1
-  m_VerticalAlignment: 512
+  m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_characterHorizontalScale: 1
@@ -46980,7 +46980,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 2.9674072, y: 0, z: -0.51379395, w: 0}
+  m_margin: {x: 2.9674072, y: 0, z: -1.505249, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -48265,7 +48265,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\xBFGuardar y acabar el d\xEDa?"
+  m_text: 'Save and end the day?
+
+'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 125cb55b44b24c4393181402bc6200e6, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: 125cb55b44b24c4393181402bc6200e6, type: 2}
@@ -48889,9 +48891,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Volver
-
-'
+  m_text: Back
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 0161d805a3764c089bef00bfe00793f5, type: 2}
   m_sharedMaterial: {fileID: 2147374, guid: 0161d805a3764c089bef00bfe00793f5, type: 2}
@@ -50161,10 +50161,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1034852202}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.16123313, y: 0.7247055}
-  m_AnchorMax: {x: 0.42870554, y: 0.75915754}
-  m_AnchoredPosition: {x: -21, y: 7}
-  m_SizeDelta: {x: 151.04, y: 6}
+  m_AnchorMin: {x: 0.11841104, y: 0.59800005}
+  m_AnchorMax: {x: 0.44986996, y: 0.7695685}
+  m_AnchoredPosition: {x: 2, y: -2.1793976}
+  m_SizeDelta: {x: 13.04, y: -1.6411018}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1101174897
 MonoBehaviour:
@@ -50213,15 +50213,15 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 46.3
-  m_fontSizeBase: 46.3
+  m_fontSize: 35.12
+  m_fontSizeBase: 35.12
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 1
   m_HorizontalAlignment: 1
-  m_VerticalAlignment: 512
+  m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_characterHorizontalScale: 1
@@ -51555,7 +51555,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "S\xED"
+  m_text: Yes
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -51902,9 +51902,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 4, y: -218}
-  m_SizeDelta: {x: 542.1649, y: 70.1273}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 5.1898, y: -217.08}
+  m_SizeDelta: {x: 1020.2871, y: 70.1273}
+  m_Pivot: {x: 0.49999994, y: 0.5}
 --- !u!114 &1184758628
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -58971,7 +58971,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Ver Dashboards de todos los d\xEDas\n"
+  m_text: View Daily Dashboards
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 0161d805a3764c089bef00bfe00793f5, type: 2}
   m_sharedMaterial: {fileID: 2147374, guid: 0161d805a3764c089bef00bfe00793f5, type: 2}
@@ -63698,9 +63698,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Continuar
-
-'
+  m_text: Continue
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 0161d805a3764c089bef00bfe00793f5, type: 2}
   m_sharedMaterial: {fileID: 2147374, guid: 0161d805a3764c089bef00bfe00793f5, type: 2}

@@ -244,22 +244,31 @@ public class RestaurantOrderManager : MonoBehaviour
         }
 
         int correctPositions = CalculateCorrectPositions();
-        int errors = activeOrders.Count - correctPositions;
+        int totalOrders = activeOrders.Count;
+        int errors = totalOrders - correctPositions;
 
-        int satisfaction = 60 + correctPositions * 15 - errors * 10;
-        int timeScore = 60 + correctPositions * 10 - errors * 10;
-        int revenue = activeOrders.Count * 100;
+        float accuracy = totalOrders > 0
+            ? correctPositions / (float)totalOrders
+            : 0f;
+
+        int satisfaction = Mathf.RoundToInt(accuracy * 100f);
+        int timeScore = Mathf.RoundToInt(accuracy * 100f);
+
+        int errorScore = Mathf.RoundToInt(accuracy * 100f);
+
+        int revenue = totalOrders * 100;
 
         if (errors == 0)
             revenue += 100;
 
         satisfaction = Mathf.Clamp(satisfaction, 0, 100);
         timeScore = Mathf.Clamp(timeScore, 0, 100);
+        errorScore = Mathf.Clamp(errorScore, 0, 100);
 
         int finalScore = Mathf.RoundToInt(
             (satisfaction * 0.5f) +
             (timeScore * 0.3f) +
-            ((100 - errors * 30) * 0.2f)
+            (errorScore * 0.2f)
         );
 
         finalScore = Mathf.Clamp(finalScore, 0, 100);

@@ -48,7 +48,7 @@ public class RestaurantSelectedSlotUI : MonoBehaviour, IPointerClickHandler
         currentOrder = order;
 
         if (slotText != null)
-            slotText.text = slotNumber + ". Habitación " + order.roomId + " - " + order.dishName;
+            slotText.text = slotNumber + ". Room " + order.roomId + " - " + order.dishName;
     }
 
     public void OnPointerClick(PointerEventData eventData)

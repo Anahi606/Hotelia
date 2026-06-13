@@ -23,6 +23,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/06 - Character.unity
     guid: 780566cfb61a0894f8252411bd133e37
+  - enabled: 1
+    path: Assets/Scenes/07 - TeacherDashboard.unity
+    guid: c2bbb1f581da1074693d848ad7002027
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 3590b91b4603b465dbb4216d601bff33, type: 3}
   m_UseUCBPForAssetBundles: 0

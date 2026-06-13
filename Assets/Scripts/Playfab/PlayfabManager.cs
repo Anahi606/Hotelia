@@ -42,6 +42,13 @@ public class PlayfabManager : MonoBehaviour
     [Header("Main Menu Buttons")]
     [SerializeField] private GameObject loginButton;
     [SerializeField] private GameObject logoutButton;
+    [SerializeField] private GameObject newGameButton;
+    [SerializeField] private GameObject continueButton;
+    [SerializeField] private GameObject teacherDashboardButton;
+
+    [Header("Azure Backend URLs")]
+    [SerializeField] private string registerTeacherUrl;
+    [SerializeField] private string upsertStudentProfileUrl;
 
     private string pendingRegisterRole = StudentRole;
 
@@ -77,45 +84,6 @@ public class PlayfabManager : MonoBehaviour
         RegisterTeacherThroughBackend(email, password, teacherCode);
     }
 
-    private void ValidateTeacherCodeBeforeRegister(string teacherCode, Action<bool> onFinished)
-    {
-        var request = new GetTitleDataRequest
-        {
-            Keys = new List<string> { TeacherAccessCodeTitleDataKey }
-        };
-
-        PlayFabClientAPI.GetTitleData(
-            request,
-            result =>
-            {
-                if (result.Data == null || !result.Data.ContainsKey(TeacherAccessCodeTitleDataKey))
-                {
-                    Debug.LogError(TeacherAccessCodeTitleDataKey + " was not found in Title Data.");
-                    SetMessage("Teacher code configuration was not found.");
-                    onFinished?.Invoke(false);
-                    return;
-                }
-
-                string validCode = result.Data[TeacherAccessCodeTitleDataKey].Trim();
-
-                bool isValid = string.Equals(
-                    teacherCode.Trim(),
-                    validCode,
-                    StringComparison.Ordinal
-                );
-
-                Debug.Log("Teacher code validation before register: " + isValid);
-                onFinished?.Invoke(isValid);
-            },
-            error =>
-            {
-                Debug.LogError("Could not read Title Data: " + error.GenerateErrorReport());
-                SetMessage("Could not validate teacher code.");
-                onFinished?.Invoke(false);
-            }
-        );
-    }
-
     private void RegisterAccount(string role, string email, string password)
     {
         pendingRegisterRole = role;
@@ -146,7 +114,17 @@ public class PlayfabManager : MonoBehaviour
 
         SaveRoleToPlayFab(CurrentRole, () =>
         {
-            FinishRegisterOnlyFlow();
+            if (CurrentRole == StudentRole)
+            {
+                UpsertStudentProfileToBackend(CurrentPlayFabId, CurrentEmail, displayName, () =>
+                {
+                    FinishRegisterOnlyFlow();
+                });
+            }
+            else
+            {
+                FinishRegisterOnlyFlow();
+            }
         });
     }
 
@@ -173,7 +151,7 @@ public class PlayfabManager : MonoBehaviour
 
         UpdateLoginUI();
 
-        SetMessage("Account registered. Please log in.");
+        SetMessage("Student account created successfully. Please log in.");
         Debug.Log("Account registered only. User was logged out and returned to login panel.");
     }
 
@@ -249,12 +227,15 @@ public class PlayfabManager : MonoBehaviour
 
             if (IsStudent)
             {
-                SetMessage("Student logged in. Syncing local progress...");
-                PlayfabCloudSaveManager.UploadLocalSQLiteSaveToPlayFab(OnUploadFinished);
+                UpsertStudentProfileToBackend(CurrentPlayFabId, CurrentEmail, displayName, () =>
+                {
+                    SetMessage("Student logged in. Press Continue to sync your progress.");
+                    Debug.Log("Student logged in. Progress will sync when pressing Continue.");
+                });
             }
             else if (IsTeacher)
             {
-                SetMessage("Teacher logged in.");
+                SetMessage("Teacher logged in. You can open the Teacher Dashboard.");
                 Debug.Log("Teacher logged in. Local SQLite progress will not be uploaded.");
             }
         });
@@ -370,11 +351,23 @@ public class PlayfabManager : MonoBehaviour
 
     private void UpdateLoginUI()
     {
+        bool loggedIn = IsLoggedInWithEmail;
+        bool teacher = loggedIn && IsTeacher;
+
         if (loginButton != null)
-            loginButton.SetActive(!IsLoggedInWithEmail);
+            loginButton.SetActive(!loggedIn);
 
         if (logoutButton != null)
-            logoutButton.SetActive(IsLoggedInWithEmail);
+            logoutButton.SetActive(loggedIn);
+
+        if (newGameButton != null)
+            newGameButton.SetActive(!teacher);
+
+        if (continueButton != null)
+            continueButton.SetActive(!teacher);
+
+        if (teacherDashboardButton != null)
+            teacherDashboardButton.SetActive(teacher);
     }
 
     public void BackToLoginPanel()
@@ -458,7 +451,7 @@ public class PlayfabManager : MonoBehaviour
         var request = new SendAccountRecoveryEmailRequest
         {
             Email = email,
-            TitleId = "1EB598"
+            TitleId = "1B608E"
         };
 
         PlayFabClientAPI.SendAccountRecoveryEmail(request, OnPasswordReset, OnError);
@@ -545,7 +538,7 @@ public class PlayfabManager : MonoBehaviour
 
         string json = JsonUtility.ToJson(data);
 
-        string url = "https://TU-AZURE-FUNCTION-URL/api/registerTeacher";
+        string url = registerTeacherUrl;
 
         UnityWebRequest request = new UnityWebRequest(url, "POST");
         byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
@@ -579,7 +572,7 @@ public class PlayfabManager : MonoBehaviour
             yield break;
         }
 
-        SetMessage("Teacher account created. Please log in.");
+        ClearLoginFields();
 
         if (registerPanelDialogue != null)
             registerPanelDialogue.SetActive(false);
@@ -590,7 +583,55 @@ public class PlayfabManager : MonoBehaviour
         if (buttonsPanel != null)
             buttonsPanel.SetActive(false);
 
-        ClearLoginFields();
+        SetMessage("Teacher account created successfully. Please log in.");
+    }
+
+    private void UpsertStudentProfileToBackend(string playFabId, string email, string displayName, Action onFinished = null)
+    {
+        StartCoroutine(UpsertStudentProfileRequest(playFabId, email, displayName, onFinished));
+    }
+
+    private IEnumerator UpsertStudentProfileRequest(string playFabId, string email, string displayName, Action onFinished)
+    {
+        StudentProfileUpsertRequestData data = new StudentProfileUpsertRequestData
+        {
+            playFabId = playFabId,
+            email = email,
+            displayName = displayName
+        };
+
+        string json = JsonUtility.ToJson(data);
+
+        UnityWebRequest request = new UnityWebRequest(upsertStudentProfileUrl, "POST");
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
+
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError("Could not upsert student profile: " + request.error);
+            Debug.LogError("Backend response: " + request.downloadHandler.text);
+            onFinished?.Invoke();
+            yield break;
+        }
+
+        StudentProfileUpsertResponseData response =
+            JsonUtility.FromJson<StudentProfileUpsertResponseData>(request.downloadHandler.text);
+
+        if (response == null || !response.success)
+        {
+            Debug.LogWarning(response != null ? response.message : "Could not save student profile.");
+        }
+        else
+        {
+            Debug.Log("Student profile saved in index.");
+        }
+
+        onFinished?.Invoke();
     }
 }
 
@@ -604,6 +645,21 @@ public class TeacherRegisterRequestData
 
 [System.Serializable]
 public class TeacherRegisterResponseData
+{
+    public bool success;
+    public string message;
+}
+
+[System.Serializable]
+public class StudentProfileUpsertRequestData
+{
+    public string playFabId;
+    public string email;
+    public string displayName;
+}
+
+[System.Serializable]
+public class StudentProfileUpsertResponseData
 {
     public bool success;
     public string message;

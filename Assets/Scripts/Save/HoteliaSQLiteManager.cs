@@ -229,6 +229,22 @@ public static class HoteliaSQLiteManager
         }
     }
 
+    public static void SaveNpcStates(List<NpcSaveEntity> npcs)
+    {
+        Initialize();
+
+        if (npcs == null)
+            return;
+
+        foreach (NpcSaveEntity npc in npcs)
+        {
+            if (npc == null)
+                continue;
+
+            connection.InsertOrReplace(npc);
+        }
+    }
+
     public static List<NpcSaveEntity> LoadNpcStates()
     {
         Initialize();

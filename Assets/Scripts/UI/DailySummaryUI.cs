@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using XCharts.Runtime;
@@ -105,7 +106,13 @@ public class DailySummaryUI : MonoBehaviour
 
     public void OpenSummary()
     {
-        HotelGamePause.RequestPause();
+        StartCoroutine(OpenSummaryRoutine());
+    }
+
+    private IEnumerator OpenSummaryRoutine()
+    {
+        if (Time.timeScale == 0f)
+            Time.timeScale = 1f;
 
         if (summaryPanel != null)
             summaryPanel.SetActive(true);
@@ -122,6 +129,17 @@ public class DailySummaryUI : MonoBehaviour
         UpdateTexts(summary);
         UpdateCharts(summary);
         UpdateAllDaysButtonVisibility();
+
+        Canvas.ForceUpdateCanvases();
+
+        yield return null;
+        yield return null;
+
+        Canvas.ForceUpdateCanvases();
+
+        yield return new WaitForSecondsRealtime(1.2f);
+
+        HotelGamePause.RequestPause();
     }
 
     private List<SummaryData> BuildSummary(List<MiniGameResultData> results)
@@ -163,18 +181,18 @@ public class DailySummaryUI : MonoBehaviour
         int currentDay = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
 
         if (titleText != null)
-            titleText.text = "Resumen del día " + currentDay;
+            titleText.text = "Day " + currentDay + " Summary";
 
         if (summary == null || summary.Count == 0)
         {
             if (generalSummaryText != null)
-                generalSummaryText.text = "Sin resultados registrados.";
+                generalSummaryText.text = "No results recorded.";
 
             if (stpText != null)
-                stpText.text = "STP: sin datos.";
+                stpText.text = "STP: no data.";
 
             if (feedbackText != null)
-                feedbackText.text = "Realiza actividades para generar métricas.";
+                feedbackText.text = "Complete activities to generate metrics.";
 
             return;
         }
@@ -203,17 +221,17 @@ public class DailySummaryUI : MonoBehaviour
         if (generalSummaryText != null)
         {
             generalSummaryText.text =
-                "<b>KPI DEL DÍA</b>\n" +
-                "Rendimiento general: " + averageScore + "%\n" +
-                "Ingresos: $" + totalRevenue + "\n" +
-                "Errores: " + totalErrors + "\n" +
-                "Actividades: " + totalActivities;
+                "<b>DAILY KPI</b>\n" +
+                "Overall performance: " + averageScore + "%\n" +
+                "Revenue: $" + totalRevenue + "\n" +
+                "Errors: " + totalErrors + "\n" +
+                "Activities: " + totalActivities;
         }
 
         if (stpText != null)
         {
             stpText.text =
-                "<b>STP APLICADO</b>\n" +
+                "<b>APPLIED STP</b>\n" +
                 stpSummary.TrimEnd();
         }
 
@@ -232,16 +250,18 @@ public class DailySummaryUI : MonoBehaviour
         switch (item.name)
         {
             case "Check-in":
-                return "• Check-in: huésped + oferta.";
+                return "• Check-in: guest + offer.";
 
             case "Habitación":
-                return "• Habitación: limpieza + orden.";
+            case "Room":
+                return "• Room: cleaning + order.";
 
             case "Restaurante":
-                return "• Restaurante: prioridad + servicio.";
+            case "Restaurant":
+                return "• Restaurant: priority + service.";
 
             default:
-                return "• " + item.name + ": gestión.";
+                return "• " + GetFullActivityName(item.name) + ": management.";
         }
     }
 
@@ -249,16 +269,18 @@ public class DailySummaryUI : MonoBehaviour
     {
         if (item == null) return "";
 
+        string activityName = GetFullActivityName(item.name);
+
         if (item.totalErrors == 0 && item.AverageScore >= 85)
-            return "• " + item.name + ": excelente.";
+            return "• " + activityName + ": excellent.";
 
         if (item.AverageScore >= 70)
-            return "• " + item.name + ": bien, mejorar detalles.";
+            return "• " + activityName + ": good, improve small details.";
 
         if (item.AverageScore >= 50)
-            return "• " + item.name + ": revisar decisiones.";
+            return "• " + activityName + ": review your decisions.";
 
-        return "• " + item.name + ": requiere mejora.";
+        return "• " + activityName + ": needs improvement.";
     }
 
     private void UpdateAllDaysButtonVisibility()
@@ -289,10 +311,10 @@ public class DailySummaryUI : MonoBehaviour
 
         ClearChartSeries(scoreBarChart);
 
-        SetChartTitle(scoreBarChart, "Puntaje por actividad (%)");
+        SetChartTitle(scoreBarChart, "Score by Activity (%)");
         SetLegend(scoreBarChart, false);
 
-        scoreBarChart.AddSerie<Bar>("Puntaje");
+        scoreBarChart.AddSerie<Bar>("Score");
 
         if (summary == null || summary.Count == 0)
         {
@@ -304,7 +326,7 @@ public class DailySummaryUI : MonoBehaviour
         {
             string activityName = GetFullActivityName(item.name);
 
-            scoreBarChart.AddXAxisData(activityName);
+            scoreBarChart.AddYAxisData(activityName);
 
             scoreBarChart.AddData(
                 0,
@@ -322,9 +344,12 @@ public class DailySummaryUI : MonoBehaviour
 
         errorsPieChart.ClearData();
 
-        SetChartTitle(errorsPieChart, "Calidad general del día");
+        if (errorsPieChart.GetSerie(0) == null)
+            errorsPieChart.AddSerie<Pie>("Result");
+
+        SetChartTitle(errorsPieChart, "Daily Quality");
         SetLegend(errorsPieChart, true);
-        SetSerieName(errorsPieChart, 0, "Resultado");
+        SetSerieName(errorsPieChart, 0, "Result");
 
         if (summary == null || summary.Count == 0)
         {
@@ -342,8 +367,8 @@ public class DailySummaryUI : MonoBehaviour
         int averageScore = Mathf.RoundToInt(totalScore / (float)summary.Count);
         int improvement = Mathf.Clamp(100 - averageScore, 0, 100);
 
-        errorsPieChart.AddData(0, averageScore, "Logrado " + averageScore + "%");
-        errorsPieChart.AddData(0, improvement, "Por mejorar " + improvement + "%");
+        errorsPieChart.AddData(0, averageScore, "Achieved " + averageScore + "%");
+        errorsPieChart.AddData(0, improvement, "Needs improvement " + improvement + "%");
 
         errorsPieChart.RefreshChart();
     }
@@ -354,10 +379,10 @@ public class DailySummaryUI : MonoBehaviour
 
         ClearChartSeries(revenueBarChart);
 
-        SetChartTitle(revenueBarChart, "Ingresos por actividad ($)");
+        SetChartTitle(revenueBarChart, "Revenue by Activity ($)");
         SetLegend(revenueBarChart, false);
 
-        revenueBarChart.AddSerie<Bar>("Ingresos");
+        revenueBarChart.AddSerie<Bar>("Revenue");
 
         if (summary == null || summary.Count == 0)
         {
@@ -369,7 +394,7 @@ public class DailySummaryUI : MonoBehaviour
         {
             string activityName = GetFullActivityName(item.name);
 
-            revenueBarChart.AddXAxisData(activityName);
+            revenueBarChart.AddYAxisData(activityName);
 
             revenueBarChart.AddData(
                 0,
@@ -395,6 +420,16 @@ public class DailySummaryUI : MonoBehaviour
 
     public void OpenAllDaysDashboard()
     {
+        StartCoroutine(OpenAllDaysDashboardRoutine());
+    }
+
+    private IEnumerator OpenAllDaysDashboardRoutine()
+    {
+        bool wasPaused = Time.timeScale == 0f;
+
+        if (wasPaused)
+            Time.timeScale = 1f;
+
         if (summaryPanel != null)
             summaryPanel.SetActive(false);
 
@@ -409,6 +444,18 @@ public class DailySummaryUI : MonoBehaviour
 
         UpdateAllDaysTexts(daySummary);
         UpdateAllDaysCharts(daySummary);
+
+        Canvas.ForceUpdateCanvases();
+
+        yield return null;
+        yield return null;
+
+        Canvas.ForceUpdateCanvases();
+
+        yield return new WaitForSecondsRealtime(1.2f);
+
+        if (wasPaused)
+            Time.timeScale = 0f;
     }
 
     public void BackToDailySummary()
@@ -492,12 +539,12 @@ public class DailySummaryUI : MonoBehaviour
     private void UpdateAllDaysTexts(List<DaySummaryData> daySummary)
     {
         if (allDaysTitleText != null)
-            allDaysTitleText.text = "Dashboard histórico";
+            allDaysTitleText.text = "Historical Dashboard";
 
         if (daySummary == null || daySummary.Count == 0)
         {
             if (allDaysGeneralText != null)
-                allDaysGeneralText.text = "Sin días registrados.";
+                allDaysGeneralText.text = "No days recorded.";
 
             return;
         }
@@ -522,19 +569,19 @@ public class DailySummaryUI : MonoBehaviour
         int averageScore = Mathf.RoundToInt(totalScore / (float)periodSummary.Count);
 
         string modeText = showingByMonths
-            ? "Vista agrupada por meses del juego."
-            : "Vista diaria.";
+            ? "Grouped by game months."
+            : "Daily view.";
 
         if (allDaysGeneralText != null)
         {
             allDaysGeneralText.text =
-                "<b>RESUMEN HISTÓRICO</b>\n" +
+                "<b>HISTORICAL SUMMARY</b>\n" +
                 modeText + "\n" +
-                "Días registrados: " + daySummary.Count + "\n" +
-                "Rendimiento promedio: " + averageScore + "%\n" +
-                "Ingresos acumulados: $" + totalRevenue + "\n" +
-                "Errores acumulados: " + totalErrors + "\n" +
-                "Actividades totales: " + totalActivities;
+                "Recorded days: " + daySummary.Count + "\n" +
+                "Average performance: " + averageScore + "%\n" +
+                "Total revenue: $" + totalRevenue + "\n" +
+                "Total errors: " + totalErrors + "\n" +
+                "Total activities: " + totalActivities;
         }
     }
 
@@ -553,10 +600,10 @@ public class DailySummaryUI : MonoBehaviour
 
         ClearChartSeries(allDaysKpiLineChart);
 
-        SetChartTitle(allDaysKpiLineChart, "Evolución del rendimiento (%)");
+        SetChartTitle(allDaysKpiLineChart, "Performance Trend (%)");
         SetLegend(allDaysKpiLineChart, false);
 
-        allDaysKpiLineChart.AddSerie<Line>("Rendimiento");
+        allDaysKpiLineChart.AddSerie<Line>("Performance");
 
         if (periodSummary == null || periodSummary.Count == 0)
         {
@@ -567,6 +614,7 @@ public class DailySummaryUI : MonoBehaviour
         foreach (PeriodSummaryData period in periodSummary)
         {
             allDaysKpiLineChart.AddXAxisData(period.label);
+
             allDaysKpiLineChart.AddData(
                 0,
                 period.AverageScore,
@@ -583,10 +631,10 @@ public class DailySummaryUI : MonoBehaviour
 
         ClearChartSeries(allDaysRevenueBarChart);
 
-        SetChartTitle(allDaysRevenueBarChart, "Ingresos");
+        SetChartTitle(allDaysRevenueBarChart, "Revenue");
         SetLegend(allDaysRevenueBarChart, false);
 
-        allDaysRevenueBarChart.AddSerie<Bar>("Ingresos");
+        allDaysRevenueBarChart.AddSerie<Bar>("Revenue");
 
         if (periodSummary == null || periodSummary.Count == 0)
         {
@@ -597,10 +645,11 @@ public class DailySummaryUI : MonoBehaviour
         foreach (PeriodSummaryData period in periodSummary)
         {
             allDaysRevenueBarChart.AddXAxisData(period.label);
+
             allDaysRevenueBarChart.AddData(
                 0,
                 period.totalRevenue,
-                period.label + " - Ingresos: $" + period.totalRevenue
+                period.label + " - Revenue: $" + period.totalRevenue
             );
         }
 
@@ -613,10 +662,10 @@ public class DailySummaryUI : MonoBehaviour
 
         ClearChartSeries(allDaysErrorsBarChart);
 
-        SetChartTitle(allDaysErrorsBarChart, "Errores");
+        SetChartTitle(allDaysErrorsBarChart, "Errors");
         SetLegend(allDaysErrorsBarChart, false);
 
-        allDaysErrorsBarChart.AddSerie<Bar>("Errores");
+        allDaysErrorsBarChart.AddSerie<Bar>("Errors");
 
         if (periodSummary == null || periodSummary.Count == 0)
         {
@@ -627,10 +676,11 @@ public class DailySummaryUI : MonoBehaviour
         foreach (PeriodSummaryData period in periodSummary)
         {
             allDaysErrorsBarChart.AddXAxisData(period.label);
+
             allDaysErrorsBarChart.AddData(
                 0,
                 period.totalErrors,
-                period.label + " - Errores: " + period.totalErrors
+                period.label + " - Errors: " + period.totalErrors
             );
         }
 
@@ -652,7 +702,7 @@ public class DailySummaryUI : MonoBehaviour
             {
                 periodSummary.Add(new PeriodSummaryData
                 {
-                    label = "Día " + day.day,
+                    label = "Day " + day.day,
                     daysCount = 1,
                     totalActivities = day.count,
                     totalRevenue = day.totalRevenue,
@@ -677,7 +727,7 @@ public class DailySummaryUI : MonoBehaviour
 
                 months[monthNumber] = new PeriodSummaryData
                 {
-                    label = "Mes " + monthNumber + "\nDía " + startDay + "-" + endDay,
+                    label = "Month " + monthNumber + "\nDay " + startDay + "-" + endDay,
                     daysCount = 0,
                     totalActivities = 0,
                     totalRevenue = 0,
@@ -712,10 +762,12 @@ public class DailySummaryUI : MonoBehaviour
                 return "Check-in";
 
             case "Habitación":
-                return "Habitación";
+            case "Room":
+                return "Room";
 
             case "Restaurante":
-                return "Restaurante";
+            case "Restaurant":
+                return "Restaurant";
 
             default:
                 return minigameName;
@@ -757,11 +809,6 @@ public class DailySummaryUI : MonoBehaviour
 
     public void ContinueToNextDay()
     {
-        if (DailyResultsManager.Instance != null)
-        {
-            DailyResultsManager.Instance.CommitTodayResults();
-        }
-
         if (summaryPanel != null)
             summaryPanel.SetActive(false);
 
@@ -770,9 +817,6 @@ public class DailySummaryUI : MonoBehaviour
 
         if (DayManager.Instance != null)
             DayManager.Instance.EndDay();
-
-        if (DailyResultsManager.Instance != null)
-            DailyResultsManager.Instance.ClearTodayResults();
 
         HotelGamePause.ReleasePause();
     }

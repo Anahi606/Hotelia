@@ -52,6 +52,8 @@ public class CheckInFlowController : MonoBehaviour
 
     private bool dialogueFinished;
 
+    private const int MaxFullMealPlanGuests = 3;
+
     [Header("Result UI")]
     public CheckInResultPanelUI resultPanelUI;
 
@@ -283,6 +285,26 @@ public class CheckInFlowController : MonoBehaviour
             return;
         }
 
+        if (RequestUsesFullMealPlan(currentRequest))
+        {
+            int currentFullMealPlanGuests = GetCurrentFullMealPlanGuestCount();
+            int newGuests = Mathf.Max(1, currentRequest.guestCount);
+
+            if (currentFullMealPlanGuests + newGuests > MaxFullMealPlanGuests)
+            {
+                Debug.Log(
+                    "Full meal plan limit reached. Current full meal guests: " +
+                    currentFullMealPlanGuests +
+                    " | New guests: " +
+                    newGuests +
+                    " | Limit: " +
+                    MaxFullMealPlanGuests
+                );
+
+                return;
+            }
+        }
+
         int currentDay = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
 
         bool roomCorrect = IsRoomCorrectForRequest(selectedRoom, currentRequest);
@@ -380,7 +402,7 @@ public class CheckInFlowController : MonoBehaviour
         if (request.bedType != room.bedType)
             return false;
 
-        if (room.bedCount < request.guestCount)
+        if (!RoomHasEnoughCapacity(room, request))
             return false;
 
         return true;
@@ -525,7 +547,7 @@ public class CheckInFlowController : MonoBehaviour
         if (room.state != RoomState.Available) return false;
         if (request.needsAccessibleRoom && !room.isAccessible) return false;
         if (request.bedType != room.bedType) return false;
-        if (room.bedCount < request.guestCount) return false;
+        if (!RoomHasEnoughCapacity(room, request)) return false;
 
         return true;
     }
@@ -595,6 +617,51 @@ public class CheckInFlowController : MonoBehaviour
                     : normalButtonColor;
             }
         }
+    }
+
+    private bool RoomHasEnoughCapacity(RoomData room, CheckInRequest request)
+    {
+        if (room == null || request == null)
+            return false;
+
+        int guestCount = Mathf.Max(1, request.guestCount);
+
+        if (room.bedType == BedType.Double && room.bedCount >= 1)
+        {
+            return guestCount <= room.bedCount * 2;
+        }
+
+        // Para camas separadas/simples, cada cama cuenta como 1 persona.
+        return room.bedCount >= guestCount;
+    }
+
+    private bool RequestUsesFullMealPlan(CheckInRequest request)
+    {
+        if (request == null)
+            return false;
+
+        // Usa el meal plan real de la solicitud
+        return request.mealPlan == MealPlan.Full;
+    }
+
+    private int GetCurrentFullMealPlanGuestCount()
+    {
+        int count = 0;
+
+        if (HotelGameData.Instance == null || HotelGameData.Instance.rooms == null)
+            return count;
+
+        foreach (RoomRuntimeData room in HotelGameData.Instance.rooms)
+        {
+            if (room == null) continue;
+            if (room.state != RoomState.Occupied) continue;
+            if (!room.hasGuestData) continue;
+            if (room.currentMealPlan != MealPlan.Full) continue;
+
+            count += Mathf.Max(1, room.currentGuestCount);
+        }
+
+        return count;
     }
 
     private void ResetSTPButtonsVisual()

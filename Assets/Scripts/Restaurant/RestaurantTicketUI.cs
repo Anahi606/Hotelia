@@ -39,13 +39,13 @@ public class RestaurantTicketUI : MonoBehaviour, IPointerClickHandler
         manager = newManager;
 
         if (roomText != null)
-            roomText.text = "Habitación " + order.roomId;
+            roomText.text = "Room " + order.roomId;
 
         if (segmentText != null)
-            segmentText.text = "Segmento: " + order.segment;
+            segmentText.text = "Segment: " + GetSegmentText(order.segment);
 
         if (dishText != null)
-            dishText.text = "Pedido: " + order.dishName;
+            dishText.text = "Order: " + order.dishName;
 
         if (tagsText != null)
             tagsText.text = GetTagsText(order);
@@ -93,18 +93,47 @@ public class RestaurantTicketUI : MonoBehaviour, IPointerClickHandler
         string tags = "";
 
         if (order.hasAllergy)
-            tags += "[Alergia] ";
+            tags += "[Allergy] ";
 
         if (order.isUrgent)
-            tags += "[Urgente] ";
+            tags += "[Urgent] ";
 
         if (order.isRoomService)
-            tags += "[Room service] ";
+            tags += "[Room Service] ";
 
         if (string.IsNullOrEmpty(tags))
             tags = "[Normal]";
 
         return tags;
+    }
+
+    private string GetSegmentText(object segment)
+    {
+        if (segment == null)
+            return "";
+
+        string text = segment.ToString();
+
+        switch (text)
+        {
+            case "Business":
+                return "Business";
+
+            case "Family":
+                return "Family";
+
+            case "Couple":
+                return "Couple";
+
+            case "Tourist":
+                return "Tourist";
+
+            case "VIP":
+                return "VIP";
+
+            default:
+                return text;
+        }
     }
 
     public void Hide()
