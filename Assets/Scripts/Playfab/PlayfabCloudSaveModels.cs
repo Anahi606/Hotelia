@@ -53,6 +53,18 @@ public class CloudDailyResultData
     public int finalScore;
     public int revenue;
     public int errors;
+    public bool hasDetailedCheckInScores;
+    public bool roomCorrect;
+    public bool segmentCorrect;
+    public bool offerCorrect;
+    public bool tourismExtraCorrect;
+    public bool budgetCorrect;
+    public int roomScore;
+    public int stpScore;
+    public int offerScore;
+    public int tourismExtraScore;
+    public int budgetScore;
+
 }
 
 [System.Serializable]

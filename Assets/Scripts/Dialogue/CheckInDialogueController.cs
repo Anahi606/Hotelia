@@ -81,6 +81,18 @@ public class CheckInDialogueController : MonoBehaviour
         ShowLine();
     }
 
+    public void StartFollowUpDialogue(string[] dialogueLines)
+    {
+        checkInScreen.SetActive(true);
+
+        lines = dialogueLines;
+        dialogueBox.SetActive(true);
+        IsDialogueActive = true;
+        index = 0;
+
+        ShowLine();
+    }
+
     public void AdvanceDialogue()
     {
         Debug.Log("AdvanceDialogue llamado. Index actual: " + index);
@@ -128,7 +140,7 @@ public class CheckInDialogueController : MonoBehaviour
         foreach (char c in line)
         {
             dialogueText.text += c;
-            yield return new WaitForSeconds(delay);
+            yield return new WaitForSecondsRealtime(delay);
         }
 
         typingCo = null;

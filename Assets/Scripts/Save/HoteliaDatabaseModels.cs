@@ -48,8 +48,20 @@ public class DailyResultEntity
     public string MinigameName { get; set; }
 
     public int FinalScore { get; set; }
+    public int Satisfaction { get; set; }
     public int Revenue { get; set; }
     public int Errors { get; set; }
+    public int TimeScore { get; set; }
+
+    public string StpSummary { get; set; }
+    public string Feedback { get; set; }
+
+    public int ClientBudget { get; set; }
+    public int PackageCost { get; set; }
+
+    public int SelectedSegment { get; set; }
+    public int SelectedOffer { get; set; }
+    public int SelectedTourismExtra { get; set; }
 }
 
 [SQLite.Table("NpcStates")]

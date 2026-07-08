@@ -10,6 +10,10 @@ public class RoomInfoPanelUI : MonoBehaviour
     public TMP_Text accessibleText;
     public TMP_Text stateText;
 
+    [Header("Price Texts")]
+    public TMP_Text roomPriceText;
+    public TMP_Text totalPackageText;
+
     private RoomData currentRoom;
     private CheckInFlowController flowController;
 
@@ -33,7 +37,67 @@ public class RoomInfoPanelUI : MonoBehaviour
         if (stateText != null)
             stateText.text = "Status: " + GetRoomStateName(room.state);
 
+        UpdatePriceInfo(room, controller);
+
         gameObject.SetActive(true);
+    }
+
+    private void UpdatePriceInfo(RoomData room, CheckInFlowController controller)
+    {
+        if (room == null || controller == null)
+        {
+            if (roomPriceText != null)
+                roomPriceText.text = "";
+
+            if (totalPackageText != null)
+                totalPackageText.text = "";
+
+            return;
+        }
+
+        CheckInRequest request = controller.GetCurrentRequest();
+
+        if (request == null)
+        {
+            if (roomPriceText != null)
+                roomPriceText.text = "";
+
+            if (totalPackageText != null)
+                totalPackageText.text = "";
+
+            return;
+        }
+
+        int roomPrice = PackagePricing.GetRoomPrice(room, request.stayDays);
+
+        if (roomPriceText != null)
+        {
+            roomPriceText.text =
+                "Room price: $" + roomPrice +
+                " (" + request.stayDays + " day" + (request.stayDays > 1 ? "s" : "") + ")";
+        }
+
+        if (totalPackageText != null)
+        {
+            if (!controller.HasConfirmedPackage())
+            {
+                totalPackageText.text = "Select offer and tourism extra first.";
+                return;
+            }
+
+            int total = controller.GetTotalCostWithRoom(room);
+            int remaining = request.clientBudget - total;
+
+            string status = remaining >= 0
+                ? "Within budget"
+                : "Over budget";
+
+            totalPackageText.text =
+                "Total with this room: $" + total +
+                " / Budget: $" + request.clientBudget +
+                "\nRemaining: $" + remaining +
+                "\nStatus: " + status;
+        }
     }
 
     public void ClosePanel()

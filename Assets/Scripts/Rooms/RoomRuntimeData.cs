@@ -15,4 +15,5 @@ public class RoomRuntimeData
     public bool hasGuestData;
     public string hotelDoorSpawnId;
     public string guestSpriteName;
+    public int lastRestaurantOrderCompletedDay = -1;
 }

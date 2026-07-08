@@ -32,7 +32,7 @@ public class DayTextUI : MonoBehaviour
         if (dayText == null) return;
         if (DayManager.Instance == null) return;
 
-        dayText.text = "Día " + DayManager.Instance.CurrentDay;
+        dayText.text = "Day " + DayManager.Instance.CurrentDay;
     }
 
     public static void UpdateAllDayTexts()

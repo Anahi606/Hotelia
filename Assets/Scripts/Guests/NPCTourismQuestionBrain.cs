@@ -61,12 +61,18 @@ public class NPCTourismQuestionBrain : MonoBehaviour
         {
             yield return new WaitForSeconds(Random.Range(minCheckDelay, maxCheckDelay));
 
+            if (HotelGamePause.IsPaused)
+                continue;
+
             TryStartQuestionInteraction();
         }
     }
 
     public bool TryStartQuestionInteraction()
     {
+        if (HotelGamePause.IsPaused)
+            return false;
+
         if (isTryingToTalk)
             return false;
 
@@ -159,6 +165,12 @@ public class NPCTourismQuestionBrain : MonoBehaviour
         }
 
         roamer.StopRoaming();
+
+        if (HotelGamePause.IsPaused)
+        {
+            CancelQuestionAttempt();
+            yield break;
+        }
 
         OpenQuestion(question);
     }

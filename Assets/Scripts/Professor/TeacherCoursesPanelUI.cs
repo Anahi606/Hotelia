@@ -7,11 +7,12 @@ using PlayFab.ClientModels;
 public class TeacherCoursesPanelUI : MonoBehaviour
 {
     private const string TeacherCoursesKey = "Hotelia_TeacherCourses";
+    private const string SubjectCatalogKey = "Hotelia_SubjectCatalog";
 
     [Header("Course Form")]
     [SerializeField] private GameObject courseFormPanel;
-    [SerializeField] private TMP_InputField courseNameInput;
-    [SerializeField] private TMP_InputField courseCodeInput;
+    [SerializeField] private TMP_Dropdown subjectDropdown;
+    [SerializeField] private TMP_InputField classCodeInput;
 
     [Header("Course List")]
     [SerializeField] private Transform courseListContainer;
@@ -21,6 +22,7 @@ public class TeacherCoursesPanelUI : MonoBehaviour
     [SerializeField] private TMP_Text messageText;
 
     private readonly List<TeacherCourseData> courses = new List<TeacherCourseData>();
+    private readonly List<TeacherSubjectCatalogData> subjectCatalog = new List<TeacherSubjectCatalogData>();
 
     private string editingCourseId = "";
     private string selectedCourseId = "";
@@ -30,7 +32,86 @@ public class TeacherCoursesPanelUI : MonoBehaviour
     private void Start()
     {
         HideCourseForm();
+        LoadSubjectCatalogFromPlayFab();
         LoadCoursesFromPlayFab();
+    }
+
+    private void LoadSubjectCatalogFromPlayFab()
+    {
+        SetMessage("Loading subject catalog...");
+
+        var request = new GetTitleDataRequest
+        {
+            Keys = new List<string> { SubjectCatalogKey }
+        };
+
+        PlayFabClientAPI.GetTitleData(
+            request,
+            result =>
+            {
+                subjectCatalog.Clear();
+
+                if (result.Data == null || !result.Data.ContainsKey(SubjectCatalogKey))
+                {
+                    SetMessage("Subject catalog not found in PlayFab Title Data.");
+                    return;
+                }
+
+                string json = result.Data[SubjectCatalogKey];
+
+                TeacherSubjectCatalogListData catalogData =
+                    JsonUtility.FromJson<TeacherSubjectCatalogListData>(json);
+
+                if (catalogData == null || catalogData.subjects == null || catalogData.subjects.Count == 0)
+                {
+                    SetMessage("Subject catalog is empty or invalid.");
+                    return;
+                }
+
+                foreach (TeacherSubjectCatalogData subject in catalogData.subjects)
+                {
+                    if (subject != null && subject.status == "ACTIVE")
+                    {
+                        subjectCatalog.Add(subject);
+                    }
+                }
+
+                PopulateSubjectDropdown();
+
+                SetMessage("Subject catalog loaded.");
+            },
+            error =>
+            {
+                SetMessage("Could not load subject catalog.");
+                Debug.LogError("Error loading subject catalog: " + error.GenerateErrorReport());
+            }
+        );
+    }
+
+    private void PopulateSubjectDropdown()
+    {
+        if (subjectDropdown == null)
+        {
+            Debug.LogWarning("SubjectDropdown is not assigned in the Inspector.");
+            return;
+        }
+
+        subjectDropdown.ClearOptions();
+
+        List<TMP_Dropdown.OptionData> options = new List<TMP_Dropdown.OptionData>();
+
+        foreach (TeacherSubjectCatalogData subject in subjectCatalog)
+        {
+            string optionText = subject.subjectName + " (" + subject.subjectCode + ")";
+            options.Add(new TMP_Dropdown.OptionData(optionText));
+        }
+
+        subjectDropdown.AddOptions(options);
+
+        if (subjectDropdown.options.Count > 0)
+            subjectDropdown.value = 0;
+
+        subjectDropdown.RefreshShownValue();
     }
 
     public void ShowCourseForm()
@@ -47,6 +128,8 @@ public class TeacherCoursesPanelUI : MonoBehaviour
 
     public void HideCourseForm()
     {
+        Debug.Log("CLICK EN CANCEL");
+
         editingCourseId = "";
 
         ClearCourseInputs();
@@ -59,50 +142,66 @@ public class TeacherCoursesPanelUI : MonoBehaviour
 
     public void SaveCourseButton()
     {
+        Debug.Log("CLICK EN SAVE");
+
         if (!PlayfabManager.IsLoggedInWithEmail || !PlayfabManager.IsTeacher)
         {
             SetMessage("Only teacher accounts can create courses.");
             return;
         }
 
-        string courseName = courseNameInput != null ? courseNameInput.text.Trim() : "";
-        string courseCode = courseCodeInput != null ? courseCodeInput.text.Trim() : "";
-
-        if (string.IsNullOrEmpty(courseName))
+        if (subjectCatalog.Count == 0)
         {
-            SetMessage("Enter a course name.");
+            SetMessage("Subject catalog has not loaded yet.");
             return;
         }
 
-        if (!IsValidCourseCode(courseCode))
+        TeacherSubjectCatalogData selectedSubject = GetSelectedSubject();
+
+        if (selectedSubject == null)
         {
-            SetMessage("Course code must have exactly 4 numbers.");
+            SetMessage("Select a valid subject.");
             return;
         }
 
-        if (CourseCodeExists(courseCode, editingCourseId))
+        string classCode = classCodeInput != null ? classCodeInput.text.Trim() : "";
+
+        if (!IsValidClassCode(classCode))
         {
-            SetMessage("A course with this code already exists.");
+            SetMessage("Class code must have exactly 4 numbers.");
+            return;
+        }
+
+        if (ClassCodeExists(classCode, editingCourseId))
+        {
+            SetMessage("A class with this code already exists.");
             return;
         }
 
         if (string.IsNullOrEmpty(editingCourseId))
         {
-            CreateCourse(courseName, courseCode);
+            CreateCourse(selectedSubject, classCode);
         }
         else
         {
-            UpdateCourse(courseName, courseCode);
+            UpdateCourse(selectedSubject, classCode);
         }
     }
 
-    private void CreateCourse(string courseName, string courseCode)
+    private void CreateCourse(TeacherSubjectCatalogData subject, string classCode)
     {
         TeacherCourseData newCourse = new TeacherCourseData
         {
             courseId = "course_" + System.DateTime.UtcNow.Ticks,
-            courseName = courseName,
-            courseCode = courseCode,
+
+            subjectName = subject.subjectName,
+            subjectCode = subject.subjectCode,
+            period = subject.period,
+            classCode = classCode,
+
+            courseName = subject.subjectName,
+            courseCode = classCode,
+
             teacherPlayFabId = PlayfabManager.CurrentPlayFabId,
             status = "ACTIVE"
         };
@@ -122,7 +221,7 @@ public class TeacherCoursesPanelUI : MonoBehaviour
         });
     }
 
-    private void UpdateCourse(string courseName, string courseCode)
+    private void UpdateCourse(TeacherSubjectCatalogData subject, string classCode)
     {
         TeacherCourseData course = FindCourseById(editingCourseId);
 
@@ -132,8 +231,16 @@ public class TeacherCoursesPanelUI : MonoBehaviour
             return;
         }
 
-        course.courseName = courseName;
-        course.courseCode = courseCode;
+        course.subjectName = subject.subjectName;
+        course.subjectCode = subject.subjectCode;
+        course.period = subject.period;
+        course.classCode = classCode;
+
+        course.courseName = subject.subjectName;
+        course.courseCode = classCode;
+
+        course.teacherPlayFabId = PlayfabManager.CurrentPlayFabId;
+        course.status = "ACTIVE";
 
         SaveCoursesToPlayFab(() =>
         {
@@ -162,16 +269,20 @@ public class TeacherCoursesPanelUI : MonoBehaviour
 
         editingCourseId = course.courseId;
 
-        if (courseNameInput != null)
-            courseNameInput.text = course.courseName;
+        if (subjectDropdown != null)
+        {
+            int subjectIndex = FindSubjectIndexByCode(course.subjectCode);
+            subjectDropdown.value = subjectIndex;
+            subjectDropdown.RefreshShownValue();
+        }
 
-        if (courseCodeInput != null)
-            courseCodeInput.text = course.courseCode;
+        if (classCodeInput != null)
+            classCodeInput.text = GetClassCode(course);
 
         if (courseFormPanel != null)
             courseFormPanel.SetActive(true);
 
-        SetMessage("Editing course: " + course.courseName);
+        SetMessage("Editing course: " + GetCourseName(course));
     }
 
     public void DeleteCourse(string courseId)
@@ -211,36 +322,66 @@ public class TeacherCoursesPanelUI : MonoBehaviour
 
         selectedCourseId = course.courseId;
 
-        SetMessage("Selected course: " + course.courseName);
+        SetMessage("Selected course: " + GetCourseName(course));
 
         Debug.Log("Selected course id: " + selectedCourseId);
     }
 
-    private bool IsValidCourseCode(string courseCode)
+    private TeacherSubjectCatalogData GetSelectedSubject()
     {
-        if (string.IsNullOrEmpty(courseCode))
-            return false;
+        if (subjectDropdown == null)
+            return null;
 
-        if (courseCode.Length != 4)
-            return false;
+        if (subjectCatalog.Count == 0)
+            return null;
 
-        for (int i = 0; i < courseCode.Length; i++)
+        int index = subjectDropdown.value;
+
+        if (index < 0 || index >= subjectCatalog.Count)
+            return null;
+
+        return subjectCatalog[index];
+    }
+
+    private int FindSubjectIndexByCode(string subjectCode)
+    {
+        if (string.IsNullOrEmpty(subjectCode))
+            return 0;
+
+        for (int i = 0; i < subjectCatalog.Count; i++)
         {
-            if (!char.IsDigit(courseCode[i]))
+            if (subjectCatalog[i].subjectCode == subjectCode)
+                return i;
+        }
+
+        return 0;
+    }
+
+    private bool IsValidClassCode(string classCode)
+    {
+        if (string.IsNullOrEmpty(classCode))
+            return false;
+
+        if (classCode.Length != 4)
+            return false;
+
+        for (int i = 0; i < classCode.Length; i++)
+        {
+            if (!char.IsDigit(classCode[i]))
                 return false;
         }
 
         return true;
     }
 
-    private bool CourseCodeExists(string courseCode, string ignoredCourseId)
+    private bool ClassCodeExists(string classCode, string ignoredCourseId)
     {
         foreach (TeacherCourseData course in courses)
         {
             if (course.courseId == ignoredCourseId)
                 continue;
 
-            if (course.courseCode == courseCode)
+            if (GetClassCode(course) == classCode)
                 return true;
         }
 
@@ -256,6 +397,43 @@ public class TeacherCoursesPanelUI : MonoBehaviour
         }
 
         return null;
+    }
+
+    private string GetCourseName(TeacherCourseData course)
+    {
+        if (course == null)
+            return "";
+
+        if (!string.IsNullOrEmpty(course.subjectName))
+            return course.subjectName;
+
+        return course.courseName;
+    }
+
+    private string GetClassCode(TeacherCourseData course)
+    {
+        if (course == null)
+            return "";
+
+        if (!string.IsNullOrEmpty(course.classCode))
+            return course.classCode;
+
+        return course.courseCode;
+    }
+
+    private void NormalizeLoadedCourse(TeacherCourseData course)
+    {
+        if (course == null)
+            return;
+
+        if (string.IsNullOrEmpty(course.subjectName) && !string.IsNullOrEmpty(course.courseName))
+            course.subjectName = course.courseName;
+
+        if (string.IsNullOrEmpty(course.classCode) && !string.IsNullOrEmpty(course.courseCode))
+            course.classCode = course.courseCode;
+
+        if (string.IsNullOrEmpty(course.subjectCode))
+            course.subjectCode = "UNKNOWN";
     }
 
     private void LoadCoursesFromPlayFab()
@@ -286,7 +464,12 @@ public class TeacherCoursesPanelUI : MonoBehaviour
                     TeacherCourseListData savedData = JsonUtility.FromJson<TeacherCourseListData>(json);
 
                     if (savedData != null && savedData.courses != null)
+                    {
                         courses.AddRange(savedData.courses);
+
+                        foreach (TeacherCourseData course in courses)
+                            NormalizeLoadedCourse(course);
+                    }
                 }
 
                 RefreshCourseList();
@@ -365,11 +548,14 @@ public class TeacherCoursesPanelUI : MonoBehaviour
 
     private void ClearCourseInputs()
     {
-        if (courseNameInput != null)
-            courseNameInput.text = "";
+        if (subjectDropdown != null && subjectDropdown.options.Count > 0)
+        {
+            subjectDropdown.value = 0;
+            subjectDropdown.RefreshShownValue();
+        }
 
-        if (courseCodeInput != null)
-            courseCodeInput.text = "";
+        if (classCodeInput != null)
+            classCodeInput.text = "";
     }
 
     private void SetMessage(string message)
@@ -391,8 +577,33 @@ public class TeacherCourseListData
 public class TeacherCourseData
 {
     public string courseId;
-    public string courseName;
-    public string courseCode;
+
+    public string subjectName;
+    public string subjectCode;
+    public int period;
+
+    public string classCode;
+
     public string teacherPlayFabId;
     public string status;
+
+    public string courseName;
+    public string courseCode;
+}
+
+[System.Serializable]
+public class TeacherSubjectCatalogListData
+{
+    public List<TeacherSubjectCatalogData> subjects = new List<TeacherSubjectCatalogData>();
+}
+
+[System.Serializable]
+public class TeacherSubjectCatalogData
+{
+    public string subjectCode;
+    public string subjectName;
+    public int period;
+    public string status;
+    public List<string> relatedMinigames = new List<string>();
+    public List<string> relatedResultAreas = new List<string>();
 }

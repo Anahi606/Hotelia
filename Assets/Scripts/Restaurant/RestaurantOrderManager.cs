@@ -95,7 +95,7 @@ public class RestaurantOrderManager : MonoBehaviour
             if (room.state != RoomState.Occupied) continue;
             if (!room.hasGuestData) continue;
 
-            if (room.currentMealPlan != MealPlan.Full) continue;
+            if (!HotelMissionTracker.IsFoodOrderPending(room)) continue;
 
             RestaurantOrder order = CreateOrderFromRoom(room);
             activeOrders.Add(order);
@@ -104,6 +104,7 @@ public class RestaurantOrderManager : MonoBehaviour
                 break;
         }
     }
+
 
     private RestaurantOrder CreateOrderFromRoom(RoomRuntimeData room)
     {
@@ -291,6 +292,8 @@ public class RestaurantOrderManager : MonoBehaviour
 
         DailyResultsManager.Instance?.RegisterResult(result);
 
+        MarkSelectedOrdersAsCompletedToday();
+
         if (gamePanel != null)
             gamePanel.SetActive(false);
 
@@ -302,6 +305,25 @@ public class RestaurantOrderManager : MonoBehaviour
 
         if (resultPanelUI != null)
             resultPanelUI.Show(satisfaction, timeScore, errors, revenue);
+    }
+
+    private void MarkSelectedOrdersAsCompletedToday()
+    {
+        if (HotelGameData.Instance == null)
+            return;
+
+        int currentDay = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
+
+        foreach (RestaurantOrder order in selectedOrders)
+        {
+            if (order == null) continue;
+
+            RoomRuntimeData room = HotelGameData.Instance.GetRoomById(order.roomId);
+
+            if (room == null) continue;
+
+            room.lastRestaurantOrderCompletedDay = currentDay;
+        }
     }
 
     private int CalculateCorrectPositions()

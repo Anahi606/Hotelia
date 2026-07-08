@@ -22,12 +22,30 @@ public enum GuestSegment
 {
     Couple,
     Family,
-    Executive
+    Executive,
+    CulturalTourist,
+    AdventureTourist,
+    BudgetTraveler
 }
 
 public enum OfferType
 {
     Romantic,
     Family,
-    Executive
+    Executive,
+    Cultural,
+    Adventure,
+    Budget
+}
+
+public enum TourismExtraType
+{
+    None,
+    CulturalTour,
+    NatureActivity,
+    CityTransport,
+    RomanticDinner,
+    FamilyActivity,
+    BusinessTransport,
+    LocalSouvenir
 }

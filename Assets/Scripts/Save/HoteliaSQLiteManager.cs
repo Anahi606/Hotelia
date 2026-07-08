@@ -163,9 +163,22 @@ public static class HoteliaSQLiteManager
             {
                 Day = result.day,
                 MinigameName = result.minigameName,
+
                 FinalScore = result.finalScore,
+                Satisfaction = result.satisfaction,
                 Revenue = result.revenue,
-                Errors = result.errors
+                Errors = result.errors,
+                TimeScore = result.timeScore,
+
+                StpSummary = result.stpSummary,
+                Feedback = result.feedback,
+
+                ClientBudget = result.clientBudget,
+                PackageCost = result.packageCost,
+
+                SelectedSegment = (int)result.selectedSegment,
+                SelectedOffer = (int)result.selectedOffer,
+                SelectedTourismExtra = (int)result.selectedTourismExtra
             };
 
             connection.Insert(entity);
@@ -185,9 +198,22 @@ public static class HoteliaSQLiteManager
 
             result.day = entity.Day;
             result.minigameName = entity.MinigameName;
+
             result.finalScore = entity.FinalScore;
+            result.satisfaction = entity.Satisfaction;
             result.revenue = entity.Revenue;
             result.errors = entity.Errors;
+            result.timeScore = entity.TimeScore;
+
+            result.stpSummary = entity.StpSummary;
+            result.feedback = entity.Feedback;
+
+            result.clientBudget = entity.ClientBudget;
+            result.packageCost = entity.PackageCost;
+
+            result.selectedSegment = (GuestSegment)entity.SelectedSegment;
+            result.selectedOffer = (OfferType)entity.SelectedOffer;
+            result.selectedTourismExtra = (TourismExtraType)entity.SelectedTourismExtra;
 
             results.Add(result);
         }

@@ -14,6 +14,7 @@ public class PlayfabManager : MonoBehaviour
     public static string CurrentEmail { get; private set; }
     public static string CurrentPlayFabId { get; private set; }
     public static string CurrentRole { get; private set; }
+    public static string CurrentSessionTicket { get; private set; } = "";
 
     public static bool IsTeacher => CurrentRole == TeacherRole;
     public static bool IsStudent => CurrentRole == StudentRole;
@@ -38,6 +39,7 @@ public class PlayfabManager : MonoBehaviour
     [SerializeField] private GameObject loginPanelDialogue;
     [SerializeField] private GameObject buttonsPanel;
     [SerializeField] private GameObject registerPanelDialogue;
+    [SerializeField] private GameObject settingsPanel;
 
     [Header("Main Menu Buttons")]
     [SerializeField] private GameObject loginButton;
@@ -54,6 +56,9 @@ public class PlayfabManager : MonoBehaviour
 
     private void Start()
     {
+        if (settingsPanel != null)
+            settingsPanel.SetActive(false);
+
         UpdateLoginUI();
     }
 
@@ -103,6 +108,7 @@ public class PlayfabManager : MonoBehaviour
         IsLoggedInWithEmail = true;
         CurrentEmail = registerEmailInput != null ? registerEmailInput.text.Trim() : "";
         CurrentPlayFabId = result.PlayFabId;
+        CurrentSessionTicket = result.SessionTicket;
         CurrentRole = pendingRegisterRole;
 
         string displayName = GetNameFromEmail(CurrentEmail);
@@ -135,6 +141,7 @@ public class PlayfabManager : MonoBehaviour
         IsLoggedInWithEmail = false;
         CurrentEmail = "";
         CurrentPlayFabId = "";
+        CurrentSessionTicket = "";
         CurrentRole = "";
         pendingRegisterRole = StudentRole;
 
@@ -212,13 +219,10 @@ public class PlayfabManager : MonoBehaviour
         IsLoggedInWithEmail = true;
         CurrentEmail = emailInput.text.Trim();
         CurrentPlayFabId = result.PlayFabId;
-
-        string displayName = GetNameFromEmail(CurrentEmail);
+        CurrentSessionTicket = result.SessionTicket;
 
         SetMessage("Logged in. Checking account role...");
         Debug.Log("Login successful with email. PlayFabId: " + CurrentPlayFabId);
-
-        UpdateDisplayName(displayName);
 
         LoadRoleFromPlayFab(() =>
         {
@@ -227,11 +231,8 @@ public class PlayfabManager : MonoBehaviour
 
             if (IsStudent)
             {
-                UpsertStudentProfileToBackend(CurrentPlayFabId, CurrentEmail, displayName, () =>
-                {
-                    SetMessage("Student logged in. Press Continue to sync your progress.");
-                    Debug.Log("Student logged in. Progress will sync when pressing Continue.");
-                });
+                SetMessage("Student logged in. Press Continue to sync your progress.");
+                Debug.Log("Student logged in. Progress will sync when pressing Continue.");
             }
             else if (IsTeacher)
             {
@@ -281,6 +282,7 @@ public class PlayfabManager : MonoBehaviour
         IsLoggedInWithEmail = false;
         CurrentEmail = "";
         CurrentPlayFabId = "";
+        CurrentSessionTicket = "";
         CurrentRole = "";
         pendingRegisterRole = StudentRole;
 
@@ -331,8 +333,45 @@ public class PlayfabManager : MonoBehaviour
         if (registerPanelDialogue != null)
             registerPanelDialogue.SetActive(false);
 
+        if (settingsPanel != null)
+            settingsPanel.SetActive(false);
+
         if (loginPanelDialogue != null)
             loginPanelDialogue.SetActive(true);
+    }
+
+    public void OpenSettingsPanel()
+    {
+        ClearLoginFields();
+
+        if (buttonsPanel != null)
+            buttonsPanel.SetActive(false);
+
+        if (loginPanelDialogue != null)
+            loginPanelDialogue.SetActive(false);
+
+        if (registerPanelDialogue != null)
+            registerPanelDialogue.SetActive(false);
+
+        if (settingsPanel != null)
+            settingsPanel.SetActive(true);
+    }
+
+    public void BackFromSettingsPanel()
+    {
+        if (settingsPanel != null)
+            settingsPanel.SetActive(false);
+
+        if (loginPanelDialogue != null)
+            loginPanelDialogue.SetActive(false);
+
+        if (registerPanelDialogue != null)
+            registerPanelDialogue.SetActive(false);
+
+        if (buttonsPanel != null)
+            buttonsPanel.SetActive(true);
+
+        UpdateLoginUI();
     }
 
     private void CloseLoginAndReturnToButtons()
@@ -344,6 +383,9 @@ public class PlayfabManager : MonoBehaviour
 
         if (registerPanelDialogue != null)
             registerPanelDialogue.SetActive(false);
+
+        if (settingsPanel != null)
+            settingsPanel.SetActive(false);
 
         if (buttonsPanel != null)
             buttonsPanel.SetActive(true);
@@ -376,6 +418,9 @@ public class PlayfabManager : MonoBehaviour
 
         if (registerPanelDialogue != null)
             registerPanelDialogue.SetActive(false);
+
+        if (settingsPanel != null)
+            settingsPanel.SetActive(false);
 
         if (loginPanelDialogue != null)
             loginPanelDialogue.SetActive(true);

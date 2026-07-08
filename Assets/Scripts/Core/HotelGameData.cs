@@ -78,6 +78,8 @@ public class HotelGameData : MonoBehaviour
             room.hotelDoorSpawnId = "";
             room.guestSpriteName = "";
 
+            room.lastRestaurantOrderCompletedDay = -1;
+
             rooms.Add(room);
         }
     }

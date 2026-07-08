@@ -16,11 +16,21 @@ public class PlayerMovement : MonoBehaviour
         animator = GetComponent<Animator>();
     }
 
+    private void OnEnable()
+    {
+        HotelGamePause.OnPauseChanged += HandlePauseChanged;
+    }
+
+    private void OnDisable()
+    {
+        HotelGamePause.OnPauseChanged -= HandlePauseChanged;
+    }
+
     private void FixedUpdate()
     {
-        if (!canMove)
+        if (!canMove || HotelGamePause.IsPaused)
         {
-            rb.linearVelocity = Vector2.zero;
+            StopPlayer();
             return;
         }
 
@@ -29,17 +39,23 @@ public class PlayerMovement : MonoBehaviour
 
     public void Move(InputAction.CallbackContext context)
     {
-        if (!canMove)
+        if (!canMove || HotelGamePause.IsPaused)
         {
             moveInput = Vector2.zero;
-            rb.linearVelocity = Vector2.zero;
-            animator.SetBool("isWalking", false);
+
+            if (rb != null)
+                rb.linearVelocity = Vector2.zero;
+
+            if (animator != null)
+                animator.SetBool("isWalking", false);
+
             return;
         }
 
         moveInput = context.ReadValue<Vector2>();
 
         bool walking = moveInput.sqrMagnitude > 0.001f;
+
         animator.SetBool("isWalking", walking);
         animator.SetFloat("InputX", moveInput.x);
         animator.SetFloat("InputY", moveInput.y);
@@ -54,11 +70,16 @@ public class PlayerMovement : MonoBehaviour
     public void StopPlayer()
     {
         moveInput = Vector2.zero;
-        rb.linearVelocity = Vector2.zero;
 
-        animator.SetBool("isWalking", false);
-        animator.SetFloat("InputX", 0f);
-        animator.SetFloat("InputY", 0f);
+        if (rb != null)
+            rb.linearVelocity = Vector2.zero;
+
+        if (animator != null)
+        {
+            animator.SetBool("isWalking", false);
+            animator.SetFloat("InputX", 0f);
+            animator.SetFloat("InputY", 0f);
+        }
     }
 
     public void SetMovementEnabled(bool enabled)
@@ -66,10 +87,14 @@ public class PlayerMovement : MonoBehaviour
         canMove = enabled;
 
         if (!canMove)
+            StopPlayer();
+    }
+
+    private void HandlePauseChanged(bool paused)
+    {
+        if (paused)
         {
             StopPlayer();
         }
     }
 }
-
-//Tengo sueño...

@@ -394,7 +394,21 @@ public static class PlayfabCloudSaveManager
                 minigameName = result.minigameName,
                 finalScore = result.finalScore,
                 revenue = result.revenue,
-                errors = result.errors
+                errors = result.errors,
+
+                hasDetailedCheckInScores = result.hasDetailedCheckInScores,
+
+                roomCorrect = result.roomCorrect,
+                segmentCorrect = result.segmentCorrect,
+                offerCorrect = result.offerCorrect,
+                tourismExtraCorrect = result.tourismExtraCorrect,
+                budgetCorrect = result.budgetCorrect,
+
+                roomScore = result.roomScore,
+                stpScore = result.stpScore,
+                offerScore = result.offerScore,
+                tourismExtraScore = result.tourismExtraScore,
+                budgetScore = result.budgetScore
             };
 
             list.Add(data);
@@ -421,7 +435,21 @@ public static class PlayfabCloudSaveManager
                 minigameName = cloudResult.minigameName,
                 finalScore = cloudResult.finalScore,
                 revenue = cloudResult.revenue,
-                errors = cloudResult.errors
+                errors = cloudResult.errors,
+
+                hasDetailedCheckInScores = cloudResult.hasDetailedCheckInScores,
+
+                roomCorrect = cloudResult.roomCorrect,
+                segmentCorrect = cloudResult.segmentCorrect,
+                offerCorrect = cloudResult.offerCorrect,
+                tourismExtraCorrect = cloudResult.tourismExtraCorrect,
+                budgetCorrect = cloudResult.budgetCorrect,
+
+                roomScore = cloudResult.roomScore,
+                stpScore = cloudResult.stpScore,
+                offerScore = cloudResult.offerScore,
+                tourismExtraScore = cloudResult.tourismExtraScore,
+                budgetScore = cloudResult.budgetScore
             };
 
             results.Add(result);

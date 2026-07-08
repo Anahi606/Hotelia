@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using XCharts.Runtime;
 
 public class DailySummaryUI : MonoBehaviour
@@ -34,6 +35,22 @@ public class DailySummaryUI : MonoBehaviour
 
     [Header("Buttons")]
     [SerializeField] private GameObject allDaysButton;
+
+    [Header("Daily Scroll Content")]
+    [SerializeField] private RectTransform dailySummaryContent;
+
+    [Header("KPI Cards")]
+    [SerializeField] private TMP_Text performanceValueText;
+    [SerializeField] private TMP_Text performanceLabelText;
+
+    [SerializeField] private TMP_Text revenueValueText;
+    [SerializeField] private TMP_Text revenueLabelText;
+
+    [SerializeField] private TMP_Text errorsValueText;
+    [SerializeField] private TMP_Text errorsLabelText;
+
+    [SerializeField] private TMP_Text focusValueText;
+    [SerializeField] private TMP_Text focusLabelText;
 
     private class SummaryData
     {
@@ -127,19 +144,62 @@ public class DailySummaryUI : MonoBehaviour
         List<SummaryData> summary = BuildSummary(results);
 
         UpdateTexts(summary);
-        UpdateCharts(summary);
         UpdateAllDaysButtonVisibility();
 
         Canvas.ForceUpdateCanvases();
 
+        if (dailySummaryContent != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(dailySummaryContent);
+
         yield return null;
-        yield return null;
+        yield return new WaitForEndOfFrame();
 
         Canvas.ForceUpdateCanvases();
 
-        yield return new WaitForSecondsRealtime(1.2f);
+        if (dailySummaryContent != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(dailySummaryContent);
+
+        UpdateCharts(summary);
+
+        yield return null;
+        yield return new WaitForEndOfFrame();
+
+        ForceRefreshDailyCharts();
+
+        yield return new WaitForSecondsRealtime(1.5f);
+
+        ForceRefreshDailyCharts();
 
         HotelGamePause.RequestPause();
+    }
+
+    private void ForceRefreshDailyCharts()
+    {
+        ForceRefreshChart(scoreBarChart);
+        ForceRefreshChart(errorsPieChart);
+        ForceRefreshChart(revenueBarChart);
+    }
+
+    private void ForceRefreshChart(BaseChart chart)
+    {
+        if (chart == null) return;
+
+        RectTransform rt = chart.transform as RectTransform;
+
+        if (rt != null)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
+
+            if (rt.rect.width < 20f || rt.rect.height < 20f)
+            {
+                Debug.LogWarning(
+                    chart.name + " tiene tamaño muy pequeño: " +
+                    rt.rect.width + " x " + rt.rect.height
+                );
+            }
+        }
+
+        chart.RefreshChart();
     }
 
     private List<SummaryData> BuildSummary(List<MiniGameResultData> results)
@@ -176,6 +236,33 @@ public class DailySummaryUI : MonoBehaviour
         return new List<SummaryData>(data.Values);
     }
 
+    private void UpdateKpiCards(int averageScore,int totalRevenue,int totalErrors,string weakestActivityName)
+    {
+        if (performanceValueText != null)
+            performanceValueText.text = averageScore + "%";
+
+        if (performanceLabelText != null)
+            performanceLabelText.text = "Performance";
+
+        if (revenueValueText != null)
+            revenueValueText.text = "$" + totalRevenue;
+
+        if (revenueLabelText != null)
+            revenueLabelText.text = "Revenue";
+
+        if (errorsValueText != null)
+            errorsValueText.text = totalErrors.ToString();
+
+        if (errorsLabelText != null)
+            errorsLabelText.text = "Errors";
+
+        if (focusValueText != null)
+            focusValueText.text = weakestActivityName;
+
+        if (focusLabelText != null)
+            focusLabelText.text = "Needs Practice";
+    }
+
     private void UpdateTexts(List<SummaryData> summary)
     {
         int currentDay = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
@@ -186,13 +273,19 @@ public class DailySummaryUI : MonoBehaviour
         if (summary == null || summary.Count == 0)
         {
             if (generalSummaryText != null)
-                generalSummaryText.text = "No results recorded.";
+                generalSummaryText.text =
+                    "<b>DAILY KPI</b>\n" +
+                    "No results recorded today.";
 
             if (stpText != null)
-                stpText.text = "STP: no data.";
+                stpText.text =
+                    "<b>APPLIED STP</b>\n" +
+                    "No activity data available.";
 
             if (feedbackText != null)
-                feedbackText.text = "Complete activities to generate metrics.";
+                feedbackText.text =
+                    "<b>FEEDBACK</b>\n" +
+                    "Complete activities to generate feedback.";
 
             return;
         }
@@ -202,30 +295,48 @@ public class DailySummaryUI : MonoBehaviour
         int totalErrors = 0;
         int totalActivities = 0;
 
+        SummaryData bestActivity = null;
+        SummaryData weakestActivity = null;
+
         string stpSummary = "";
         string feedbackSummary = "";
 
         foreach (SummaryData item in summary)
         {
+            if (item == null)
+                continue;
+
             totalScore += item.AverageScore;
             totalRevenue += item.totalRevenue;
             totalErrors += item.totalErrors;
             totalActivities += item.count;
 
-            stpSummary += GetShortSTP(item) + "\n";
-            feedbackSummary += GetShortFeedback(item) + "\n";
+            if (bestActivity == null || item.AverageScore > bestActivity.AverageScore)
+                bestActivity = item;
+
+            if (weakestActivity == null || item.AverageScore < weakestActivity.AverageScore)
+                weakestActivity = item;
+
+            stpSummary += GetDetailedSTP(item) + "\n";
+            feedbackSummary += GetDetailedFeedback(item) + "\n";
         }
 
         int averageScore = Mathf.RoundToInt(totalScore / (float)summary.Count);
+
+        string bestActivityName = bestActivity != null ? GetFullActivityName(bestActivity.name) : "-";
+        string weakestActivityName = weakestActivity != null ? GetFullActivityName(weakestActivity.name) : "-";
+        UpdateKpiCards(averageScore,totalRevenue,totalErrors, weakestActivityName);
 
         if (generalSummaryText != null)
         {
             generalSummaryText.text =
                 "<b>DAILY KPI</b>\n" +
-                "Overall performance: " + averageScore + "%\n" +
+                "Score: " + averageScore + "% (" + GetPerformanceLevel(averageScore) + ")\n" +
                 "Revenue: $" + totalRevenue + "\n" +
                 "Errors: " + totalErrors + "\n" +
-                "Activities: " + totalActivities;
+                "Activities: " + totalActivities + "\n" +
+                "Best: " + bestActivityName + "\n" +
+                "Review: " + weakestActivityName;
         }
 
         if (stpText != null)
@@ -239,48 +350,110 @@ public class DailySummaryUI : MonoBehaviour
         {
             feedbackText.text =
                 "<b>FEEDBACK</b>\n" +
-                feedbackSummary.TrimEnd();
+                feedbackSummary.TrimEnd() +
+                "\n" +
+                GetGeneralRecommendation(averageScore, totalErrors, weakestActivity);
         }
     }
 
-    private string GetShortSTP(SummaryData item)
-    {
-        if (item == null) return "";
-
-        switch (item.name)
-        {
-            case "Check-in":
-                return "• Check-in: guest + offer.";
-
-            case "Habitación":
-            case "Room":
-                return "• Room: cleaning + order.";
-
-            case "Restaurante":
-            case "Restaurant":
-                return "• Restaurant: priority + service.";
-
-            default:
-                return "• " + GetFullActivityName(item.name) + ": management.";
-        }
-    }
-
-    private string GetShortFeedback(SummaryData item)
+    private string GetDetailedSTP(SummaryData item)
     {
         if (item == null) return "";
 
         string activityName = GetFullActivityName(item.name);
 
+        switch (item.name)
+        {
+            case "Check-in":
+                return "• Check-in: guest type, room fit, offer and budget.";
+
+            case "Habitación":
+            case "Room":
+                return "• Room: status, cleaning, bed and trash.";
+
+            case "Restaurante":
+            case "Restaurant":
+                return "• Restaurant: ticket priority and correct delivery.";
+
+            case "Paquetes":
+            case "Packages":
+                return "• Packages: budget, menu, decoration and occasion.";
+
+            default:
+                return "• " + activityName + ": service decision and accuracy.";
+        }
+    }
+
+    private string GetDetailedFeedback(SummaryData item)
+    {
+        if (item == null) return "";
+
+        string activityName = GetFullActivityName(item.name);
+
+        string baseText =
+            "• " + activityName + ": " +
+            item.AverageScore + "%, " +
+            item.totalErrors + " errors. ";
+
         if (item.totalErrors == 0 && item.AverageScore >= 85)
-            return "• " + activityName + ": excellent.";
+            return baseText + "Excellent. Keep this strategy.";
 
         if (item.AverageScore >= 70)
-            return "• " + activityName + ": good, improve small details.";
+            return baseText + "Good. Improve small details.";
 
         if (item.AverageScore >= 50)
-            return "• " + activityName + ": review your decisions.";
+            return baseText + "Review choices before confirming.";
 
-        return "• " + activityName + ": needs improvement.";
+        return baseText + "Needs practice. Read the task carefully.";
+    }
+
+    private string GetPerformanceLevel(int score)
+    {
+        if (score >= 85)
+            return "Excellent";
+
+        if (score >= 70)
+            return "Good";
+
+        if (score >= 60)
+            return "Acceptable";
+
+        if (score >= 40)
+            return "At risk";
+
+        return "Critical";
+    }
+
+    private string GetRiskLevel(int averageScore, int totalErrors)
+    {
+        if (averageScore >= 85 && totalErrors == 0)
+            return "Low";
+
+        if (averageScore >= 70 && totalErrors <= 2)
+            return "Moderate";
+
+        if (averageScore >= 50)
+            return "High";
+
+        return "Critical";
+    }
+
+    private string GetGeneralRecommendation(int averageScore, int totalErrors, SummaryData weakestActivity)
+    {
+        string weakestActivityName = weakestActivity != null
+            ? GetFullActivityName(weakestActivity.name)
+            : "the weakest activity";
+
+        if (averageScore >= 85 && totalErrors == 0)
+            return "<b>Next:</b> Continue. Keep high accuracy.";
+
+        if (averageScore >= 70)
+            return "<b>Next:</b> Review " + weakestActivityName + " to reduce errors.";
+
+        if (averageScore >= 50)
+            return "<b>Next:</b> Practice " + weakestActivityName + " again.";
+
+        return "<b>Next:</b> Repeat " + weakestActivityName + " slowly.";
     }
 
     private void UpdateAllDaysButtonVisibility()
@@ -313,26 +486,31 @@ public class DailySummaryUI : MonoBehaviour
 
         SetChartTitle(scoreBarChart, "Score by Activity (%)");
         SetLegend(scoreBarChart, false);
+        SetPercentageYAxis(scoreBarChart);
 
         scoreBarChart.AddSerie<Bar>("Score");
 
         if (summary == null || summary.Count == 0)
         {
             scoreBarChart.RefreshChart();
+            UpdateKpiCards(0, 0, 0, "-");
             return;
         }
 
         foreach (SummaryData item in summary)
         {
             string activityName = GetFullActivityName(item.name);
+            int score = Mathf.Clamp(item.AverageScore, 0, 100);
 
-            scoreBarChart.AddYAxisData(activityName);
+            scoreBarChart.AddXAxisData(activityName);
 
             scoreBarChart.AddData(
                 0,
-                item.AverageScore,
-                activityName + ": " + item.AverageScore + "%"
+                score,
+                activityName + ": " + score + "%"
             );
+
+            Debug.Log("Daily Score Chart -> " + activityName + ": " + score + "%");
         }
 
         scoreBarChart.RefreshChart();
@@ -342,13 +520,12 @@ public class DailySummaryUI : MonoBehaviour
     {
         if (errorsPieChart == null) return;
 
-        errorsPieChart.ClearData();
-
-        if (errorsPieChart.GetSerie(0) == null)
-            errorsPieChart.AddSerie<Pie>("Result");
+        ClearChartSeries(errorsPieChart);
 
         SetChartTitle(errorsPieChart, "Daily Quality");
         SetLegend(errorsPieChart, true);
+
+        errorsPieChart.AddSerie<Pie>("Result");
         SetSerieName(errorsPieChart, 0, "Result");
 
         if (summary == null || summary.Count == 0)
@@ -394,7 +571,7 @@ public class DailySummaryUI : MonoBehaviour
         {
             string activityName = GetFullActivityName(item.name);
 
-            revenueBarChart.AddYAxisData(activityName);
+            revenueBarChart.AddXAxisData(activityName);
 
             revenueBarChart.AddData(
                 0,
@@ -602,6 +779,7 @@ public class DailySummaryUI : MonoBehaviour
 
         SetChartTitle(allDaysKpiLineChart, "Performance Trend (%)");
         SetLegend(allDaysKpiLineChart, false);
+        SetPercentageYAxis(allDaysKpiLineChart);
 
         allDaysKpiLineChart.AddSerie<Line>("Performance");
 
@@ -686,6 +864,7 @@ public class DailySummaryUI : MonoBehaviour
 
         allDaysErrorsBarChart.RefreshChart();
     }
+
 
     private List<PeriodSummaryData> BuildDashboardPeriodSummary(List<DaySummaryData> daySummary)
     {
@@ -795,6 +974,22 @@ public class DailySummaryUI : MonoBehaviour
 
         if (legend != null)
             legend.show = show;
+    }
+
+    private void SetPercentageYAxis(BaseChart chart)
+    {
+        if (chart == null)
+            return;
+
+        YAxis yAxis = chart.EnsureChartComponent<YAxis>();
+
+        if (yAxis != null)
+        {
+            yAxis.minMaxType = Axis.AxisMinMaxType.Custom;
+            yAxis.min = 0;
+            yAxis.max = 100;
+            yAxis.splitNumber = 5;
+        }
     }
 
     private void SetSerieName(BaseChart chart, int index, string serieName)

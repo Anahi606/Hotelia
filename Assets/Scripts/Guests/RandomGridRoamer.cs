@@ -572,22 +572,135 @@ public class RandomGridRoamer : MonoBehaviour
             roamRoutine = null;
         }
 
-        float timer = 0f;
+        float endTime = Time.time + timeout;
+        float repathInterval = 0.5f;
 
-        while (target != null && timer < timeout)
+        while (target != null && Time.time < endTime)
         {
-            float distance = Vector2.Distance(rb.position, target.position);
-
-            if (distance <= stopDistance)
+            if (HotelGamePause.IsPaused)
                 break;
 
-            Vector2 direction = ((Vector2)target.position - rb.position).normalized;
+            float distanceToTarget = Vector2.Distance(rb.position, target.position);
 
-            rb.linearVelocity = direction * moveSpeed;
-            SetWalkingAnimation(true, direction);
+            if (distanceToTarget <= stopDistance)
+                break;
 
-            timer += Time.fixedDeltaTime;
-            yield return new WaitForFixedUpdate();
+            NPCRoamZone zone = GetZoneContainingNPC();
+
+            if (zone == null)
+            {
+                zone = GetClosestZoneToNPC();
+
+                if (zone == null)
+                {
+                    Debug.LogWarning(gameObject.name + " no encontró zona para acercarse al player.");
+                    break;
+                }
+
+                rb.position = zone.GetClosestPoint(rb.position);
+            }
+
+            Vector2 safeTargetPosition = target.position;
+
+            if (!zone.ContainsWorldPosition(safeTargetPosition))
+                safeTargetPosition = zone.GetClosestPoint(safeTargetPosition);
+
+            Vector2Int startCell = WorldToCell(rb.position);
+
+            if (!IsCellWalkable(startCell, zone))
+            {
+                if (TryFindNearbyWalkableCell(rb.position, zone, out Vector2Int fixedStartCell))
+                {
+                    rb.position = CellToWorld(fixedStartCell);
+                    startCell = fixedStartCell;
+                }
+                else
+                {
+                    Debug.LogWarning(gameObject.name + " no encontró celda inicial caminable.");
+                    break;
+                }
+            }
+
+            Vector2Int targetCell = WorldToCell(safeTargetPosition);
+
+            if (!IsCellWalkable(targetCell, zone))
+            {
+                if (!TryFindNearbyWalkableCell(safeTargetPosition, zone, out targetCell))
+                {
+                    Debug.LogWarning(gameObject.name + " no encontró celda caminable cerca del player.");
+                    break;
+                }
+            }
+
+            List<Vector2Int> path = FindPath(startCell, targetCell, zone);
+
+            if (path == null || path.Count == 0)
+            {
+                Debug.LogWarning(gameObject.name + " no encontró camino hacia el player.");
+                break;
+            }
+
+            bool needsNewPath = false;
+            float repathTimer = 0f;
+
+            for (int i = 0; i < path.Count; i++)
+            {
+                Vector2 targetPosition = CellToWorld(path[i]);
+
+                while (Vector2.Distance(rb.position, targetPosition) > arrivalDistance)
+                {
+                    if (target == null)
+                    {
+                        StopMoving();
+                        yield break;
+                    }
+
+                    if (HotelGamePause.IsPaused)
+                    {
+                        StopMoving();
+                        yield break;
+                    }
+
+                    if (Time.time >= endTime)
+                    {
+                        StopMoving();
+                        yield break;
+                    }
+
+                    float currentDistanceToTarget = Vector2.Distance(rb.position, target.position);
+
+                    if (currentDistanceToTarget <= stopDistance)
+                    {
+                        StopMoving();
+                        yield break;
+                    }
+
+                    Vector2 direction = (targetPosition - rb.position).normalized;
+
+                    rb.linearVelocity = direction * moveSpeed;
+                    SetWalkingAnimation(true, direction);
+
+                    repathTimer += Time.fixedDeltaTime;
+
+                    if (repathTimer >= repathInterval)
+                    {
+                        needsNewPath = true;
+                        break;
+                    }
+
+                    yield return new WaitForFixedUpdate();
+                }
+
+                if (needsNewPath)
+                    break;
+
+                rb.position = targetPosition;
+            }
+
+            if (!needsNewPath)
+                break;
+
+            yield return null;
         }
 
         StopMoving();

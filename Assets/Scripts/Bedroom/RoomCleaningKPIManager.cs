@@ -245,17 +245,41 @@ public class RoomCleaningKPIManager : MonoBehaviour
 
         if (completedEverything)
         {
-            room.state = RoomState.Available;
             room.needsCleaning = false;
 
-            Debug.Log("Habitación " + room.roomId + " quedó limpia y libre.");
+            if (RoomCleaningSession.selectedReservationStillActive)
+            {
+                room.state = RoomState.Occupied;
+
+                Debug.Log("Habitación " + room.roomId +
+                          " quedó limpia, pero sigue ocupada.");
+            }
+            else
+            {
+                room.state = RoomState.Available;
+
+                Debug.Log("Habitación " + room.roomId +
+                          " quedó limpia y libre.");
+            }
         }
         else
         {
-            room.state = RoomState.Dirty;
             room.needsCleaning = true;
 
-            Debug.Log("Habitación " + room.roomId + " sigue sucia.");
+            if (RoomCleaningSession.selectedReservationStillActive)
+            {
+                room.state = RoomState.Occupied;
+
+                Debug.Log("Habitación " + room.roomId +
+                          " sigue ocupada y con limpieza pendiente.");
+            }
+            else
+            {
+                room.state = RoomState.Dirty;
+
+                Debug.Log("Habitación " + room.roomId +
+                          " sigue sucia.");
+            }
         }
     }
 

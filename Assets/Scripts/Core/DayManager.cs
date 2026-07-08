@@ -86,11 +86,39 @@ public class DayManager : MonoBehaviour
         {
             if (room == null) continue;
 
-            if (room.state == RoomState.Occupied && !IsReservationActive(room))
+            if (room.state == RoomState.Occupied)
             {
-                EndReservation(room);
+                if (!IsReservationActive(room))
+                {
+                    EndReservation(room);
+                }
+                else
+                {
+                    MarkOccupiedRoomDirty(room);
+                }
+            }
+
+            else if (room.state == RoomState.Dirty)
+            {
+                room.needsCleaning = true;
+            }
+
+            else if (room.state == RoomState.Available)
+            {
+                room.needsCleaning = false;
             }
         }
+    }
+
+    private void MarkOccupiedRoomDirty(RoomRuntimeData room)
+    {
+        if (room == null) return;
+
+        room.state = RoomState.Occupied;
+        room.needsCleaning = true;
+
+        Debug.Log("La habitación " + room.roomId +
+                  " sigue ocupada y ahora necesita limpieza diaria.");
     }
 
     private void EndReservation(RoomRuntimeData room)
