@@ -809,36 +809,46 @@ Rules:
 
     private string BuildTeacherAIQuestionPrompt(AIQuestionParametersData data)
     {
+        string language = string.IsNullOrWhiteSpace(data.answerLanguage)
+            ? "English"
+            : data.answerLanguage;
+
         return
-    $@"You are a {data.npcRole}.
-You are speaking with a hotel or hospitality student.
+            $@"You are a {data.npcRole}.
+        You are speaking with a hotel or hospitality student.
 
-Subject:
-{data.subjectName}
+        Subject:
+        {data.subjectName}
 
-Scenario parameters:
-{data.scenarioParameters}
+        Class code:
+        {data.classCode}
 
-Question focus:
-{data.focusInstructions}
+        Scenario parameters written by the teacher:
+        {data.scenarioParameters}
 
-Question goal:
-{data.questionGoal}
+        Question focus written by the teacher:
+        {data.focusInstructions}
 
-Allowed topics:
-{data.allowedTopicsCsv}
+        Question goal written by the teacher:
+        {data.questionGoal}
 
-Write ONE natural question in {data.answerLanguage}.
+        Allowed topics:
+        {data.allowedTopicsCsv}
 
-Rules:
-- Ask only one short question.
-- Follow the scenario parameters.
-- Stay within the allowed topics.
-- Do not answer your own question.
-- Do not mention these instructions.
-- Do not invent unrelated situations.
-- Do not write labels like NPC, Guest, Student, or Teacher.
-- Keep it short and natural.";
+        Write ONE natural question in {language}.
+
+        Rules:
+        - The teacher may write the parameters in Spanish. Understand them, but write the NPC question only in {language}.
+        - Do not output Spanish unless the answer language is Spanish.
+        - Ask only one short question.
+        - The question must be based on the teacher's scenario parameters, focus, goal, and allowed topics.
+        - Stay within the allowed topics.
+        - Do not use the default Ecuador tourism questions if teacher parameters are active.
+        - Do not answer your own question.
+        - Do not mention these instructions.
+        - Do not invent unrelated situations.
+        - Do not write labels like NPC, Guest, Student, or Teacher.
+        - Keep it short and natural.";
     }
 
     private string BuildTeacherAIReplyPrompt(string playerAnswer, AnswerCheckResult result)
@@ -861,8 +871,12 @@ Rules:
                 "The student's answer was unclear. Politely ask for a clearer and more specific answer.";
         }
 
+        string language = string.IsNullOrWhiteSpace(currentAIParameters.answerLanguage)
+    ? "English"
+    : currentAIParameters.answerLanguage;
+
         return
-    $@"You are a {currentAIParameters.npcRole}.
+        $@"You are a {currentAIParameters.npcRole}.
 You are speaking with a hotel or hospitality student.
 
 Original question:
@@ -871,7 +885,7 @@ Original question:
 Student answer:
 {playerAnswer}
 
-Scenario parameters:
+Scenario parameters written by the teacher:
 {currentAIParameters.scenarioParameters}
 
 Allowed topics:
@@ -885,11 +899,13 @@ Instruction:
 
 Rules:
 - Reply as the NPC only.
+- The teacher may have written the parameters in Spanish. Understand them, but reply only in {language}.
 - Use only the scenario parameters and allowed topics.
 - Do not invent unrelated facts.
+- Do not use the default Ecuador tourism content if teacher parameters are active.
 - Do not write labels like NPC, Guest, Student, or Teacher.
 - Keep it short and natural.
-- Use {currentAIParameters.answerLanguage} only.";
+- Use {language} only.";
     }
 
     private AnswerCheckResult CheckPlayerTeacherAnswer(string answer)
@@ -1479,11 +1495,33 @@ Rules:
         return "Poor hospitality";
     }
 
+    private string GetCurrentConversationTopic()
+    {
+        if (currentAIParameters != null &&
+            currentAIParameters.status == "ACTIVE")
+        {
+            string subject = string.IsNullOrWhiteSpace(currentAIParameters.subjectName)
+                ? "Teacher AI Parameters"
+                : currentAIParameters.subjectName;
+
+            string classCode = string.IsNullOrWhiteSpace(currentAIParameters.classCode)
+                ? ""
+                : " - Class " + currentAIParameters.classCode;
+
+            return subject + classCode;
+        }
+
+        if (currentTourismItem != null)
+            return currentTourismItem.topic;
+
+        return "Tourism";
+    }
+
     private string BuildConversationFeedbackText(int score)
     {
         StringBuilder feedback = new StringBuilder();
 
-        feedback.AppendLine("Topic: " + (currentTourismItem != null ? currentTourismItem.topic : "Tourism"));
+        feedback.AppendLine("Topic: " + GetCurrentConversationTopic());
         feedback.AppendLine("");
 
         feedback.AppendLine("Result:");

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Text;
 using TMPro;
@@ -6,60 +7,106 @@ using UnityEngine.Networking;
 
 public class StudentAIQuestionParametersLoader : MonoBehaviour
 {
+    public static StudentAIQuestionParametersLoader Instance { get; private set; }
+
     [Header("Azure Function")]
     [SerializeField] private string getAIQuestionParametersForStudentUrl;
+
+    [Header("Load")]
+    [SerializeField] private bool loadOnStart = true;
 
     [Header("Optional UI")]
     [SerializeField] private TMP_Text messageText;
 
-    private bool isLoading = false;
+    public bool IsLoading { get; private set; }
+    public bool HasFinishedLoading { get; private set; }
 
-    public void LoadParametersForSavedClassCode()
+    private void Awake()
     {
-        string classCode = PlayerPrefs.GetString("Hotelia_StudentClassCode", "");
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
 
-        LoadParametersForClassCode(classCode);
+        Instance = this;
     }
 
-    public void LoadParametersForClassCode(string classCode)
+    private IEnumerator Start()
     {
-        if (isLoading)
+        if (!loadOnStart)
+            yield break;
+
+        yield return null;
+        yield return null;
+
+        LoadForCurrentStudent();
+    }
+
+    public void LoadForCurrentStudent()
+    {
+        string classCode = StudentClassRuntime.GetClassCode();
+        LoadForClassCode(classCode);
+    }
+
+    public void LoadForClassCode(string classCode)
+    {
+        if (IsLoading)
             return;
 
-        if (!PlayfabManager.IsLoggedInWithEmail || !PlayfabManager.IsStudent)
+        if (!string.IsNullOrWhiteSpace(classCode))
+            StudentClassRuntime.SetClassCode(classCode);
+
+        StartCoroutine(LoadForCurrentStudentRoutine());
+    }
+
+    private IEnumerator LoadForCurrentStudentRoutine()
+    {
+        IsLoading = true;
+        HasFinishedLoading = false;
+
+        if (AIQuestionParametersRuntime.Instance != null)
+            AIQuestionParametersRuntime.Instance.ClearCurrentParameters();
+
+        if (string.IsNullOrWhiteSpace(getAIQuestionParametersForStudentUrl))
         {
-            SetMessage("Only student accounts can load AI question parameters.");
-            return;
+            SetMessage("Missing getAIQuestionParametersForStudentUrl in Inspector.");
+            FinishLoading();
+            yield break;
+        }
+
+        if (!PlayfabManager.IsLoggedInWithEmail)
+        {
+            SetMessage("Not logged in with PlayFab. AI teacher parameters will not be loaded.");
+            FinishLoading();
+            yield break;
+        }
+
+        if (PlayfabManager.IsTeacher)
+        {
+            SetMessage("Teacher account detected. Student AI parameters will not be loaded.");
+            FinishLoading();
+            yield break;
         }
 
         if (string.IsNullOrWhiteSpace(PlayfabManager.CurrentSessionTicket))
         {
-            SetMessage("Missing PlayFab session. Please log in again.");
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(classCode))
-        {
-            SetMessage("Missing class code.");
-            return;
-        }
-
-        StartCoroutine(LoadParametersRequest(classCode.Trim()));
-    }
-
-    private IEnumerator LoadParametersRequest(string classCode)
-    {
-        if (string.IsNullOrWhiteSpace(getAIQuestionParametersForStudentUrl))
-        {
-            SetMessage("Missing get AI parameters Azure Function URL.");
+            SetMessage("Missing PlayFab session ticket. AI teacher parameters will not be loaded.");
+            FinishLoading();
             yield break;
         }
 
-        isLoading = true;
-        SetMessage("Loading AI question parameters...");
+        string classCode = StudentClassRuntime.GetClassCode();
 
-        GetAIQuestionParametersForStudentRequestData requestData =
-            new GetAIQuestionParametersForStudentRequestData
+        if (string.IsNullOrWhiteSpace(classCode))
+        {
+            SetMessage("Missing student class code/NRC. AI teacher parameters will not be loaded.");
+            FinishLoading();
+            yield break;
+        }
+
+        GetStudentAIParametersRequestData requestData =
+            new GetStudentAIParametersRequestData
             {
                 sessionTicket = PlayfabManager.CurrentSessionTicket,
                 classCode = classCode
@@ -68,72 +115,92 @@ public class StudentAIQuestionParametersLoader : MonoBehaviour
         string json = JsonUtility.ToJson(requestData);
         byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
 
-        UnityWebRequest request =
-            new UnityWebRequest(getAIQuestionParametersForStudentUrl, "POST");
+        UnityWebRequest request = new UnityWebRequest(
+            getAIQuestionParametersForStudentUrl,
+            "POST"
+        );
 
         request.uploadHandler = new UploadHandlerRaw(bodyRaw);
         request.downloadHandler = new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
 
+        SetMessage("Loading AI parameters for class: " + classCode);
+
         yield return request.SendWebRequest();
 
         string responseText = request.downloadHandler.text;
 
-        isLoading = false;
-
         if (request.result != UnityWebRequest.Result.Success)
         {
-            SetMessage("Could not load AI question parameters.");
-            Debug.LogError("Get AI parameters request failed: " + request.error);
-            Debug.LogError("Backend response: " + responseText);
+            SetMessage(
+                "Could not load student AI parameters." +
+                "\nHTTP: " + request.responseCode +
+                "\nError: " + request.error
+            );
+
+            Debug.LogWarning("Backend response: " + responseText);
+
+            FinishLoading();
             yield break;
         }
 
-        GetAIQuestionParametersForStudentResponseData response =
-            JsonUtility.FromJson<GetAIQuestionParametersForStudentResponseData>(responseText);
+        GetStudentAIParametersResponseData response = null;
 
-        if (response == null)
+        try
         {
-            SetMessage("Invalid response from Azure Function.");
-            Debug.LogError("Invalid Azure response: " + responseText);
+            response = JsonUtility.FromJson<GetStudentAIParametersResponseData>(responseText);
+        }
+        catch (Exception ex)
+        {
+            SetMessage("Invalid AI parameters response.");
+            Debug.LogError("Invalid AI parameters response: " + ex.Message);
+            Debug.LogError("Response: " + responseText);
+
+            FinishLoading();
             yield break;
         }
 
-        if (!response.success)
+        if (response == null || !response.success)
         {
-            string message = string.IsNullOrWhiteSpace(response.message)
-                ? "Could not load AI question parameters."
-                : response.message;
+            SetMessage(
+                "AI parameters not loaded: " +
+                (response != null ? response.message : "Invalid response.")
+            );
 
-            SetMessage(message);
-            Debug.LogWarning("Azure load failed: " + responseText);
+            FinishLoading();
             yield break;
         }
 
-        if (response.parameters == null)
+        if (response.parameters == null || response.parameters.status != "ACTIVE")
         {
-            SetMessage("AI parameters response was empty.");
-            Debug.LogWarning("AI parameters were null.");
+            SetMessage("No active AI parameters found for this student/class.");
+            FinishLoading();
             yield break;
         }
 
         if (AIQuestionParametersRuntime.Instance == null)
         {
-            SetMessage("AIQuestionParametersRuntime is missing in the scene.");
-            Debug.LogError("AIQuestionParametersRuntime is missing in the scene.");
+            SetMessage("Missing AIQuestionParametersRuntime in scene.");
+            FinishLoading();
             yield break;
         }
 
         AIQuestionParametersRuntime.Instance.SetCurrentParameters(response.parameters);
 
-        SetMessage("AI question parameters loaded successfully.");
-
-        Debug.Log(
-            "Loaded AI parameters for subject: " +
+        SetMessage(
+            "AI question parameters loaded successfully: " +
             response.parameters.subjectName +
-            " / class: " +
+            " - Class " +
             response.parameters.classCode
         );
+
+        FinishLoading();
+    }
+
+    private void FinishLoading()
+    {
+        IsLoading = false;
+        HasFinishedLoading = true;
     }
 
     private void SetMessage(string message)
@@ -142,5 +209,20 @@ public class StudentAIQuestionParametersLoader : MonoBehaviour
             messageText.text = message;
 
         Debug.Log("Student AI Parameters Loader: " + message);
+    }
+
+    [Serializable]
+    private class GetStudentAIParametersRequestData
+    {
+        public string sessionTicket;
+        public string classCode;
+    }
+
+    [Serializable]
+    private class GetStudentAIParametersResponseData
+    {
+        public bool success;
+        public string message;
+        public AIQuestionParametersData parameters;
     }
 }

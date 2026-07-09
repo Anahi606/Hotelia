@@ -102,6 +102,11 @@ public class NPCOllamaTourismBrain : MonoBehaviour
         if (HotelGamePause.IsPaused)
             return false;
 
+        if (StudentAIQuestionParametersLoader.Instance != null && !StudentAIQuestionParametersLoader.Instance.HasFinishedLoading)
+        {
+            return false;
+        }
+
         if (!IsThisNpcValid())
             return false;
 
@@ -194,6 +199,12 @@ public class NPCOllamaTourismBrain : MonoBehaviour
     private void OpenOllamaDialogue()
     {
         if (HotelGamePause.IsPaused)
+        {
+            CancelTalkAttempt();
+            return;
+        }
+
+        if (StudentAIQuestionParametersLoader.Instance != null && !StudentAIQuestionParametersLoader.Instance.HasFinishedLoading)
         {
             CancelTalkAttempt();
             return;

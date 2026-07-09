@@ -6,6 +6,15 @@ public class AIQuestionParametersRuntime : MonoBehaviour
 
     public AIQuestionParametersData CurrentParameters { get; private set; }
 
+    public bool HasActiveParameters
+    {
+        get
+        {
+            return CurrentParameters != null &&
+                   CurrentParameters.status == "ACTIVE";
+        }
+    }
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -22,23 +31,20 @@ public class AIQuestionParametersRuntime : MonoBehaviour
     {
         CurrentParameters = parameters;
 
-        if (parameters != null)
+        if (CurrentParameters != null)
         {
             Debug.Log(
-                "Current AI parameters set: " +
-                parameters.subjectName +
-                " / Class " +
-                parameters.classCode
+                "AI parameters loaded: " +
+                CurrentParameters.subjectName +
+                " - Class " +
+                CurrentParameters.classCode
             );
-        }
-        else
-        {
-            Debug.LogWarning("Current AI parameters were cleared.");
         }
     }
 
-    public void ClearParameters()
+    public void ClearCurrentParameters()
     {
         CurrentParameters = null;
+        Debug.Log("AI parameters cleared.");
     }
 }
