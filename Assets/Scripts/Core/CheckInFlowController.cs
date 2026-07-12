@@ -91,7 +91,8 @@ public class CheckInFlowController : MonoBehaviour
     [SerializeField] private Button[] tourismExtraButtons;
 
     [Header("Pricing Settings")]
-    [SerializeField] private float vatRate = 0.12f;
+    [SerializeField] private float vatRate = 0.13f;
+    [SerializeField] private bool applyHotelServiceFee = true;
     [SerializeField] private float serviceFeeRate = 0.10f;
 
     [Header("Breakdown UI - Dollar Values")]

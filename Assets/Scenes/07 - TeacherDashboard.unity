@@ -19774,7 +19774,7 @@ MonoBehaviour:
   allowedTopicsInput: {fileID: 1189267271}
   correctKeywordsInput: {fileID: 1534000763}
   wrongKeywordsInput: {fileID: 447511500}
-  saveAIQuestionParametersUrl: 
+  saveAIQuestionParametersUrl: https://hotelia-teacher-registration-ctajh3a9e5d2effc.brazilsouth-01.azurewebsites.net/api/saveAIQuestionParameters
   messageText: {fileID: 1039883565}
 --- !u!1 &741668434
 GameObject:
@@ -38089,8 +38089,8 @@ MonoBehaviour:
   searchResultsContainer: {fileID: 554692934}
   searchStudentRowPrefab: {fileID: 3975868300267827476, guid: 06fc76b75a6946041b67d3c40efcc142, type: 3}
   messageText: {fileID: 1989187606}
-  searchStudentsUrl: 
-  bulkCreateStudentsUrl: 
+  searchStudentsUrl: https://hotelia-teacher-registration-ctajh3a9e5d2effc.brazilsouth-01.azurewebsites.net/api/searchStudents
+  bulkCreateStudentsUrl: https://hotelia-teacher-registration-ctajh3a9e5d2effc.brazilsouth-01.azurewebsites.net/api/bulkCreateStudents
 --- !u!1 &1361485098
 GameObject:
   m_ObjectHideFlags: 0
@@ -57139,7 +57139,7 @@ MonoBehaviour:
   - {fileID: 834840167}
   objectsToHideWhileExporting: []
   pdfReportsFolderName: HoteliaReports
-  getStudentPerformanceUrl: 
+  getStudentPerformanceUrl: https://hotelia-teacher-registration-ctajh3a9e5d2effc.brazilsouth-01.azurewebsites.net/api/getStudentPerformance
 --- !u!1 &2065385286
 GameObject:
   m_ObjectHideFlags: 0

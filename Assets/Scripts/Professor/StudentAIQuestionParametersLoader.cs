@@ -30,6 +30,8 @@ public class StudentAIQuestionParametersLoader : MonoBehaviour
         }
 
         Instance = this;
+
+        HasFinishedLoading = !loadOnStart;
     }
 
     private IEnumerator Start()
@@ -43,6 +45,11 @@ public class StudentAIQuestionParametersLoader : MonoBehaviour
         LoadForCurrentStudent();
     }
 
+    private void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
+    }
     public void LoadForCurrentStudent()
     {
         string classCode = StudentClassRuntime.GetClassCode();
@@ -123,6 +130,7 @@ public class StudentAIQuestionParametersLoader : MonoBehaviour
         request.uploadHandler = new UploadHandlerRaw(bodyRaw);
         request.downloadHandler = new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
+        request.timeout = 15;
 
         SetMessage("Loading AI parameters for class: " + classCode);
 

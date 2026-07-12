@@ -1470,8 +1470,8 @@ MonoBehaviour:
   newGameButton: {fileID: 587917241}
   continueButton: {fileID: 1477868231}
   teacherDashboardButton: {fileID: 979202}
-  registerTeacherUrl: 
-  upsertStudentProfileUrl: 
+  registerTeacherUrl: 'https://hotelia-teacher-registration-ctajh3a9e5d2effc.brazilsouth-01.azurewebsites.net/api/registerTeacher '
+  upsertStudentProfileUrl: https://hotelia-teacher-registration-ctajh3a9e5d2effc.brazilsouth-01.azurewebsites.net/api/upsertStudentProfile
 --- !u!1 &172675193
 GameObject:
   m_ObjectHideFlags: 0

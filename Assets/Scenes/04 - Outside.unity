@@ -25063,7 +25063,7 @@ SpriteRenderer:
   m_SortingLayer: 3
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -4298345892085953899, guid: 281313337206a174f82629567db7d874, type: 3}
+  m_Sprite: {fileID: 5491915177780520168, guid: 90694c17e5161f141a2f8457ef20e9d8, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -25385,7 +25385,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCharacterVisual
   maleLibrary: {fileID: 7108339969198208228, guid: 4a4c297a13fb8f042a20d6259e143cb1, type: 3}
-  femaleLibrary: {fileID: 7108339969198208228, guid: 58e277cfa36366d4eac8f2df96d373a8, type: 3}
+  femaleLibrary: {fileID: 7108339969198208228, guid: 268dfc6f52eae6e4db2ff9f00dbb6894, type: 3}
   defaultCategory: Idle
   defaultLabel: sprite_0
 --- !u!1 &911352227

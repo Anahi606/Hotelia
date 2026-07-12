@@ -503,6 +503,7 @@ public class TeacherPerformancePanelUI : MonoBehaviour
 
                 StudentPerformanceRequestData data = new StudentPerformanceRequestData
                 {
+                    teacherSessionTicket = PlayfabManager.CurrentSessionTicket,
                     studentPlayFabId = student.playFabId
                 };
 
@@ -660,6 +661,7 @@ public class TeacherPerformancePanelUI : MonoBehaviour
 
             StudentPerformanceRequestData data = new StudentPerformanceRequestData
             {
+                teacherSessionTicket = PlayfabManager.CurrentSessionTicket,
                 studentPlayFabId = student.playFabId
             };
 
@@ -747,6 +749,7 @@ public class TeacherPerformancePanelUI : MonoBehaviour
 
         StudentPerformanceRequestData data = new StudentPerformanceRequestData
         {
+            teacherSessionTicket = PlayfabManager.CurrentSessionTicket,
             studentPlayFabId = student.playFabId
         };
 
@@ -2500,7 +2503,7 @@ public class TeacherPerformancePanelUI : MonoBehaviour
         string fullPath = Path.Combine(folderPath, fileName);
 
         string pdfDataText = BuildCurrentPdfDataText();
-        
+
         string pdfFeedbackText = BuildCurrentReportFeedback();
 
         string fullPdfText =
@@ -2508,7 +2511,7 @@ public class TeacherPerformancePanelUI : MonoBehaviour
             "\n\n----------------------------------------\n\n" +
             pdfFeedbackText;
 
-        SimplePdfWriter.SaveTexturesAndFeedbackAsPdf(capturedPages,fullPath,"Report Data and Learning Feedback",fullPdfText,92);
+        SimplePdfWriter.SaveTexturesAndFeedbackAsPdf(capturedPages, fullPath, "Report Data and Learning Feedback", fullPdfText, 92);
 
         foreach (Texture2D texture in capturedPages)
         {
@@ -3011,6 +3014,7 @@ public class TeacherPerformancePanelUI : MonoBehaviour
 [System.Serializable]
 public class StudentPerformanceRequestData
 {
+    public string teacherSessionTicket;
     public string studentPlayFabId;
 }
 

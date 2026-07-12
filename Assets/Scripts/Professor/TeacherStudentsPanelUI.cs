@@ -505,6 +505,7 @@ public class TeacherStudentsPanelUI : MonoBehaviour
         SetMessage(string.IsNullOrEmpty(query) ? "Loading all students..." : "Searching students...");
         SearchStudentRequestData data = new SearchStudentRequestData
         {
+            teacherSessionTicket = PlayfabManager.CurrentSessionTicket,
             query = query
         };
 
@@ -576,7 +577,6 @@ public class TeacherStudentsPanelUI : MonoBehaviour
             string json = JsonUtility.ToJson(data, true);
 
             Debug.Log("Bulk create students URL: " + bulkCreateStudentsUrl);
-            Debug.Log("Bulk create students payload for NCR " + GetClassCode(selectedCourse) + ":\n" + json);
 
             UnityWebRequest request = CreateJsonPostRequest(bulkCreateStudentsUrl, json);
             request.timeout = 60;
@@ -593,8 +593,7 @@ public class TeacherStudentsPanelUI : MonoBehaviour
                     "Bulk import failed for NCR " + GetClassCode(selectedCourse) +
                     ". HTTP Code: " + request.responseCode +
                     ". Error: " + request.error +
-                    "\nBackend response: " + backendText +
-                    "\nPayload sent:\n" + json
+                    "\nBackend response: " + backendText
                 );
 
                 continue;
@@ -1126,6 +1125,7 @@ public class AssignedStudentData
 [System.Serializable]
 public class SearchStudentRequestData
 {
+    public string teacherSessionTicket;
     public string query;
 }
 

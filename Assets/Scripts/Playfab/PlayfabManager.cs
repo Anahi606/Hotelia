@@ -122,7 +122,7 @@ public class PlayfabManager : MonoBehaviour
         {
             if (CurrentRole == StudentRole)
             {
-                UpsertStudentProfileToBackend(CurrentPlayFabId, CurrentEmail, displayName, () =>
+                UpsertStudentProfileToBackend(() =>
                 {
                     FinishRegisterOnlyFlow();
                 });
@@ -631,18 +631,30 @@ public class PlayfabManager : MonoBehaviour
         SetMessage("Teacher account created successfully. Please log in.");
     }
 
-    private void UpsertStudentProfileToBackend(string playFabId, string email, string displayName, Action onFinished = null)
+    private void UpsertStudentProfileToBackend(Action onFinished = null)
     {
-        StartCoroutine(UpsertStudentProfileRequest(playFabId, email, displayName, onFinished));
+        StartCoroutine(UpsertStudentProfileRequest(onFinished));
     }
 
-    private IEnumerator UpsertStudentProfileRequest(string playFabId, string email, string displayName, Action onFinished)
+    private IEnumerator UpsertStudentProfileRequest(Action onFinished)
     {
+        if (string.IsNullOrWhiteSpace(CurrentSessionTicket))
+        {
+            Debug.LogError("Could not upsert student profile: missing PlayFab session ticket.");
+            onFinished?.Invoke();
+            yield break;
+        }
+
+        if (string.IsNullOrWhiteSpace(upsertStudentProfileUrl))
+        {
+            Debug.LogError("Could not upsert student profile: Azure Function URL is empty.");
+            onFinished?.Invoke();
+            yield break;
+        }
+
         StudentProfileUpsertRequestData data = new StudentProfileUpsertRequestData
         {
-            playFabId = playFabId,
-            email = email,
-            displayName = displayName
+            sessionTicket = CurrentSessionTicket
         };
 
         string json = JsonUtility.ToJson(data);
@@ -698,9 +710,7 @@ public class TeacherRegisterResponseData
 [System.Serializable]
 public class StudentProfileUpsertRequestData
 {
-    public string playFabId;
-    public string email;
-    public string displayName;
+    public string sessionTicket;
 }
 
 [System.Serializable]

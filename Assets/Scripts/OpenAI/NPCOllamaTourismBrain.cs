@@ -49,18 +49,26 @@ public class NPCOllamaTourismBrain : MonoBehaviour
         FindPlayer();
 
         nextAllowedTalkTime = Time.time + 2f;
-
-        talkLoopCoroutine = StartCoroutine(TalkLoop());
     }
     private void OnEnable()
     {
         HotelGamePause.OnPauseChanged += OnGamePauseChanged;
+
+        if (talkLoopCoroutine == null)
+        {
+            talkLoopCoroutine = StartCoroutine(TalkLoop());
+        }
     }
 
     private void OnGamePauseChanged(bool paused)
     {
         if (!paused)
             return;
+
+        if (Ollama_Handler.Instance != null && Ollama_Handler.Instance.IsOpen)
+        {
+            return;
+        }
 
         if (approachCoroutine != null)
         {
@@ -102,7 +110,9 @@ public class NPCOllamaTourismBrain : MonoBehaviour
         if (HotelGamePause.IsPaused)
             return false;
 
-        if (StudentAIQuestionParametersLoader.Instance != null && !StudentAIQuestionParametersLoader.Instance.HasFinishedLoading)
+        StudentAIQuestionParametersLoader loader = StudentAIQuestionParametersLoader.Instance;
+
+        if (loader != null && loader.IsLoading)
         {
             return false;
         }
@@ -118,13 +128,18 @@ public class NPCOllamaTourismBrain : MonoBehaviour
         if (player == null)
             return false;
 
-        if (Ollama_Handler.Instance == null)
+        Ollama_Handler handler = Ollama_Handler.Instance;
+
+        if (handler == null)
         {
-            Debug.LogWarning("No existe Ollama_Handler en la escena.");
+            Debug.LogWarning(
+                "No se encontró un componente Ollama_Handler activo o inactivo."
+            );
+
             return false;
         }
 
-        if (Ollama_Handler.Instance.IsOpen)
+        if (handler.IsOpen)
             return false;
 
         if (Time.time < nextAllowedTalkTime)
@@ -204,7 +219,9 @@ public class NPCOllamaTourismBrain : MonoBehaviour
             return;
         }
 
-        if (StudentAIQuestionParametersLoader.Instance != null && !StudentAIQuestionParametersLoader.Instance.HasFinishedLoading)
+        StudentAIQuestionParametersLoader loader = StudentAIQuestionParametersLoader.Instance;
+
+        if (loader != null && loader.IsLoading)
         {
             CancelTalkAttempt();
             return;
@@ -213,19 +230,25 @@ public class NPCOllamaTourismBrain : MonoBehaviour
         if (!IsThisNpcValid())
             return;
 
-        if (Ollama_Handler.Instance == null)
+        Ollama_Handler handler = Ollama_Handler.Instance;
+
+        if (handler == null)
+        {
+            Debug.LogWarning(
+                "No se pudo abrir el diálogo porque Ollama_Handler no está disponible."
+            );
+
+            CancelTalkAttempt();
+            return;
+        }
+
+        if (handler.IsOpen)
         {
             CancelTalkAttempt();
             return;
         }
 
-        if (Ollama_Handler.Instance.IsOpen)
-        {
-            CancelTalkAttempt();
-            return;
-        }
-
-        Ollama_Handler.Instance.OpenDialogue(npcPortraitSprite, OnConversationFinished);
+        handler.OpenDialogue(npcPortraitSprite,OnConversationFinished);
     }
 
     private void OnConversationFinished()

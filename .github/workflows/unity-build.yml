@@ -1,0 +1,59 @@
+name: Unity Build - Hotelia
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+
+  pull_request:
+    branches:
+      - develop
+      - main
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    name: Compilar Hotelia para Windows
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Restaurar cache de Unity
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-${{ runner.os }}-Windows-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-${{ runner.os }}-Windows-
+            Library-${{ runner.os }}-
+            Library-
+
+      - name: Compilar Hotelia
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion: auto
+          targetPlatform: StandaloneWindows64
+          buildName: Hotelia
+          buildsPath: build
+
+      - name: Guardar build de Windows
+        uses: actions/upload-artifact@v4
+        with:
+          name: Hotelia-Windows
+          path: build
+          if-no-files-found: error
+          retention-days: 14

@@ -9,7 +9,20 @@ using UnityEngine.Networking;
 
 public class Ollama_Handler : MonoBehaviour
 {
-    public static Ollama_Handler Instance { get; private set; }
+    private static Ollama_Handler instance;
+
+    public static Ollama_Handler Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                instance = FindObjectOfType<Ollama_Handler>(true);
+            }
+
+            return instance;
+        }
+    }
 
     [Header("Panel")]
     public GameObject panel;
@@ -282,13 +295,22 @@ public class Ollama_Handler : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
+        if (instance != null && instance != this)
         {
-            Destroy(gameObject);
-            return;
+            Debug.LogWarning(
+                "Se encontró otro Ollama_Handler. " +
+                "El manager de la escena actual tomará el control."
+            );
         }
 
-        Instance = this;
+        instance = this;
+
+        Debug.Log(
+            "Ollama_Handler registrado correctamente: " +
+            gameObject.name +
+            " | Escena: " +
+            gameObject.scene.name
+        );
 
         if (panel != null)
             panel.SetActive(false);
@@ -1633,8 +1655,18 @@ Rules:
         if (string.IsNullOrWhiteSpace(azureFunctionUrl))
             throw new Exception("Missing Azure Function URL. Assign it in the Inspector.");
 
+        string sessionTicket = PlayfabManager.CurrentSessionTicket;
+
+        if (string.IsNullOrWhiteSpace(sessionTicket))
+        {
+            throw new Exception(
+                "AI dialogue requires a signed-in student account."
+            );
+        }
+
         AzureNpcRequest requestBody = new AzureNpcRequest
         {
+            sessionTicket = PlayfabManager.CurrentSessionTicket,
             prompt = prompt
         };
 
@@ -1768,8 +1800,15 @@ Rules:
 
     private void OnDestroy()
     {
-        if (Instance == this)
-            Instance = null;
+        Debug.Log(
+            "Ollama_Handler destruido: " +
+            gameObject.name +
+            " | Escena: " +
+            gameObject.scene.name
+        );
+
+        if (instance == this)
+            instance = null;
 
         if (pauseRequestedByThisDialogue)
         {
@@ -1785,6 +1824,7 @@ Rules:
 [Serializable]
 public class AzureNpcRequest
 {
+    public string sessionTicket;
     public string prompt;
 }
 
