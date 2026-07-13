@@ -13754,9 +13754,9 @@ MonoBehaviour:
   resolutionDropdown: {fileID: 1273683587}
   fullscreenToggle: {fileID: 737879353}
   applyButton: {fileID: 1074289731}
-  backButton: {fileID: 0}
+  backButton: {fileID: 172675195}
   mainMenuButton: {fileID: 0}
-  quitButton: {fileID: 172675195}
+  quitButton: {fileID: 0}
   mainMenuSceneName: MainMenu
 --- !u!1 &2114043709
 GameObject:
