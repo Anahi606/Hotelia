@@ -2,6 +2,7 @@ using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Hotelia.Core;
 
 public class CheckInFlowController : MonoBehaviour
 {
@@ -117,6 +118,7 @@ public class CheckInFlowController : MonoBehaviour
     [SerializeField] private Color goodMoneyColor = new Color(0.1f, 0.45f, 0.1f);
     [SerializeField] private Color badMoneyColor = new Color(0.75f, 0.1f, 0.1f);
     [SerializeField] private Color normalMoneyColor = Color.black;
+
 
     public void StartCheckIn()
     {
@@ -509,15 +511,12 @@ public class CheckInFlowController : MonoBehaviour
 
     private bool IsSevereBudgetOver(PriceBreakdown breakdown)
     {
-        if (breakdown.withinBudget)
-            return false;
-
-        if (breakdown.budget <= 0)
-            return true;
-
-        float maxAllowedTotal = breakdown.budget * (1f + severeBudgetOverPercent);
-
-        return breakdown.total > maxAllowedTotal;
+        return CheckInFinancialRules.IsSevereBudgetOver(
+            total: Convert.ToDecimal(breakdown.total),
+            budget: Convert.ToDecimal(breakdown.budget),
+            severeBudgetOverPercent:
+                Convert.ToDecimal(severeBudgetOverPercent)
+        );
     }
 
     private string[] GetFinalCheckInDialogueLines(
@@ -1053,18 +1052,22 @@ public class CheckInFlowController : MonoBehaviour
             breakdown.offerPrice +
             breakdown.extraPrice;
 
-        breakdown.vat = breakdown.subtotal * vatRate;
-        breakdown.serviceFee = breakdown.subtotal * serviceFeeRate;
+        CheckInQuoteResult quote =
+        CheckInFinancialRules.CalculateQuote(
+            subtotal: Convert.ToDecimal(breakdown.subtotal),
+            budget: Convert.ToDecimal(breakdown.budget),
+            vatRate: Convert.ToDecimal(vatRate),
+            applyServiceFee: applyHotelServiceFee,
+            serviceFeeRate: Convert.ToDecimal(serviceFeeRate)
+        );
 
-        breakdown.total =
-            breakdown.subtotal +
-            breakdown.vat +
-            breakdown.serviceFee;
+            breakdown.vat = Convert.ToSingle(quote.Vat);
+            breakdown.serviceFee = Convert.ToSingle(quote.ServiceFee);
+            breakdown.total = Convert.ToSingle(quote.Total);
+            breakdown.remaining = Convert.ToSingle(quote.Remaining);
+            breakdown.withinBudget = quote.WithinBudget;
 
-        breakdown.remaining = breakdown.budget - breakdown.total;
-        breakdown.withinBudget = breakdown.remaining >= 0;
-
-        return breakdown;
+            return breakdown;
     }
 
     private void EnsureCurrentRequestBudgetCanAffordBestPackage()
@@ -1125,10 +1128,15 @@ public class CheckInFlowController : MonoBehaviour
 
         float subtotal = roomPrice + mealPrice + offerPrice + extraPrice;
 
-        float vat = subtotal * vatRate;
-        float serviceFee = subtotal * serviceFeeRate;
+        decimal total =
+            CheckInFinancialRules.CalculateTotal(
+                subtotal: Convert.ToDecimal(subtotal),
+                vatRate: Convert.ToDecimal(vatRate),
+                applyServiceFee: applyHotelServiceFee,
+                serviceFeeRate: Convert.ToDecimal(serviceFeeRate)
+            );
 
-        return subtotal + vat + serviceFee;
+        return Convert.ToSingle(total);
     }
 
     private string Money(float value)

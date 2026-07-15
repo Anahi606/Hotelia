@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using Hotelia.Core;
 
 public class RoomCleaningKPIManager : MonoBehaviour
 {
@@ -85,7 +86,8 @@ public class RoomCleaningKPIManager : MonoBehaviour
         SetupBeds();
         SetupTrash();
 
-        minigameActive = roomIsDirty;
+        minigameActive =
+            CleaningRules.CanStartCleaning(roomIsDirty);
 
         if (!roomIsDirty)
         {
@@ -191,20 +193,16 @@ public class RoomCleaningKPIManager : MonoBehaviour
 
     private void FinishByTime()
     {
-        if (resultsShown) return;
+        if (resultsShown)
+            return;
 
         minigameActive = false;
+        const bool completedEverything = false;
 
-        bool allTrashCleaned = trashSpawner == null || trashSpawner.GetRemainingTrash() <= 0;
-        bool allBedsMade = madeBeds >= totalBeds;
-
-        bool completedEverything = allTrashCleaned && allBedsMade;
-
-        roomIsDirty = !completedEverything;
-        RoomCleaningSession.selectedNeedsCleaning = !completedEverything;
+        roomIsDirty = true;
+        RoomCleaningSession.selectedNeedsCleaning = true;
 
         UpdateRoomRuntimeData(completedEverything);
-
         ShowResults(completedEverything);
     }
 
@@ -231,55 +229,83 @@ public class RoomCleaningKPIManager : MonoBehaviour
     {
         if (HotelGameData.Instance == null)
         {
-            Debug.LogWarning("No existe HotelGameData. No se pudo actualizar la habitación.");
+            Debug.LogWarning(
+                "No existe HotelGameData. No se pudo actualizar la habitación."
+            );
+
             return;
         }
 
-        RoomRuntimeData room = HotelGameData.Instance.GetRoomById(RoomCleaningSession.selectedRoomId);
+        RoomRuntimeData room =
+            HotelGameData.Instance.GetRoomById(
+                RoomCleaningSession.selectedRoomId
+            );
 
         if (room == null)
         {
-            Debug.LogWarning("No se encontró la habitación " + RoomCleaningSession.selectedRoomId + " en HotelGameData.");
+            Debug.LogWarning(
+                "No se encontró la habitación " +
+                RoomCleaningSession.selectedRoomId +
+                " en HotelGameData."
+            );
+
             return;
         }
 
-        if (completedEverything)
+        CleaningRoomOutcome outcome =
+            CleaningRules.ResolveRoomOutcome(
+                completedEverything,
+                RoomCleaningSession.selectedReservationStillActive
+            );
+
+        switch (outcome)
         {
-            room.needsCleaning = false;
-
-            if (RoomCleaningSession.selectedReservationStillActive)
-            {
-                room.state = RoomState.Occupied;
-
-                Debug.Log("Habitación " + room.roomId +
-                          " quedó limpia, pero sigue ocupada.");
-            }
-            else
-            {
+            case CleaningRoomOutcome.Available:
+                room.needsCleaning = false;
                 room.state = RoomState.Available;
 
-                Debug.Log("Habitación " + room.roomId +
-                          " quedó limpia y libre.");
-            }
-        }
-        else
-        {
-            room.needsCleaning = true;
+                Debug.Log(
+                    "Habitación " + room.roomId +
+                    " quedó limpia y libre."
+                );
+                break;
 
-            if (RoomCleaningSession.selectedReservationStillActive)
-            {
+            case CleaningRoomOutcome.Occupied:
+                room.needsCleaning = false;
                 room.state = RoomState.Occupied;
 
-                Debug.Log("Habitación " + room.roomId +
-                          " sigue ocupada y con limpieza pendiente.");
-            }
-            else
-            {
+                Debug.Log(
+                    "Habitación " + room.roomId +
+                    " quedó limpia, pero sigue ocupada."
+                );
+                break;
+
+            case CleaningRoomOutcome.OccupiedNeedsCleaning:
+                room.needsCleaning = true;
+                room.state = RoomState.Occupied;
+
+                Debug.Log(
+                    "Habitación " + room.roomId +
+                    " sigue ocupada y con limpieza pendiente."
+                );
+                break;
+
+            case CleaningRoomOutcome.Dirty:
+                room.needsCleaning = true;
                 room.state = RoomState.Dirty;
 
-                Debug.Log("Habitación " + room.roomId +
-                          " sigue sucia.");
-            }
+                Debug.Log(
+                    "Habitación " + room.roomId +
+                    " sigue sucia."
+                );
+                break;
+
+            default:
+                Debug.LogWarning(
+                    "Resultado de limpieza no reconocido para la habitación " +
+                    room.roomId
+                );
+                break;
         }
     }
 
@@ -290,28 +316,32 @@ public class RoomCleaningKPIManager : MonoBehaviour
         resultsShown = true;
         minigameActive = false;
 
-        int remainingTrash = trashSpawner != null ? trashSpawner.GetRemainingTrash() : 0;
-        int remainingBeds = Mathf.Max(0, totalBeds - madeBeds);
+        int remainingTrash =
+            trashSpawner != null
+                ? trashSpawner.GetRemainingTrash()
+                : 0;
 
-        int trashErrors = remainingTrash;
-        int bedErrors = remainingBeds;
-        int totalErrors = trashErrors + bedErrors;
+        CleaningProgressResult evaluation =
+            CleaningRules.EvaluateProgress(
+                totalTrash: totalTrash,
+                remainingTrash: remainingTrash,
+                totalBeds: totalBeds,
+                madeBeds: madeBeds,
+                currentTime: currentTime,
+                totalTime: totalTime
+            );
 
-        int trashScore = totalTrash == 0 ? 100 : Mathf.RoundToInt((cleanedTrash / (float)totalTrash) * 100f);
-        int bedScore = totalBeds == 0 ? 100 : Mathf.RoundToInt((madeBeds / (float)totalBeds) * 100f);
-        int timeScore = totalTime <= 0 ? 0 : Mathf.RoundToInt((currentTime / totalTime) * 100f);
+        cleanedTrash = evaluation.CleanedTrash;
 
-        trashScore = Mathf.Clamp(trashScore, 0, 100);
-        bedScore = Mathf.Clamp(bedScore, 0, 100);
-        timeScore = Mathf.Clamp(timeScore, 0, 100);
+        int remainingBeds = evaluation.RemainingBeds;
+        int trashErrors = evaluation.RemainingTrash;
+        int bedErrors = evaluation.RemainingBeds;
+        int totalErrors = evaluation.TotalErrors;
 
-        int finalScore = Mathf.RoundToInt(
-            (trashScore * 0.4f) +
-            (bedScore * 0.4f) +
-            (timeScore * 0.2f)
-        );
-
-        finalScore = Mathf.Clamp(finalScore, 0, 100);
+        int trashScore = evaluation.TrashScore;
+        int bedScore = evaluation.BedScore;
+        int timeScore = evaluation.TimeScore;
+        int finalScore = evaluation.FinalScore;
 
         RegisterDailyRoomCleaningResult(
             completedEverything,
