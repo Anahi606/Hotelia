@@ -253,23 +253,88 @@ public class PlayfabManager : MonoBehaviour
             request,
             result =>
             {
-                if (result.Data != null && result.Data.ContainsKey(RoleKey))
+                string savedRole = "";
+
+                if (result.Data != null &&
+                    result.Data.ContainsKey(RoleKey) &&
+                    result.Data[RoleKey] != null)
                 {
-                    CurrentRole = result.Data[RoleKey].Value;
-                }
-                else
-                {
-                    CurrentRole = StudentRole;
-                    Debug.LogWarning("No role found. Defaulting to student.");
+                    savedRole = (result.Data[RoleKey].Value ?? "")
+                        .Trim()
+                        .ToLowerInvariant();
                 }
 
-                Debug.Log("Loaded account role: " + CurrentRole);
-                onFinished?.Invoke();
+                if (savedRole == TeacherRole || savedRole == StudentRole)
+                {
+                    CurrentRole = savedRole;
+                    Debug.Log("Loaded account role: " + CurrentRole);
+                    onFinished?.Invoke();
+                    return;
+                }
+
+                Debug.LogWarning(
+                    "No valid role was found in PlayFab. " +
+                    "The account will be repaired as student."
+                );
+
+                RepairMissingStudentRole(onFinished);
             },
             error =>
             {
-                CurrentRole = StudentRole;
-                Debug.LogWarning("Could not load role. Defaulting to student. Error: " + error.GenerateErrorReport());
+                CurrentRole = "";
+
+                Debug.LogError(
+                    "Could not load the account role from PlayFab: " +
+                    error.GenerateErrorReport()
+                );
+
+                SetMessage(
+                    "Could not verify the account role. " +
+                    "Check your connection and log in again."
+                );
+
+                onFinished?.Invoke();
+            }
+        );
+    }
+
+    private void RepairMissingStudentRole(Action onFinished)
+    {
+        CurrentRole = StudentRole;
+
+        var request = new UpdateUserDataRequest
+        {
+            Data = new Dictionary<string, string>
+        {
+            { RoleKey, StudentRole }
+        },
+            Permission = UserDataPermission.Private
+        };
+
+        PlayFabClientAPI.UpdateUserData(
+            request,
+            result =>
+            {
+                Debug.Log("Missing role repaired and saved as student.");
+
+                UpsertStudentProfileToBackend(() =>
+                {
+                    onFinished?.Invoke();
+                });
+            },
+            error =>
+            {
+                CurrentRole = "";
+
+                Debug.LogError(
+                    "Could not repair the missing student role: " +
+                    error.GenerateErrorReport()
+                );
+
+                SetMessage(
+                    "The account exists, but its student role could not be saved."
+                );
+
                 onFinished?.Invoke();
             }
         );
