@@ -79,25 +79,50 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
-    # La compilación solo comienza cuando EditMode termina correctamente.
+    # La compilación solo se ejecuta cuando EditMode aprueba.
     needs: editmode-tests
 
     steps:
+      - name: Liberar espacio del runner
+        shell: bash
+        run: |
+          echo "Espacio disponible antes de limpiar:"
+          df -h
+
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/local/.ghcup
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+
+          sudo apt-get clean
+          sudo rm -rf /var/lib/apt/lists/*
+
+          docker system prune --all --force || true
+
+          echo "Espacio disponible después de limpiar:"
+          df -h
+
       - name: Descargar repositorio
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           lfs: true
 
-      - name: Restaurar cache de Unity para Windows
-        uses: actions/cache@v4
-        with:
-          path: Library
-          key: Library-${{ runner.os }}-Windows-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
-          restore-keys: |
-            Library-${{ runner.os }}-Windows-
-            Library-${{ runner.os }}-
-            Library-
+      # No se restaura Library aquí porque ocupa espacio
+      # mientras Docker descarga la imagen de Unity para Windows.
+
+      - name: Mostrar espacio antes de compilar
+        shell: bash
+        run: |
+          echo "Espacio disponible antes de Unity Builder:"
+          df -h
+
+          echo "Tamaño del proyecto:"
+          du -sh . || true
+
+          echo "Tamaño de Library:"
+          du -sh Library 2>/dev/null || true
 
       - name: Compilar Hotelia
         uses: game-ci/unity-builder@v4
@@ -111,6 +136,16 @@ jobs:
           targetPlatform: StandaloneWindows64
           buildName: Hotelia
           buildsPath: build
+
+      - name: Mostrar espacio después de compilar
+        if: always()
+        shell: bash
+        run: |
+          echo "Espacio disponible después de Unity Builder:"
+          df -h
+
+          echo "Tamaño de la compilación:"
+          du -sh build 2>/dev/null || true
 
       - name: Guardar build de Windows
         uses: actions/upload-artifact@v4
