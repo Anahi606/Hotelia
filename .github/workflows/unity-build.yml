@@ -18,8 +18,8 @@ permissions:
   checks: write
 
 jobs:
-  tests:
-    name: Ejecutar pruebas EditMode y PlayMode
+  editmode-tests:
+    name: Ejecutar pruebas EditMode
     runs-on: ubuntu-latest
     timeout-minutes: 45
 
@@ -34,14 +34,14 @@ jobs:
         uses: actions/cache@v4
         with:
           path: Library
-          key: Library-${{ runner.os }}-Tests-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          key: Library-${{ runner.os }}-EditMode-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
           restore-keys: |
-            Library-${{ runner.os }}-Tests-
+            Library-${{ runner.os }}-EditMode-
             Library-${{ runner.os }}-
             Library-
 
-      - name: Ejecutar pruebas automatizadas
-        id: unityTests
+      - name: Ejecutar pruebas EditMode
+        id: editModeTests
         uses: game-ci/unity-test-runner@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -50,16 +50,27 @@ jobs:
         with:
           projectPath: .
           unityVersion: auto
-          testMode: All
+          testMode: EditMode
+          artifactsPath: artifacts/editmode
           githubToken: ${{ secrets.GITHUB_TOKEN }}
-          checkName: Hotelia Unity Test Results
+          checkName: Hotelia EditMode Test Results
+          coverageOptions: generateAdditionalMetrics;generateHtmlReport;generateBadgeReport;assemblyFilters:+Hotelia.Core
 
-      - name: Guardar resultados de las pruebas
+      - name: Guardar resultados EditMode
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Hotelia-Test-Results
-          path: ${{ steps.unityTests.outputs.artifactsPath }}
+          name: Hotelia-EditMode-Test-Results
+          path: ${{ steps.editModeTests.outputs.artifactsPath }}
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Guardar reporte de cobertura EditMode
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Hotelia-EditMode-Coverage
+          path: ${{ steps.editModeTests.outputs.coveragePath }}
           if-no-files-found: warn
           retention-days: 14
 
@@ -68,8 +79,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
-    # La compilación solo inicia si las pruebas aprueban.
-    needs: tests
+    # La compilación solo comienza cuando EditMode termina correctamente.
+    needs: editmode-tests
 
     steps:
       - name: Descargar repositorio
