@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Hotelia.Core;
 
 public class RestaurantOrderManager : MonoBehaviour
 {
@@ -119,7 +120,12 @@ public class RestaurantOrderManager : MonoBehaviour
         order.isUrgent = Random.value < 0.40f;
 
         order.dishName = GetDishBySegment(room.currentGuestSegment);
-        order.priorityScore = CalculatePriority(order);
+        order.priorityScore =
+            RestaurantPriorityRules.CalculatePriority(
+                order.hasAllergy,
+                order.isUrgent,
+                order.isRoomService
+            );
 
         return order;
     }
@@ -141,16 +147,22 @@ public class RestaurantOrderManager : MonoBehaviour
                 return "Dish of the day";
         }
     }
-
-    private int CalculatePriority(RestaurantOrder order)
+    private RestaurantOrderEvaluation EvaluateSelectedOrders()
     {
-        int score = 0;
+        List<int> selectedPriorities =
+            new List<int>(selectedOrders.Count);
 
-        if (order.hasAllergy) score += 5;
-        if (order.isUrgent) score += 4;
-        if (order.isRoomService) score += 2;
+        foreach (RestaurantOrder order in selectedOrders)
+        {
+            if (order == null)
+                continue;
 
-        return score;
+            selectedPriorities.Add(order.priorityScore);
+        }
+
+        return RestaurantPriorityRules.Evaluate(
+            selectedPriorities
+        );
     }
 
     private void RefreshTickets()
@@ -244,9 +256,12 @@ public class RestaurantOrderManager : MonoBehaviour
             return;
         }
 
-        int correctPositions = CalculateCorrectPositions();
+        RestaurantOrderEvaluation evaluation =
+            EvaluateSelectedOrders();
+
+        int correctPositions = evaluation.CorrectPositions;
         int totalOrders = activeOrders.Count;
-        int errors = totalOrders - correctPositions;
+        int errors = evaluation.Errors;
 
         float accuracy = totalOrders > 0
             ? correctPositions / (float)totalOrders
@@ -257,10 +272,9 @@ public class RestaurantOrderManager : MonoBehaviour
 
         int errorScore = Mathf.RoundToInt(accuracy * 100f);
 
-        int revenue = totalOrders * 100;
-
-        if (errors == 0)
-            revenue += 100;
+        int revenue =
+            (totalOrders * 100) +
+            evaluation.Bonus;
 
         satisfaction = Mathf.Clamp(satisfaction, 0, 100);
         timeScore = Mathf.Clamp(timeScore, 0, 100);
@@ -324,24 +338,6 @@ public class RestaurantOrderManager : MonoBehaviour
 
             room.lastRestaurantOrderCompletedDay = currentDay;
         }
-    }
-
-    private int CalculateCorrectPositions()
-    {
-        List<RestaurantOrder> correctOrder = new List<RestaurantOrder>(activeOrders);
-
-        correctOrder.Sort((a, b) => b.priorityScore.CompareTo(a.priorityScore));
-
-        int correct = 0;
-
-        for (int i = 0; i < selectedOrders.Count; i++)
-        {
-            if (selectedOrders[i] == correctOrder[i])
-                correct++;
-            ;
-        }
-
-        return correct;
     }
 
     public void ResetSelection()
