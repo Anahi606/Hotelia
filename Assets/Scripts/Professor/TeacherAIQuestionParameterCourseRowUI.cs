@@ -42,15 +42,9 @@ public class TeacherAIQuestionParameterCourseRowUI : MonoBehaviour
 
         if (courseCodeText != null)
         {
-            string subjectCode = !string.IsNullOrWhiteSpace(parameterData.subjectCode)
-                ? parameterData.subjectCode
-                : "No subject code";
-
-            string classCode = !string.IsNullOrWhiteSpace(parameterData.classCode)
+            courseCodeText.text = !string.IsNullOrWhiteSpace(parameterData.classCode)
                 ? parameterData.classCode
                 : "No class code";
-
-            courseCodeText.text = "Code: " + subjectCode + " / Class: " + classCode;
         }
 
         if (assignedStatusText != null)

@@ -489,7 +489,7 @@ public class Ollama_Handler : MonoBehaviour
             ? AIQuestionParametersRuntime.Instance.CurrentParameters
             : null;
 
-        if (IsUsingTeacherAIParameters())
+        if (IsUsingTeacherAIParameters() && CanUseOnlineAI())
         {
             await StartTeacherAIConversation();
             return;
@@ -1187,9 +1187,104 @@ Rules:
     private string GetFallbackTouristQuestion(TourismKnowledgeItem item)
     {
         if (item == null)
-            return "Hi! I'm visiting Ecuador. Could you help me with some tourist information?";
+        {
+            return
+                "Hi! I'm visiting Ecuador. " +
+                "Could you help me with some tourist information?";
+        }
 
-        return "Hi! I'm visiting Ecuador and I need some help. " + item.questionGoal;
+        switch (item.topic)
+        {
+            case "Loja coffee":
+                return
+                    "Hi! I would love to try Ecuadorian coffee. " +
+                    "Where can I find some of the best coffee in Ecuador?";
+
+            case "Capital of Ecuador":
+                return
+                    "Hi! Could you tell me which city is the capital of Ecuador?";
+
+            case "Currency":
+                return
+                    "Hello! What currency should I use while visiting Ecuador?";
+
+            case "Galapagos Islands":
+                return
+                    "Hi! Why are the Galápagos Islands so famous?";
+
+            case "Cotopaxi":
+                return
+                    "Hello! Can tourists visit Cotopaxi from Quito?";
+
+            case "Mitad del Mundo":
+                return
+                    "Hi! Could you explain what Mitad del Mundo is?";
+
+            case "Quito Historic Center":
+                return
+                    "Hello! What can tourists see in Quito's Historic Center?";
+
+            case "Ecuadorian food":
+                return
+                    "Hi! Could you recommend a traditional Ecuadorian dish?";
+
+            case "Weather in Quito":
+                return
+                    "Hello! What kind of weather should I expect in Quito?";
+
+            case "Safety in Quito":
+                return
+                    "Hi! Could you give me a safety tip for moving around Quito?";
+
+            case "Ecuador regions":
+                return
+                    "Hello! What are the main regions of Ecuador?";
+
+            case "Amazon region":
+                return
+                    "Hi! What can tourists experience in the Ecuadorian Amazon?";
+
+            case "Otavalo Market":
+                return
+                    "Hello! What is Otavalo famous for?";
+
+            case "Baños":
+                return
+                    "Hi! What activities can tourists do in Baños?";
+
+            case "Cuenca":
+                return
+                    "Hello! What is the city of Cuenca known for?";
+
+            case "Guayaquil":
+                return
+                    "Hi! What places would you recommend visiting in Guayaquil?";
+
+            case "Ecuador language":
+                return
+                    "Hello! What language should tourists use in Ecuador?";
+
+            case "Altitude in Quito":
+                return
+                    "Hi! Can Quito's altitude affect tourists when they arrive?";
+
+            case "Public transport in Quito":
+                return
+                    "Hello! What public transportation can tourists use in Quito?";
+
+            case "Coast of Ecuador":
+                return
+                    "Hi! What is Ecuador's coastal region like?";
+
+            case "Typical souvenir":
+                return
+                    "Hello! What traditional souvenir could I buy in Ecuador?";
+
+            default:
+                return
+                    "Hi! I'm visiting Ecuador. " +
+                    "Could you help me with some tourist information?";
+        }
     }
 
     private string GetFallbackResponse(AnswerCheckResult result)
@@ -1650,83 +1745,173 @@ Rules:
         FinishDialogueCleanup();
     }
 
+    private bool CanUseOnlineAI()
+    {
+        bool isLoggedInStudent =
+            PlayfabManager.IsLoggedInWithEmail &&
+            PlayfabManager.IsStudent;
+
+        bool hasSessionTicket =
+            !string.IsNullOrWhiteSpace(
+                PlayfabManager.CurrentSessionTicket
+            );
+
+        bool hasInternet =
+            Application.internetReachability !=
+            NetworkReachability.NotReachable;
+
+        return isLoggedInStudent &&
+               hasSessionTicket &&
+               hasInternet;
+    }
+
     private async Task<string> GenerateText(string prompt)
     {
-        if (string.IsNullOrWhiteSpace(azureFunctionUrl))
-            throw new Exception("Missing Azure Function URL. Assign it in the Inspector.");
+        if (string.IsNullOrWhiteSpace(prompt))
+            return "";
 
-        string sessionTicket = PlayfabManager.CurrentSessionTicket;
-
-        if (string.IsNullOrWhiteSpace(sessionTicket))
+        /*
+         * Guest mode or no internet:
+         * do not call Azure or OpenAI.
+         * Returning an empty string activates the local fallback.
+         */
+        if (!CanUseOnlineAI())
         {
-            throw new Exception(
-                "AI dialogue requires a signed-in student account."
+            Debug.Log(
+                "NPC running in guest/offline mode. " +
+                "Using local dialogue."
             );
+
+            return "";
         }
 
-        AzureNpcRequest requestBody = new AzureNpcRequest
+        if (string.IsNullOrWhiteSpace(azureFunctionUrl))
         {
-            sessionTicket = PlayfabManager.CurrentSessionTicket,
-            prompt = prompt
-        };
+            Debug.LogWarning(
+                "Azure Function URL is missing. " +
+                "Using local NPC dialogue."
+            );
 
-        string jsonBody = JsonUtility.ToJson(requestBody);
-        byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonBody);
+            return "";
+        }
 
-        using (UnityWebRequest request = new UnityWebRequest(azureFunctionUrl, "POST"))
+        string sessionTicket =
+            PlayfabManager.CurrentSessionTicket;
+
+        AzureNpcRequest requestBody =
+            new AzureNpcRequest
+            {
+                sessionTicket = sessionTicket,
+                prompt = prompt
+            };
+
+        string jsonBody =
+            JsonUtility.ToJson(requestBody);
+
+        byte[] bodyRaw =
+            Encoding.UTF8.GetBytes(jsonBody);
+
+        using (
+            UnityWebRequest request =
+                new UnityWebRequest(
+                    azureFunctionUrl,
+                    "POST"
+                )
+        )
         {
-            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-            request.downloadHandler = new DownloadHandlerBuffer();
+            request.uploadHandler =
+                new UploadHandlerRaw(bodyRaw);
 
-            request.SetRequestHeader("Content-Type", "application/json");
+            request.downloadHandler =
+                new DownloadHandlerBuffer();
 
-            UnityWebRequestAsyncOperation operation = request.SendWebRequest();
+            request.SetRequestHeader(
+                "Content-Type",
+                "application/json"
+            );
+
+            request.timeout = 30;
+
+            UnityWebRequestAsyncOperation operation =
+                request.SendWebRequest();
 
             while (!operation.isDone)
                 await Task.Yield();
 
-            string responseText = request.downloadHandler.text;
+            string responseText =
+                request.downloadHandler != null
+                    ? request.downloadHandler.text
+                    : "";
 
+            /*
+             * Azure, PlayFab or OpenAI failed.
+             * Continue with local dialogue instead of breaking the game.
+             */
             if (request.result != UnityWebRequest.Result.Success)
             {
-                Debug.LogError(
-                    "Azure Function HTTP " + request.responseCode +
-                    "\nUnity error: " + request.error +
-                    "\nResponse body: " + responseText
+                Debug.LogWarning(
+                    "Online NPC dialogue unavailable. " +
+                    "Using local fallback.\n" +
+                    "HTTP: " + request.responseCode +
+                    "\nError: " + request.error +
+                    "\nBackend response: " + responseText
                 );
 
-                AzureNpcResponse errorResponse = null;
-
-                try
-                {
-                    errorResponse = JsonUtility.FromJson<AzureNpcResponse>(responseText);
-                }
-                catch
-                {
-                    //Ignorar JSON parse error
-                }
-
-                if (errorResponse != null && !string.IsNullOrWhiteSpace(errorResponse.message))
-                    throw new Exception(errorResponse.message);
-
-                throw new Exception("Azure Function request failed. HTTP " + request.responseCode);
+                return "";
             }
 
-            AzureNpcResponse response = JsonUtility.FromJson<AzureNpcResponse>(responseText);
+            AzureNpcResponse response = null;
+
+            try
+            {
+                response =
+                    JsonUtility.FromJson<AzureNpcResponse>(
+                        responseText
+                    );
+            }
+            catch (Exception parseError)
+            {
+                Debug.LogWarning(
+                    "Could not parse Azure NPC response. " +
+                    "Using local fallback. " +
+                    parseError.Message
+                );
+
+                return "";
+            }
 
             if (response == null)
-                throw new Exception("Invalid response from Azure Function.");
+            {
+                Debug.LogWarning(
+                    "Azure returned an invalid NPC response. " +
+                    "Using local fallback."
+                );
+
+                return "";
+            }
 
             if (!response.success)
             {
-                string errorMessage = string.IsNullOrWhiteSpace(response.message)
-                    ? "Azure Function returned an error."
-                    : response.message;
+                Debug.LogWarning(
+                    "Azure NPC error: " +
+                    response.message +
+                    ". Using local fallback."
+                );
 
-                throw new Exception(errorMessage);
+                return "";
             }
 
-            return CleanResponse(response.text ?? "");
+            if (string.IsNullOrWhiteSpace(response.text))
+            {
+                Debug.LogWarning(
+                    "Azure returned empty NPC text. " +
+                    "Using local fallback."
+                );
+
+                return "";
+            }
+
+            return CleanResponse(response.text);
         }
     }
 
