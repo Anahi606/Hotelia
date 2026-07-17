@@ -53,15 +53,6 @@ public class SettingsPanelUI : MonoBehaviour
         if (musicVolumeSlider != null)
             musicVolumeSlider.onValueChanged.AddListener(PreviewMusicVolume);
 
-        if (resolutionDropdown != null)
-            resolutionDropdown.onValueChanged.AddListener(PreviewVideoSettings);
-
-        if (fullscreenToggle != null)
-            fullscreenToggle.onValueChanged.AddListener(PreviewVideoSettings);
-
-        if (applyButton != null)
-            applyButton.onClick.AddListener(ApplySettings);
-
         if (backButton != null)
             backButton.onClick.AddListener(BackButtonClicked);
     }
@@ -76,12 +67,6 @@ public class SettingsPanelUI : MonoBehaviour
     {
         if (musicVolumeSlider != null)
             musicVolumeSlider.onValueChanged.RemoveListener(PreviewMusicVolume);
-
-        if (resolutionDropdown != null)
-            resolutionDropdown.onValueChanged.RemoveListener(PreviewVideoSettings);
-
-        if (fullscreenToggle != null)
-            fullscreenToggle.onValueChanged.RemoveListener(PreviewVideoSettings);
 
         if (applyButton != null)
             applyButton.onClick.RemoveListener(ApplySettings);
@@ -207,45 +192,6 @@ public class SettingsPanelUI : MonoBehaviour
         {
             AudioSettingsManager.Instance.PreviewMusicVolume(value);
         }
-    }
-
-    private void PreviewVideoSettings(int value)
-    {
-        if (isLoadingUI)
-            return;
-
-        PreviewVideoSettings();
-    }
-
-    private void PreviewVideoSettings(bool value)
-    {
-        if (isLoadingUI)
-            return;
-
-        PreviewVideoSettings();
-    }
-
-    private void PreviewVideoSettings()
-    {
-        if (resolutionDropdown == null || fullscreenToggle == null)
-            return;
-
-        int selectedIndex = resolutionDropdown.value;
-
-        if (selectedIndex < 0 || selectedIndex >= resolutionOptions.Count)
-            return;
-
-        ResolutionOption selectedResolution = resolutionOptions[selectedIndex];
-
-        FullScreenMode screenMode = fullscreenToggle.isOn
-            ? FullScreenMode.FullScreenWindow
-            : FullScreenMode.Windowed;
-
-        Screen.SetResolution(
-            selectedResolution.width,
-            selectedResolution.height,
-            screenMode
-        );
     }
 
     public void ApplySettings()
