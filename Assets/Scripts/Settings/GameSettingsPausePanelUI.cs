@@ -96,20 +96,6 @@ public class GameSettingsPausePanelUI : MonoBehaviour
 
         SetMixerMusicVolume(savedVolume);
 
-        if (resolutionDropdown != null)
-        {
-            resolutionDropdown.onValueChanged.AddListener(
-                PreviewVideoSettings
-            );
-        }
-
-        if (fullscreenToggle != null)
-        {
-            fullscreenToggle.onValueChanged.AddListener(
-                PreviewVideoSettings
-            );
-        }
-
         if (applyButton != null)
             applyButton.onClick.AddListener(ApplySettings);
 
@@ -129,20 +115,6 @@ public class GameSettingsPausePanelUI : MonoBehaviour
         {
             musicVolumeSlider.onValueChanged.RemoveListener(
                 PreviewMusicVolume
-            );
-        }
-
-        if (resolutionDropdown != null)
-        {
-            resolutionDropdown.onValueChanged.RemoveListener(
-                PreviewVideoSettings
-            );
-        }
-
-        if (fullscreenToggle != null)
-        {
-            fullscreenToggle.onValueChanged.RemoveListener(
-                PreviewVideoSettings
             );
         }
 
@@ -390,48 +362,6 @@ public class GameSettingsPausePanelUI : MonoBehaviour
         SetMixerMusicVolume(value);
     }
 
-    private void PreviewVideoSettings(int value)
-    {
-        if (isLoadingUI)
-            return;
-
-        PreviewVideoSettings();
-    }
-
-    private void PreviewVideoSettings(bool value)
-    {
-        if (isLoadingUI)
-            return;
-
-        PreviewVideoSettings();
-    }
-
-    private void PreviewVideoSettings()
-    {
-        if (resolutionDropdown == null ||
-            fullscreenToggle == null)
-        {
-            return;
-        }
-
-        int selectedIndex = resolutionDropdown.value;
-
-        if (selectedIndex < 0 ||
-            selectedIndex >= resolutionOptions.Count)
-        {
-            return;
-        }
-
-        ResolutionOption selectedResolution =
-            resolutionOptions[selectedIndex];
-
-        StartResolutionChange(
-            selectedResolution.width,
-            selectedResolution.height,
-            fullscreenToggle.isOn
-        );
-    }
-
     private void StartResolutionChange(
         int width,
         int height,
@@ -454,10 +384,10 @@ public class GameSettingsPausePanelUI : MonoBehaviour
     }
 
     private IEnumerator ApplyResolutionRoutine(
-        int width,
-        int height,
-        bool fullscreen
-    )
+    int width,
+    int height,
+    bool fullscreen
+)
     {
         FullScreenMode screenMode = fullscreen
             ? FullScreenMode.FullScreenWindow
@@ -469,22 +399,14 @@ public class GameSettingsPausePanelUI : MonoBehaviour
             screenMode
         );
 
-        // Espera a que Unity reconstruya la pantalla.
         yield return null;
         yield return new WaitForEndOfFrame();
-
-        // Evita que la imagen quede oscura en espacio de color Linear.
-        if (QualitySettings.activeColorSpace == ColorSpace.Linear)
-        {
-            GL.sRGBWrite = true;
-        }
 
         Canvas.ForceUpdateCanvases();
 
         Debug.Log(
-            $"Resolution preview: {width} x {height} | " +
-            $"Fullscreen: {fullscreen} | " +
-            $"Color Space: {QualitySettings.activeColorSpace}"
+            $"Resolution applied: {width} x {height} | " +
+            $"Fullscreen: {fullscreen}"
         );
 
         resolutionCoroutine = null;
