@@ -53,6 +53,9 @@ public class SettingsPanelUI : MonoBehaviour
         if (musicVolumeSlider != null)
             musicVolumeSlider.onValueChanged.AddListener(PreviewMusicVolume);
 
+        if (applyButton != null)
+            applyButton.onClick.AddListener(ApplySettings);
+
         if (backButton != null)
             backButton.onClick.AddListener(BackButtonClicked);
     }
