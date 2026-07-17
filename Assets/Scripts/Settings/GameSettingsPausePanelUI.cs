@@ -33,6 +33,10 @@ public class GameSettingsPausePanelUI : MonoBehaviour
     [Header("Scenes")]
     [SerializeField] private string mainMenuSceneName = "MainMenu";
 
+    [Header("Input")]
+    [SerializeField] private bool listenForEscapeDirectly = false;
+    [SerializeField] private bool pauseGameWhenOpen = true;
+
     private struct ResolutionOption
     {
         public int width;
@@ -109,6 +113,21 @@ public class GameSettingsPausePanelUI : MonoBehaviour
             quitButton.onClick.AddListener(QuitGame);
     }
 
+    private void Update()
+    {
+        if (!listenForEscapeDirectly)
+            return;
+
+        if (Keyboard.current == null)
+            return;
+
+        if (Keyboard.current.escapeKey.wasPressedThisFrame)
+        {
+            Debug.Log("ESC presionado en panel docente.");
+            ToggleSettingsPanel();
+        }
+    }
+
     private void OnDestroy()
     {
         if (musicVolumeSlider != null)
@@ -164,10 +183,20 @@ public class GameSettingsPausePanelUI : MonoBehaviour
         LoadOriginalSettingsIntoUI();
 
         if (settingsPanel != null)
+        {
             settingsPanel.SetActive(true);
+            settingsPanel.transform.SetAsLastSibling();
+        }
+        else
+        {
+            Debug.LogError("Settings Panel no está asignado.");
+        }
 
-        HotelGamePause.RequestPause();
-        hasPauseRequest = true;
+        if (pauseGameWhenOpen)
+        {
+            HotelGamePause.RequestPause();
+            hasPauseRequest = true;
+        }
     }
 
     public void CloseWithoutApplying()
@@ -186,7 +215,7 @@ public class GameSettingsPausePanelUI : MonoBehaviour
         if (settingsPanel != null)
             settingsPanel.SetActive(false);
 
-        if (hasPauseRequest)
+        if (pauseGameWhenOpen && hasPauseRequest)
         {
             HotelGamePause.ReleasePause();
             hasPauseRequest = false;
@@ -539,7 +568,7 @@ public class GameSettingsPausePanelUI : MonoBehaviour
     {
         RestoreOriginalSettings();
 
-        if (hasPauseRequest)
+        if (pauseGameWhenOpen && hasPauseRequest)
         {
             HotelGamePause.ReleasePause();
             hasPauseRequest = false;
