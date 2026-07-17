@@ -3,15 +3,22 @@ using UnityEngine.SceneManagement;
 
 public class TeacherMainMenuButton : MonoBehaviour
 {
-    [Header("Scene")]
-    [SerializeField] private string mainMenuSceneName = "Menu";
+    private const string MainMenuSceneName = "01-Menu";
 
     public void GoToMainMenu()
     {
-        // Por si el juego estaba pausado desde algún panel
         Time.timeScale = 1f;
 
-        // Cargar escena del menú principal
-        SceneManager.LoadScene(mainMenuSceneName);
+        if (Application.CanStreamedLevelBeLoaded(MainMenuSceneName))
+        {
+            SceneManager.LoadScene(MainMenuSceneName);
+        }
+        else
+        {
+            Debug.LogError(
+                $"No se encontró la escena '{MainMenuSceneName}'. " +
+                "Verifica que esté incluida en Build Profiles > Scene List."
+            );
+        }
     }
 }
