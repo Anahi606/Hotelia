@@ -22,8 +22,16 @@ public class RestaurantOrderManager : MonoBehaviour
     [Header("Player")]
     public PlayerMovement playerMovement;
 
+    [Header("Interaction")]
+    [SerializeField] private RestaurantInteractable restaurantInteractable;
+
     private readonly List<RestaurantOrder> activeOrders = new List<RestaurantOrder>();
     private readonly List<RestaurantOrder> selectedOrders = new List<RestaurantOrder>();
+
+    public void SetRestaurantInteractable(RestaurantInteractable interactable)
+    {
+        restaurantInteractable = interactable;
+    }
 
     public void OpenRestaurant()
     {
@@ -76,6 +84,20 @@ public class RestaurantOrderManager : MonoBehaviour
         selectedOrders.Clear();
 
         playerMovement?.SetMovementEnabled(true);
+
+        if (restaurantInteractable != null)
+        {
+            restaurantInteractable.NotifyRestaurantClosed();
+        }
+        else
+        {
+            Debug.LogWarning(
+                "RestaurantInteractable no está registrado " +
+                "en RestaurantOrderManager."
+            );
+        }
+
+        Debug.Log("Restaurante cerrado y movimiento habilitado.");
     }
 
     private void GenerateOrdersFromOccupiedRooms()
