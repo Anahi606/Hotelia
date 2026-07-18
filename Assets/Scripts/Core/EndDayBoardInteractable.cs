@@ -5,7 +5,10 @@ public class EndDayBoardInteractable : MonoBehaviour
 {
     [Header("UI")]
     [SerializeField] private GameObject endDayPanel;
-    [SerializeField] private GameObject interactText;
+
+    [Header("Interaction Prompt")]
+    [Tooltip("Objeto 2D con SpriteRenderer que muestra la tecla E.")]
+    [SerializeField] private GameObject interactionPrompt;
 
     private bool playerInside;
     private bool panelOpen;
@@ -13,20 +16,26 @@ public class EndDayBoardInteractable : MonoBehaviour
     private void Start()
     {
         if (endDayPanel != null)
+        {
             endDayPanel.SetActive(false);
+        }
         else
-            Debug.LogWarning("EndDayPanel no está asignado en EndDayBoardInteractable.");
+        {
+            Debug.LogWarning(
+                "EndDayPanel no está asignado en EndDayBoardInteractable."
+            );
+        }
 
-        if (interactText != null)
-            interactText.SetActive(false);
+        HideInteractionPrompt();
     }
 
     private void Update()
     {
-        if (!playerInside) return;
-        if (panelOpen) return;
+        if (!playerInside || panelOpen)
+            return;
 
-        if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
+        if (Keyboard.current != null &&
+            Keyboard.current.eKey.wasPressedThisFrame)
         {
             Debug.Log("E presionada dentro del trigger de fin de día.");
             OpenPanel();
@@ -37,15 +46,16 @@ public class EndDayBoardInteractable : MonoBehaviour
     {
         if (endDayPanel == null)
         {
-            Debug.LogWarning("No se puede abrir EndDayPanel porque no está asignado.");
+            Debug.LogWarning(
+                "No se puede abrir EndDayPanel porque no está asignado."
+            );
+
             return;
         }
 
+        HideInteractionPrompt();
+
         endDayPanel.SetActive(true);
-
-        if (interactText != null)
-            interactText.SetActive(false);
-
         panelOpen = true;
 
         Debug.Log("EndDayPanel abierto.");
@@ -61,7 +71,9 @@ public class EndDayBoardInteractable : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("No se encontró DailySummaryUI en la escena.");
+            Debug.LogWarning(
+                "No se encontró DailySummaryUI en la escena."
+            );
         }
     }
 
@@ -75,39 +87,58 @@ public class EndDayBoardInteractable : MonoBehaviour
         if (endDayPanel != null)
             endDayPanel.SetActive(false);
 
-        if (interactText != null && playerInside)
-            interactText.SetActive(true);
-
         panelOpen = false;
+
+        if (playerInside)
+            ShowInteractionPrompt();
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        Debug.Log("Entró al trigger: " + other.name);
+        if (!other.CompareTag("Player"))
+            return;
 
-        if (other.CompareTag("Player"))
-        {
-            playerInside = true;
+        playerInside = true;
 
-            if (interactText != null && !panelOpen)
-                interactText.SetActive(true);
+        if (!panelOpen)
+            ShowInteractionPrompt();
 
-            Debug.Log("Player dentro del trigger de fin de día.");
-        }
+        Debug.Log("Player dentro del trigger de fin de día.");
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        Debug.Log("Salió del trigger: " + other.name);
+        if (!other.CompareTag("Player"))
+            return;
 
-        if (other.CompareTag("Player"))
+        playerInside = false;
+        HideInteractionPrompt();
+
+        Debug.Log("Player salió del trigger de fin de día.");
+    }
+
+    private void ShowInteractionPrompt()
+    {
+        if (interactionPrompt != null)
         {
-            playerInside = false;
-
-            if (interactText != null)
-                interactText.SetActive(false);
-
-            Debug.Log("Player salió del trigger de fin de día.");
+            interactionPrompt.SetActive(true);
         }
+        else
+        {
+            Debug.LogWarning(
+                "Interaction Prompt no está asignado en EndDayBoardInteractable."
+            );
+        }
+    }
+
+    private void HideInteractionPrompt()
+    {
+        if (interactionPrompt != null)
+            interactionPrompt.SetActive(false);
+    }
+
+    private void OnDisable()
+    {
+        HideInteractionPrompt();
     }
 }
