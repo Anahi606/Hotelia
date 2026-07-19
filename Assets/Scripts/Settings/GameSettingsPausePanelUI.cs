@@ -51,11 +51,11 @@ public class GameSettingsPausePanelUI : MonoBehaviour
 
     private static readonly ResolutionOption[] allowed16By9Resolutions =
     {
-        new ResolutionOption(3840, 2160), //4K
-        new ResolutionOption(2560, 1440), //1440p
-        new ResolutionOption(1920, 1080), //1080p
-        new ResolutionOption(1600, 900),  //900p
-        new ResolutionOption(1280, 720)   //720p
+        new ResolutionOption(3840, 2160), // 4K
+        new ResolutionOption(2560, 1440), // 1440p
+        new ResolutionOption(1920, 1080), // 1080p
+        new ResolutionOption(1600, 900),  // 900p
+        new ResolutionOption(1280, 720)   // 720p
     };
 
     private readonly List<ResolutionOption> resolutionOptions =
@@ -82,35 +82,21 @@ public class GameSettingsPausePanelUI : MonoBehaviour
         BuildResolutionDropdown();
 
         if (settingsPanel != null)
-            settingsPanel.SetActive(false);
-
-        float savedVolume = PlayerPrefs.GetFloat(MusicVolumeKey, 0.8f);
-
-        if (musicVolumeSlider != null)
         {
-            musicVolumeSlider.minValue = 0f;
-            musicVolumeSlider.maxValue = 1f;
-            musicVolumeSlider.wholeNumbers = false;
-            musicVolumeSlider.SetValueWithoutNotify(savedVolume);
-
-            musicVolumeSlider.onValueChanged.AddListener(
-                PreviewMusicVolume
-            );
+            settingsPanel.SetActive(false);
         }
 
-        SetMixerMusicVolume(savedVolume);
+        LoadSavedAudioSettings();
+        ConfigureListeners();
+        LoadSavedVideoSettingsIntoUI();
+    }
 
-        if (applyButton != null)
-            applyButton.onClick.AddListener(ApplySettings);
-
-        if (backButton != null)
-            backButton.onClick.AddListener(CloseWithoutApplying);
-
-        if (mainMenuButton != null)
-            mainMenuButton.onClick.AddListener(ReturnToMainMenu);
-
-        if (quitButton != null)
-            quitButton.onClick.AddListener(QuitGame);
+    private bool IsAnyTutorialBlockingInput()
+    {
+        return
+            CheckInTutorialBookUI.IsBlockingGameInput ||
+            RestaurantTutorialBookUI.IsBlockingGameInput ||
+            RoomCleaningTutorialBookUI.IsBlockingGameInput;
     }
 
     private void Update()
@@ -121,33 +107,34 @@ public class GameSettingsPausePanelUI : MonoBehaviour
         if (Keyboard.current == null)
             return;
 
-        if (Keyboard.current.escapeKey.wasPressedThisFrame)
+        if (!Keyboard.current.escapeKey.wasPressedThisFrame)
+            return;
+
+        if (!isOpen && IsAnyTutorialBlockingInput())
         {
-            Debug.Log("ESC presionado en panel docente.");
-            ToggleSettingsPanel();
+            Debug.Log(
+                "Settings blocked while the tutorial is open."
+            );
+
+            return;
         }
+
+        Debug.Log(
+            "ESC presionado en el panel de configuración."
+        );
+
+        ToggleSettingsPanel();
     }
 
     private void OnDestroy()
     {
-        if (musicVolumeSlider != null)
+        RemoveListeners();
+
+        if (resolutionCoroutine != null)
         {
-            musicVolumeSlider.onValueChanged.RemoveListener(
-                PreviewMusicVolume
-            );
+            StopCoroutine(resolutionCoroutine);
+            resolutionCoroutine = null;
         }
-
-        if (applyButton != null)
-            applyButton.onClick.RemoveListener(ApplySettings);
-
-        if (backButton != null)
-            backButton.onClick.RemoveListener(CloseWithoutApplying);
-
-        if (mainMenuButton != null)
-            mainMenuButton.onClick.RemoveListener(ReturnToMainMenu);
-
-        if (quitButton != null)
-            quitButton.onClick.RemoveListener(QuitGame);
 
         if (hasPauseRequest)
         {
@@ -156,10 +143,188 @@ public class GameSettingsPausePanelUI : MonoBehaviour
         }
     }
 
+    private void ConfigureListeners()
+    {
+        if (musicVolumeSlider != null)
+        {
+            musicVolumeSlider.onValueChanged.AddListener(
+                PreviewMusicVolume
+            );
+        }
+
+        if (fullscreenToggle != null)
+        {
+            fullscreenToggle.onValueChanged.AddListener(
+                UpdateResolutionDropdownState
+            );
+        }
+
+        if (applyButton != null)
+        {
+            applyButton.onClick.AddListener(
+                ApplySettings
+            );
+        }
+
+        if (backButton != null)
+        {
+            backButton.onClick.AddListener(
+                CloseWithoutApplying
+            );
+        }
+
+        if (mainMenuButton != null)
+        {
+            mainMenuButton.onClick.AddListener(
+                ReturnToMainMenu
+            );
+        }
+
+        if (quitButton != null)
+        {
+            quitButton.onClick.AddListener(
+                QuitGame
+            );
+        }
+    }
+
+    private void RemoveListeners()
+    {
+        if (musicVolumeSlider != null)
+        {
+            musicVolumeSlider.onValueChanged.RemoveListener(
+                PreviewMusicVolume
+            );
+        }
+
+        if (fullscreenToggle != null)
+        {
+            fullscreenToggle.onValueChanged.RemoveListener(
+                UpdateResolutionDropdownState
+            );
+        }
+
+        if (applyButton != null)
+        {
+            applyButton.onClick.RemoveListener(
+                ApplySettings
+            );
+        }
+
+        if (backButton != null)
+        {
+            backButton.onClick.RemoveListener(
+                CloseWithoutApplying
+            );
+        }
+
+        if (mainMenuButton != null)
+        {
+            mainMenuButton.onClick.RemoveListener(
+                ReturnToMainMenu
+            );
+        }
+
+        if (quitButton != null)
+        {
+            quitButton.onClick.RemoveListener(
+                QuitGame
+            );
+        }
+    }
+
+    private void LoadSavedAudioSettings()
+    {
+        float savedVolume = PlayerPrefs.GetFloat(
+            MusicVolumeKey,
+            0.8f
+        );
+
+        savedVolume = Mathf.Clamp01(savedVolume);
+
+        if (musicVolumeSlider != null)
+        {
+            musicVolumeSlider.minValue = 0f;
+            musicVolumeSlider.maxValue = 1f;
+            musicVolumeSlider.wholeNumbers = false;
+
+            musicVolumeSlider.SetValueWithoutNotify(
+                savedVolume
+            );
+        }
+
+        SetMixerMusicVolume(savedVolume);
+    }
+
+    private void LoadSavedVideoSettingsIntoUI()
+    {
+        bool savedFullscreen = PlayerPrefs.GetInt(
+            FullscreenKey,
+            Screen.fullScreen ? 1 : 0
+        ) == 1;
+
+        int savedWidth = PlayerPrefs.GetInt(
+            ResolutionWidthKey,
+            Screen.width
+        );
+
+        int savedHeight = PlayerPrefs.GetInt(
+            ResolutionHeightKey,
+            Screen.height
+        );
+
+        if (fullscreenToggle != null)
+        {
+            fullscreenToggle.SetIsOnWithoutNotify(
+                savedFullscreen
+            );
+        }
+
+        int resolutionIndex;
+
+        if (savedFullscreen)
+        {
+            Resolution nativeResolution =
+                Screen.currentResolution;
+
+            resolutionIndex = GetResolutionIndex(
+                nativeResolution.width,
+                nativeResolution.height
+            );
+        }
+        else
+        {
+            resolutionIndex = GetResolutionIndex(
+                savedWidth,
+                savedHeight
+            );
+        }
+
+        if (resolutionDropdown != null)
+        {
+            resolutionDropdown.SetValueWithoutNotify(
+                resolutionIndex
+            );
+
+            resolutionDropdown.RefreshShownValue();
+        }
+
+        UpdateResolutionDropdownState(savedFullscreen);
+    }
+
     public void OnPause(InputAction.CallbackContext context)
     {
         if (!context.performed)
             return;
+
+        if (!isOpen && IsAnyTutorialBlockingInput())
+        {
+            Debug.Log(
+                "Pause input blocked while the tutorial is open."
+            );
+
+            return;
+        }
 
         ToggleSettingsPanel();
     }
@@ -167,32 +332,55 @@ public class GameSettingsPausePanelUI : MonoBehaviour
     public void ToggleSettingsPanel()
     {
         if (isOpen)
+        {
             CloseWithoutApplying();
-        else
-            OpenSettingsPanel();
+            return;
+        }
+
+        if (IsAnyTutorialBlockingInput())
+        {
+            Debug.Log(
+                "Settings cannot be opened while a tutorial is active."
+            );
+
+            return;
+        }
+
+        OpenSettingsPanel();
     }
 
     public void OpenSettingsPanel()
     {
+        if (IsAnyTutorialBlockingInput())
+        {
+            Debug.Log(
+                "Settings cannot be opened while a tutorial is active."
+            );
+
+            return;
+        }
+
         if (isOpen)
             return;
+
+        if (settingsPanel == null)
+        {
+            Debug.LogError(
+                "GameSettingsPausePanelUI: Settings Panel no está asignado."
+            );
+
+            return;
+        }
 
         isOpen = true;
 
         CaptureOriginalSettings();
         LoadOriginalSettingsIntoUI();
 
-        if (settingsPanel != null)
-        {
-            settingsPanel.SetActive(true);
-            settingsPanel.transform.SetAsLastSibling();
-        }
-        else
-        {
-            Debug.LogError("Settings Panel no está asignado.");
-        }
+        settingsPanel.SetActive(true);
+        settingsPanel.transform.SetAsLastSibling();
 
-        if (pauseGameWhenOpen)
+        if (pauseGameWhenOpen && !hasPauseRequest)
         {
             HotelGamePause.RequestPause();
             hasPauseRequest = true;
@@ -213,7 +401,9 @@ public class GameSettingsPausePanelUI : MonoBehaviour
         isOpen = false;
 
         if (settingsPanel != null)
+        {
             settingsPanel.SetActive(false);
+        }
 
         if (pauseGameWhenOpen && hasPauseRequest)
         {
@@ -263,10 +453,25 @@ public class GameSettingsPausePanelUI : MonoBehaviour
             );
         }
 
-        int resolutionIndex = GetResolutionIndex(
-            originalResolutionWidth,
-            originalResolutionHeight
-        );
+        int resolutionIndex;
+
+        if (originalFullscreen)
+        {
+            Resolution nativeResolution =
+                Screen.currentResolution;
+
+            resolutionIndex = GetResolutionIndex(
+                nativeResolution.width,
+                nativeResolution.height
+            );
+        }
+        else
+        {
+            resolutionIndex = GetResolutionIndex(
+                originalResolutionWidth,
+                originalResolutionHeight
+            );
+        }
 
         if (resolutionDropdown != null)
         {
@@ -277,16 +482,34 @@ public class GameSettingsPausePanelUI : MonoBehaviour
             resolutionDropdown.RefreshShownValue();
         }
 
+        UpdateResolutionDropdownState(
+            originalFullscreen
+        );
+
         isLoadingUI = false;
     }
 
     private void RestoreOriginalSettings()
     {
-        SetMixerMusicVolume(originalMusicVolume);
+        SetMixerMusicVolume(
+            originalMusicVolume
+        );
+
+        int width = originalResolutionWidth;
+        int height = originalResolutionHeight;
+
+        if (originalFullscreen)
+        {
+            Resolution nativeResolution =
+                Screen.currentResolution;
+
+            width = nativeResolution.width;
+            height = nativeResolution.height;
+        }
 
         StartResolutionChange(
-            originalResolutionWidth,
-            originalResolutionHeight,
+            width,
+            height,
             originalFullscreen
         );
 
@@ -340,31 +563,60 @@ public class GameSettingsPausePanelUI : MonoBehaviour
             return false;
         }
 
-        int selectedIndex = resolutionDropdown.value;
+        bool fullscreen = fullscreenToggle.isOn;
 
-        if (selectedIndex < 0 ||
-            selectedIndex >= resolutionOptions.Count)
+        int width;
+        int height;
+
+        if (fullscreen)
         {
-            Debug.LogError(
-                "GameSettingsPausePanelUI: Invalid resolution selected."
+            Resolution nativeResolution =
+                Screen.currentResolution;
+
+            width = nativeResolution.width;
+            height = nativeResolution.height;
+
+            int nativeIndex = GetResolutionIndex(
+                width,
+                height
             );
 
-            return false;
+            resolutionDropdown.SetValueWithoutNotify(
+                nativeIndex
+            );
+
+            resolutionDropdown.RefreshShownValue();
         }
+        else
+        {
+            int selectedIndex =
+                resolutionDropdown.value;
 
-        ResolutionOption selectedResolution =
-            resolutionOptions[selectedIndex];
+            if (selectedIndex < 0 ||
+                selectedIndex >= resolutionOptions.Count)
+            {
+                Debug.LogError(
+                    "GameSettingsPausePanelUI: Invalid resolution selected."
+                );
 
-        bool fullscreen = fullscreenToggle.isOn;
+                return false;
+            }
+
+            ResolutionOption selectedResolution =
+                resolutionOptions[selectedIndex];
+
+            width = selectedResolution.width;
+            height = selectedResolution.height;
+        }
 
         PlayerPrefs.SetInt(
             ResolutionWidthKey,
-            selectedResolution.width
+            width
         );
 
         PlayerPrefs.SetInt(
             ResolutionHeightKey,
-            selectedResolution.height
+            height
         );
 
         PlayerPrefs.SetInt(
@@ -373,8 +625,12 @@ public class GameSettingsPausePanelUI : MonoBehaviour
         );
 
         StartResolutionChange(
-            selectedResolution.width,
-            selectedResolution.height,
+            width,
+            height,
+            fullscreen
+        );
+
+        UpdateResolutionDropdownState(
             fullscreen
         );
 
@@ -389,6 +645,32 @@ public class GameSettingsPausePanelUI : MonoBehaviour
         value = Mathf.Clamp01(value);
 
         SetMixerMusicVolume(value);
+    }
+
+    private void UpdateResolutionDropdownState(
+        bool fullscreen
+    )
+    {
+        if (resolutionDropdown == null)
+            return;
+        resolutionDropdown.interactable = !fullscreen;
+
+        if (!fullscreen)
+            return;
+
+        Resolution nativeResolution =
+            Screen.currentResolution;
+
+        int nativeIndex = GetResolutionIndex(
+            nativeResolution.width,
+            nativeResolution.height
+        );
+
+        resolutionDropdown.SetValueWithoutNotify(
+            nativeIndex
+        );
+
+        resolutionDropdown.RefreshShownValue();
     }
 
     private void StartResolutionChange(
@@ -413,20 +695,40 @@ public class GameSettingsPausePanelUI : MonoBehaviour
     }
 
     private IEnumerator ApplyResolutionRoutine(
-    int width,
-    int height,
-    bool fullscreen
-)
+        int width,
+        int height,
+        bool fullscreen
+    )
     {
         FullScreenMode screenMode = fullscreen
             ? FullScreenMode.FullScreenWindow
             : FullScreenMode.Windowed;
 
+#if UNITY_2022_2_OR_NEWER
+
+        RefreshRate currentRefreshRate =
+            Screen.currentResolution.refreshRateRatio;
+
         Screen.SetResolution(
             width,
             height,
-            screenMode
+            screenMode,
+            currentRefreshRate
         );
+
+#else
+
+        int currentRefreshRate =
+            Screen.currentResolution.refreshRate;
+
+        Screen.SetResolution(
+            width,
+            height,
+            screenMode,
+            currentRefreshRate
+        );
+
+#endif
 
         yield return null;
         yield return new WaitForEndOfFrame();
@@ -434,7 +736,9 @@ public class GameSettingsPausePanelUI : MonoBehaviour
         Canvas.ForceUpdateCanvases();
 
         Debug.Log(
-            $"Resolution applied: {width} x {height} | " +
+            $"Resolution applied: {Screen.width} x {Screen.height} | " +
+            $"Requested: {width} x {height} | " +
+            $"Mode: {screenMode} | " +
             $"Fullscreen: {fullscreen}"
         );
 
@@ -486,36 +790,57 @@ public class GameSettingsPausePanelUI : MonoBehaviour
             in allowed16By9Resolutions
         )
         {
-            bool isSupported = supportedResolutions.Any(
-                resolution =>
-                    resolution.width == allowed.width &&
-                    resolution.height == allowed.height
-            );
+            bool isSupported =
+                supportedResolutions.Any(
+                    resolution =>
+                        resolution.width == allowed.width &&
+                        resolution.height == allowed.height
+                );
 
             if (isSupported)
             {
-                resolutionOptions.Add(allowed);
+                AddResolutionIfMissing(
+                    allowed.width,
+                    allowed.height
+                );
             }
         }
+        Resolution nativeResolution =
+            Screen.currentResolution;
 
-        // Protección para que nunca quede vacío.
+        AddResolutionIfMissing(
+            nativeResolution.width,
+            nativeResolution.height
+        );
+
         if (resolutionOptions.Count == 0)
         {
-            resolutionOptions.Add(
-                new ResolutionOption(
-                    Screen.width,
-                    Screen.height
-                )
+            AddResolutionIfMissing(
+                Screen.width,
+                Screen.height
             );
         }
+
+        resolutionOptions.Sort(
+            (first, second) =>
+            {
+                long firstPixels =
+                    (long)first.width * first.height;
+
+                long secondPixels =
+                    (long)second.width * second.height;
+
+                return secondPixels.CompareTo(
+                    firstPixels
+                );
+            }
+        );
 
         List<string> dropdownOptions =
             resolutionOptions
                 .Select(
                     option =>
-                        option.width +
-                        " x " +
-                        option.height
+                        $"{option.width} x {option.height}"
                 )
                 .ToList();
 
@@ -524,6 +849,29 @@ public class GameSettingsPausePanelUI : MonoBehaviour
         );
 
         resolutionDropdown.RefreshShownValue();
+    }
+
+    private void AddResolutionIfMissing(
+        int width,
+        int height
+    )
+    {
+        bool alreadyExists =
+            resolutionOptions.Any(
+                option =>
+                    option.width == width &&
+                    option.height == height
+            );
+
+        if (alreadyExists)
+            return;
+
+        resolutionOptions.Add(
+            new ResolutionOption(
+                width,
+                height
+            )
+        );
     }
 
     private int GetResolutionIndex(
@@ -537,10 +885,8 @@ public class GameSettingsPausePanelUI : MonoBehaviour
             i++
         )
         {
-            if (
-                resolutionOptions[i].width == width &&
-                resolutionOptions[i].height == height
-            )
+            if (resolutionOptions[i].width == width &&
+                resolutionOptions[i].height == height)
             {
                 return i;
             }
@@ -552,10 +898,8 @@ public class GameSettingsPausePanelUI : MonoBehaviour
             i++
         )
         {
-            if (
-                resolutionOptions[i].width == Screen.width &&
-                resolutionOptions[i].height == Screen.height
-            )
+            if (resolutionOptions[i].width == Screen.width &&
+                resolutionOptions[i].height == Screen.height)
             {
                 return i;
             }
@@ -586,11 +930,15 @@ public class GameSettingsPausePanelUI : MonoBehaviour
         HotelGamePause.ForceResume();
 
 #if UNITY_EDITOR
+
         Debug.Log(
             "QuitGame called. Application.Quit only works in a build."
         );
+
 #else
+
         Application.Quit();
+
 #endif
     }
 }

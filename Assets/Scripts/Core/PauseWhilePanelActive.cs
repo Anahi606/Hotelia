@@ -11,6 +11,11 @@ public class PauseWhilePanelActive : MonoBehaviour
 
         HotelGamePause.RequestPause();
         hasPauseRequest = true;
+
+        Debug.Log(
+            $"[PauseWhilePanelActive] REQUEST | " +
+            $"Object: {gameObject.name} | ID: {GetInstanceID()}"
+        );
     }
 
     private void OnDisable()
@@ -28,7 +33,17 @@ public class PauseWhilePanelActive : MonoBehaviour
         if (!hasPauseRequest)
             return;
 
-        HotelGamePause.ReleasePause();
         hasPauseRequest = false;
+        HotelGamePause.ReleasePause();
+
+        Debug.Log(
+            $"[PauseWhilePanelActive] RELEASE | " +
+            $"Object: {gameObject.name} | ID: {GetInstanceID()}"
+        );
+    }
+
+    public void ClosePanel()
+    {
+        gameObject.SetActive(false);
     }
 }

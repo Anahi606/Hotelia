@@ -21,6 +21,15 @@ public class MenuController : MonoBehaviour
 
         HotelSaveSystem.DeleteSave();
 
+        CheckInTutorialBookUI.ResetForNewGame();
+        RestaurantTutorialBookUI.ResetForNewGame();
+        RoomCleaningTutorialBookUI.ResetForNewGame();
+
+        if (DayManager.Instance != null)
+        {
+            DayManager.Instance.ResetDays();
+        }
+
         SceneManager.LoadScene(_newGameLevel);
     }
 

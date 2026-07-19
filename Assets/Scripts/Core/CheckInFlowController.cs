@@ -78,6 +78,9 @@ public class CheckInFlowController : MonoBehaviour
     [Header("Result UI")]
     public CheckInResultPanelUI resultPanelUI;
 
+    [Header("Restaurant Tutorial")]
+    [SerializeField] private RestaurantTutorialBookUI restaurantTutorial;
+
     [Header("Guest NPCs")]
     public GameObject[] guestNPCPrefabs;
 
@@ -119,9 +122,24 @@ public class CheckInFlowController : MonoBehaviour
     [SerializeField] private Color badMoneyColor = new Color(0.75f, 0.1f, 0.1f);
     [SerializeField] private Color normalMoneyColor = Color.black;
 
-
+    private bool IsAnyTutorialBlockingInput()
+    {
+        return
+            CheckInTutorialBookUI.IsBlockingGameInput ||
+            RestaurantTutorialBookUI.IsBlockingGameInput ||
+            RoomCleaningTutorialBookUI.IsBlockingGameInput;
+    }
     public void StartCheckIn()
     {
+        if (IsAnyTutorialBlockingInput())
+        {
+            Debug.Log(
+                "Check-In interaction blocked while a tutorial is open."
+            );
+
+            return;
+        }
+
         if (IsCheckInActive)
         {
             Debug.Log("El check-in ya está activo.");
@@ -590,6 +608,8 @@ public class CheckInFlowController : MonoBehaviour
             pendingGuestAccepted
         );
 
+        CheckInTutorialBookUI.MarkAsCompleted();
+
         if (checkInScreen != null)
             checkInScreen.SetActive(false);
 
@@ -878,6 +898,22 @@ public class CheckInFlowController : MonoBehaviour
     public void CloseResultAndFinishCheckIn()
     {
         CloseCheckIn();
+
+        if (restaurantTutorial == null)
+        {
+            Debug.LogError(
+                "[Restaurant Tutorial] No está asignado en CheckInFlowController."
+            );
+
+            return;
+        }
+
+        bool opened = restaurantTutorial.OpenIfNeeded();
+
+        Debug.Log(
+            "[Restaurant Tutorial] Intento de apertura. Resultado: " +
+            opened
+        );
     }
 
     private bool HasFreeRooms()

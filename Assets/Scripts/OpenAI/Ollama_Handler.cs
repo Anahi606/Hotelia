@@ -6,6 +6,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine.Networking;
+using UnityEngine.InputSystem;
 
 public class Ollama_Handler : MonoBehaviour
 {
@@ -44,6 +45,13 @@ public class Ollama_Handler : MonoBehaviour
 
     [Header("Player")]
     public PlayerMovement playerMovement;
+
+    [Header("Gameplay Input Blocking")]
+    [SerializeField] private PlayerInput playerInput;
+    [SerializeField] private string interactActionName = "Interact";
+
+    private InputAction interactAction;
+    private bool interactActionWasEnabled;
 
     [Header("Auto Close")]
     public float closeDelay = 2f;
@@ -326,13 +334,142 @@ public class Ollama_Handler : MonoBehaviour
             feedbackCloseButton.onClick.AddListener(CloseFeedbackPanel);
         }
 
+        ResolvePlayerReferences();
+    }
+
+    private void ResolvePlayerReferences()
+    {
+        GameObject playerObject = null;
+
         if (playerMovement == null)
         {
-            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+            playerObject = GameObject.FindGameObjectWithTag("Player");
 
-            if (playerObj != null)
-                playerMovement = playerObj.GetComponent<PlayerMovement>();
+            if (playerObject != null)
+            {
+                playerMovement =
+                    playerObject.GetComponent<PlayerMovement>();
+
+                if (playerMovement == null)
+                {
+                    playerMovement =
+                        playerObject.GetComponentInChildren<PlayerMovement>();
+                }
+            }
         }
+
+        if (playerInput == null && playerMovement != null)
+        {
+            playerInput =
+                playerMovement.GetComponent<PlayerInput>();
+
+            if (playerInput == null)
+            {
+                playerInput =
+                    playerMovement.GetComponentInParent<PlayerInput>();
+            }
+
+            if (playerInput == null)
+            {
+                playerInput =
+                    playerMovement.GetComponentInChildren<PlayerInput>();
+            }
+        }
+
+        if (playerInput == null && playerObject != null)
+        {
+            playerInput =
+                playerObject.GetComponent<PlayerInput>();
+
+            if (playerInput == null)
+            {
+                playerInput =
+                    playerObject.GetComponentInChildren<PlayerInput>();
+            }
+        }
+
+        if (playerInput == null)
+        {
+            playerInput = FindObjectOfType<PlayerInput>();
+        }
+
+        ResolveInteractAction();
+    }
+
+    private void ResolveInteractAction()
+    {
+        interactAction = null;
+
+        if (playerInput == null)
+        {
+            Debug.LogWarning(
+                "Ollama_Handler: No se encontró el PlayerInput."
+            );
+
+            return;
+        }
+
+        if (playerInput.actions == null)
+        {
+            Debug.LogWarning(
+                "Ollama_Handler: PlayerInput no tiene Input Actions asignadas."
+            );
+
+            return;
+        }
+
+        interactAction = playerInput.actions.FindAction(
+            interactActionName,
+            false
+        );
+
+        if (interactAction == null)
+        {
+            Debug.LogWarning(
+                $"Ollama_Handler: No se encontró la acción " +
+                $"'{interactActionName}'. Revisa el nombre en Input Actions."
+            );
+        }
+    }
+
+    private void BlockPlayerInteraction()
+    {
+        if (interactAction == null)
+        {
+            ResolvePlayerReferences();
+        }
+
+        if (interactAction == null)
+            return;
+
+        interactActionWasEnabled = interactAction.enabled;
+
+        if (interactAction.enabled)
+        {
+            interactAction.Disable();
+
+            Debug.Log(
+                "Interacción del jugador bloqueada durante el diálogo."
+            );
+        }
+    }
+
+    private void RestorePlayerInteraction()
+    {
+        if (interactAction == null)
+            return;
+
+        if (interactActionWasEnabled &&
+            !interactAction.enabled)
+        {
+            interactAction.Enable();
+
+            Debug.Log(
+                "Interacción del jugador habilitada nuevamente."
+            );
+        }
+
+        interactActionWasEnabled = false;
     }
 
     public async void OpenDialogue(Sprite npcSprite = null, Action finishedCallback = null)
@@ -340,7 +477,6 @@ public class Ollama_Handler : MonoBehaviour
         if (IsOpen || isGenerating)
             return;
 
-        // Si otro panel ya pausó el juego, el NPC no puede abrir diálogo
         if (HotelGamePause.IsPaused)
             return;
 
@@ -361,7 +497,8 @@ public class Ollama_Handler : MonoBehaviour
         IsOpen = true;
         conversationEnding = false;
 
-        // El diálogo también pausa el juego
+        BlockPlayerInteraction();
+
         HotelGamePause.RequestPause();
         pauseRequestedByThisDialogue = true;
 
@@ -414,6 +551,7 @@ public class Ollama_Handler : MonoBehaviour
         }
 
         ClearOllamaConversationData();
+        RestorePlayerInteraction();
 
         if (playerMovement != null)
             playerMovement.SetMovementEnabled(true);
@@ -1934,8 +2072,21 @@ Rules:
 
     private void SetInputEnabled(bool enabled)
     {
-        if (InputText != null)
-            InputText.interactable = enabled;
+        if (InputText == null)
+            return;
+
+        InputText.interactable = enabled;
+
+        if (enabled)
+        {
+            InputText.Select();
+            InputText.ActivateInputField();
+            InputText.MoveTextEnd(false);
+        }
+        else
+        {
+            InputText.DeactivateInputField();
+        }
     }
 
     private bool ValidateReferences()
@@ -1979,8 +2130,12 @@ Rules:
             pauseRequestedByThisDialogue = false;
         }
 
+        RestorePlayerInteraction();
+
         if (playerMovement != null)
+        {
             playerMovement.SetMovementEnabled(true);
+        }
     }
 
     private void OnDestroy()
@@ -1993,7 +2148,9 @@ Rules:
         );
 
         if (instance == this)
+        {
             instance = null;
+        }
 
         if (pauseRequestedByThisDialogue)
         {
@@ -2001,8 +2158,12 @@ Rules:
             pauseRequestedByThisDialogue = false;
         }
 
+        RestorePlayerInteraction();
+
         if (playerMovement != null)
+        {
             playerMovement.SetMovementEnabled(true);
+        }
     }
 }
 

@@ -135,12 +135,26 @@ public class TrashSpawner : MonoBehaviour
         return true;
     }
 
-    public void RemoveTrash(TrashItem trash)
+    public bool RemoveTrash(TrashItem trash)
     {
-        if (spawnedTrash.Contains(trash))
+        if (trash == null)
+            return false;
+
+        bool wasRegistered = spawnedTrash.Remove(trash);
+
+        if (!wasRegistered)
         {
-            spawnedTrash.Remove(trash);
+            Debug.LogError(
+                "El objeto no estaba registrado como basura: " +
+                trash.gameObject.name,
+                trash
+            );
+
+            return false;
         }
+
+        Destroy(trash.gameObject);
+        return true;
     }
 
     public int GetRemainingTrash()

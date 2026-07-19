@@ -5,6 +5,7 @@ using Hotelia.Core;
 public class RoomCleaningKPIManager : MonoBehaviour
 {
     public static RoomCleaningKPIManager Instance { get; private set; }
+    private bool setupAlreadyExecuted;
 
     [Header("Timer")]
     [SerializeField] private float totalTime = 60f;
@@ -62,8 +63,24 @@ public class RoomCleaningKPIManager : MonoBehaviour
         }
     }
 
-    public void SetupCleaningRoom(bool isDirty, TrashSpawner spawner, BedSpot[] activeBeds)
+    public void SetupCleaningRoom(
+    bool isDirty,
+    TrashSpawner spawner,
+    BedSpot[] activeBeds
+)
     {
+        if (setupAlreadyExecuted)
+        {
+            Debug.LogWarning(
+                "SetupCleaningRoom intentó ejecutarse más de una vez. " +
+                "Se ignoró la nueva inicialización."
+            );
+
+            return;
+        }
+
+        setupAlreadyExecuted = true;
+
         roomIsDirty = isDirty;
         trashSpawner = spawner;
         beds = activeBeds;
@@ -99,9 +116,12 @@ public class RoomCleaningKPIManager : MonoBehaviour
             UpdateTimerUI();
         }
 
-        Debug.Log("Minijuego limpieza configurado. Sucia: " + roomIsDirty +
-                  " | Camas: " + totalBeds +
-                  " | Basura: " + totalTrash);
+        Debug.Log(
+            "Minijuego limpieza configurado. Sucia: " +
+            roomIsDirty +
+            " | Camas: " + totalBeds +
+            " | Basura: " + totalTrash
+        );
     }
 
     private void SetupBeds()
@@ -114,12 +134,10 @@ public class RoomCleaningKPIManager : MonoBehaviour
 
             if (roomIsDirty)
             {
-                // Habitación sucia: cama sin piezas y minijuego disponible.
                 bed.SetBedCompletedVisual(false);
             }
             else
             {
-                // Habitación ocupada/libre: cama ya tendida y sin minijuego.
                 bed.SetBedCompletedVisual(true);
                 madeBeds++;
             }
@@ -146,14 +164,29 @@ public class RoomCleaningKPIManager : MonoBehaviour
 
     public void RegisterTrashCleaned()
     {
-        if (!minigameActive || resultsShown) return;
+        if (!minigameActive || resultsShown)
+            return;
 
         cleanedTrash++;
 
         if (cleanedTrash > totalTrash)
             cleanedTrash = totalTrash;
 
+        RestoreCompletedBedVisuals();
+
         CheckIfRoomFinished();
+    }
+
+    private void RestoreCompletedBedVisuals()
+    {
+        if (beds == null)
+            return;
+
+        foreach (BedSpot bed in beds)
+        {
+            if (bed != null)
+                bed.EnsureCompletedVisuals();
+        }
     }
 
     public void RegisterBedMade()
@@ -349,6 +382,8 @@ public class RoomCleaningKPIManager : MonoBehaviour
             timeScore,
             finalScore
         );
+
+        RoomCleaningTutorialBookUI.MarkAsCompleted();
 
         if (resultPanel != null)
             resultPanel.SetActive(true);
