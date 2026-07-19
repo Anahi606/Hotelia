@@ -56,6 +56,18 @@ public class PlayfabManager : MonoBehaviour
 
     private void Start()
     {
+        if (IsLoggedInWithEmail &&
+            !string.IsNullOrWhiteSpace(CurrentPlayFabId))
+        {
+            HoteliaSQLiteManager.UsePlayFabProfile(
+                CurrentPlayFabId
+            );
+        }
+        else
+        {
+            HoteliaSQLiteManager.UseGuestProfile();
+        }
+
         if (settingsPanel != null)
             settingsPanel.SetActive(false);
 
@@ -110,6 +122,9 @@ public class PlayfabManager : MonoBehaviour
         CurrentPlayFabId = result.PlayFabId;
         CurrentSessionTicket = result.SessionTicket;
         CurrentRole = pendingRegisterRole;
+        HoteliaSQLiteManager.UsePlayFabProfile(
+            CurrentPlayFabId
+        );
 
         string displayName = GetNameFromEmail(CurrentEmail);
 
@@ -145,6 +160,7 @@ public class PlayfabManager : MonoBehaviour
         CurrentRole = "";
         pendingRegisterRole = StudentRole;
 
+        HoteliaSQLiteManager.UseGuestProfile();
         ClearLoginFields();
 
         if (registerPanelDialogue != null)
@@ -217,12 +233,52 @@ public class PlayfabManager : MonoBehaviour
     private void OnLoginSuccess(LoginResult result)
     {
         IsLoggedInWithEmail = true;
-        CurrentEmail = emailInput.text.Trim();
+        CurrentEmail = emailInput != null
+            ? emailInput.text.Trim()
+            : "";
+
         CurrentPlayFabId = result.PlayFabId;
         CurrentSessionTicket = result.SessionTicket;
 
+        bool profileActivated =
+            HoteliaSQLiteManager.UsePlayFabProfile(
+                CurrentPlayFabId
+            );
+
+        if (!profileActivated)
+        {
+            Debug.LogError(
+                "Login succeeded, but the local SQLite profile " +
+                "could not be activated."
+            );
+
+            SetMessage(
+                "Login succeeded, but your local save profile " +
+                "could not be opened."
+            );
+
+            PlayFabClientAPI.ForgetAllCredentials();
+
+            IsLoggedInWithEmail = false;
+            CurrentEmail = "";
+            CurrentPlayFabId = "";
+            CurrentSessionTicket = "";
+            CurrentRole = "";
+
+            HoteliaSQLiteManager.UseGuestProfile();
+
+            UpdateLoginUI();
+            return;
+        }
+
         SetMessage("Logged in. Checking account role...");
-        Debug.Log("Login successful with email. PlayFabId: " + CurrentPlayFabId);
+
+        Debug.Log(
+            "Login successful with email. PlayFabId: " +
+            CurrentPlayFabId +
+            " | SQLite profile: " +
+            HoteliaSQLiteManager.ActiveProfileId
+        );
 
         LoadRoleFromPlayFab(() =>
         {
@@ -231,13 +287,23 @@ public class PlayfabManager : MonoBehaviour
 
             if (IsStudent)
             {
-                SetMessage("Student logged in. Press Continue to sync your progress.");
-                Debug.Log("Student logged in. Progress will sync when pressing Continue.");
+                SetMessage(
+                    "Student logged in. Press Continue to sync your progress."
+                );
+
+                Debug.Log(
+                    "Student logged in. Progress will sync when pressing Continue."
+                );
             }
             else if (IsTeacher)
             {
-                SetMessage("Teacher logged in. You can open the Teacher Dashboard.");
-                Debug.Log("Teacher logged in. Local SQLite progress will not be uploaded.");
+                SetMessage(
+                    "Teacher logged in. You can open the Teacher Dashboard."
+                );
+
+                Debug.Log(
+                    "Teacher logged in. Local SQLite progress will not be uploaded."
+                );
             }
         });
     }
@@ -351,15 +417,23 @@ public class PlayfabManager : MonoBehaviour
         CurrentRole = "";
         pendingRegisterRole = StudentRole;
 
+        HoteliaSQLiteManager.UseGuestProfile();
+
         ClearLoginFields();
 
-        Debug.Log("Player logged out from PlayFab.");
+        Debug.Log(
+            "Player logged out from PlayFab. " +
+            "Guest SQLite profile activated."
+        );
 
         if (buttonsPanel != null)
             buttonsPanel.SetActive(true);
 
         if (loginPanelDialogue != null)
             loginPanelDialogue.SetActive(false);
+
+        if (registerPanelDialogue != null)
+            registerPanelDialogue.SetActive(false);
 
         UpdateLoginUI();
     }

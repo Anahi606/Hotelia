@@ -172,9 +172,8 @@ public class DayManager : MonoBehaviour
     public void ResetDays()
     {
         CurrentDay = 1;
-
-        HotelSaveSystem.SaveEndOfDay();
-
         DayTextUI.UpdateAllDayTexts();
+
+        Debug.Log("Días reiniciados para una nueva partida.");
     }
 }

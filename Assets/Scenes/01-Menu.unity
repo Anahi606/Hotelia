@@ -1678,8 +1678,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -6.1386013, y: 64}
-  m_SizeDelta: {x: 689.72, y: 115.1854}
+  m_AnchoredPosition: {x: 0.0000095367, y: 53}
+  m_SizeDelta: {x: 689.72, y: 171.7852}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &197918880
 MonoBehaviour:
@@ -1701,7 +1701,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Do you want to start a new game?
+  m_text: Do you want to start a new game? (If you already have a save your last
+    game will be deleted)
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 125cb55b44b24c4393181402bc6200e6, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: 125cb55b44b24c4393181402bc6200e6, type: 2}
@@ -7433,7 +7434,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -256, y: -108}
+  m_AnchoredPosition: {x: -256, y: -122}
   m_SizeDelta: {x: 167.4438, y: 59.3517}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1096807907
@@ -9672,7 +9673,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 255, y: -108}
+  m_AnchoredPosition: {x: 255, y: -122}
   m_SizeDelta: {x: 167.4438, y: 59.3517}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1414936398
@@ -13770,6 +13771,8 @@ MonoBehaviour:
   mainMenuButton: {fileID: 0}
   quitButton: {fileID: 0}
   mainMenuSceneName: MainMenu
+  listenForEscapeDirectly: 0
+  pauseGameWhenOpen: 1
 --- !u!1 &2114043709
 GameObject:
   m_ObjectHideFlags: 0

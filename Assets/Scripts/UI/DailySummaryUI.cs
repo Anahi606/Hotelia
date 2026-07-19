@@ -88,6 +88,8 @@ public class DailySummaryUI : MonoBehaviour
         }
     }
 
+    private Coroutine openSummaryCoroutine;
+    private bool hasSummaryPauseRequest;
     private const int MaxDailyDashboardDays = 15;
     private const int DaysPerGameMonth = 30;
 
@@ -123,7 +125,10 @@ public class DailySummaryUI : MonoBehaviour
 
     public void OpenSummary()
     {
-        StartCoroutine(OpenSummaryRoutine());
+        StopOpenSummaryRoutine();
+
+        openSummaryCoroutine =
+            StartCoroutine(OpenSummaryRoutine());
     }
 
     private IEnumerator OpenSummaryRoutine()
@@ -170,7 +175,48 @@ public class DailySummaryUI : MonoBehaviour
 
         ForceRefreshDailyCharts();
 
+        openSummaryCoroutine = null;
+
+        if (summaryPanel != null &&
+            summaryPanel.activeInHierarchy)
+        {
+            RequestSummaryPause();
+        }
+    }
+
+    private void StopOpenSummaryRoutine()
+    {
+        if (openSummaryCoroutine == null)
+            return;
+
+        StopCoroutine(openSummaryCoroutine);
+        openSummaryCoroutine = null;
+    }
+
+    private void RequestSummaryPause()
+    {
+        if (hasSummaryPauseRequest)
+            return;
+
         HotelGamePause.RequestPause();
+        hasSummaryPauseRequest = true;
+
+        Debug.Log(
+            "[DailySummaryUI] Summary pause requested."
+        );
+    }
+
+    private void ReleaseSummaryPause()
+    {
+        if (!hasSummaryPauseRequest)
+            return;
+
+        hasSummaryPauseRequest = false;
+        HotelGamePause.ReleasePause();
+
+        Debug.Log(
+            "[DailySummaryUI] Summary pause released."
+        );
     }
 
     private void ForceRefreshDailyCharts()
@@ -552,12 +598,35 @@ public class DailySummaryUI : MonoBehaviour
 
     private void UpdateRevenueBarChart(List<SummaryData> summary)
     {
-        if (revenueBarChart == null) return;
+        if (revenueBarChart == null)
+            return;
 
         ClearChartSeries(revenueBarChart);
 
-        SetChartTitle(revenueBarChart, "Revenue by Activity ($)");
+        SetChartTitle(
+            revenueBarChart,
+            "Revenue by Activity ($)"
+        );
+
         SetLegend(revenueBarChart, false);
+
+        XAxis xAxis =
+            revenueBarChart.EnsureChartComponent<XAxis>();
+
+        if (xAxis != null)
+        {
+            xAxis.type = Axis.AxisType.Value;
+            xAxis.minMaxType = Axis.AxisMinMaxType.Default;
+        }
+
+        YAxis yAxis =
+            revenueBarChart.EnsureChartComponent<YAxis>();
+
+        if (yAxis != null)
+        {
+            yAxis.type = Axis.AxisType.Category;
+            yAxis.axisLabel.show = true;
+        }
 
         revenueBarChart.AddSerie<Bar>("Revenue");
 
@@ -569,14 +638,25 @@ public class DailySummaryUI : MonoBehaviour
 
         foreach (SummaryData item in summary)
         {
-            string activityName = GetFullActivityName(item.name);
+            if (item == null)
+                continue;
 
-            revenueBarChart.AddXAxisData(activityName);
+            string activityName =
+                GetFullActivityName(item.name);
+
+            revenueBarChart.AddYAxisData(activityName);
 
             revenueBarChart.AddData(
                 0,
                 item.totalRevenue,
                 activityName + ": $" + item.totalRevenue
+            );
+
+            Debug.Log(
+                "Daily Revenue Chart -> " +
+                activityName +
+                ": $" +
+                item.totalRevenue
             );
         }
 
@@ -1004,36 +1084,32 @@ public class DailySummaryUI : MonoBehaviour
 
     public void ContinueToNextDay()
     {
+        StopOpenSummaryRoutine();
+
         if (summaryPanel != null)
             summaryPanel.SetActive(false);
 
         if (allDaysDashboardPanel != null)
             allDaysDashboardPanel.SetActive(false);
 
+        ReleaseSummaryPause();
+
         if (DayManager.Instance != null)
             DayManager.Instance.EndDay();
-
-        HotelGamePause.ReleasePause();
     }
 
     private void OnDisable()
     {
-        if ((summaryPanel != null && summaryPanel.activeSelf) ||
-            (allDaysDashboardPanel != null && allDaysDashboardPanel.activeSelf))
-        {
-            HotelGamePause.ReleasePause();
-        }
+        StopOpenSummaryRoutine();
+        ReleaseSummaryPause();
     }
 
     private void OnDestroy()
     {
+        StopOpenSummaryRoutine();
+        ReleaseSummaryPause();
+
         if (Instance == this)
             Instance = null;
-
-        if ((summaryPanel != null && summaryPanel.activeSelf) ||
-            (allDaysDashboardPanel != null && allDaysDashboardPanel.activeSelf))
-        {
-            HotelGamePause.ReleasePause();
-        }
     }
 }

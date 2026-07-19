@@ -28,6 +28,33 @@ public static class PlayfabCloudSaveManager
             return;
         }
 
+        if (string.IsNullOrWhiteSpace(PlayfabManager.CurrentPlayFabId))
+        {
+            Debug.LogError(
+                "Cloud synchronization was cancelled because " +
+                "the current PlayFabId is missing."
+            );
+
+            onFinished?.Invoke(null);
+            return;
+        }
+
+        bool profileActivated =
+            HoteliaSQLiteManager.UsePlayFabProfile(
+                PlayfabManager.CurrentPlayFabId
+            );
+
+        if (!profileActivated)
+        {
+            Debug.LogError(
+                "Cloud synchronization was cancelled because " +
+                "the SQLite profile could not be activated."
+            );
+
+            onFinished?.Invoke(null);
+            return;
+        }
+
         HotelSaveData localSave = HotelSaveSystem.LoadGame();
 
         var request = new GetUserDataRequest
@@ -135,7 +162,40 @@ public static class PlayfabCloudSaveManager
 
         if (PlayfabManager.IsTeacher)
         {
-            Debug.Log("Progress was not uploaded because the current account is a teacher account.");
+            Debug.Log(
+                "Progress was not uploaded because " +
+                "the current account is a teacher account."
+            );
+
+            onFinished?.Invoke(false);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(
+            PlayfabManager.CurrentPlayFabId
+        ))
+        {
+            Debug.LogError(
+                "Progress cannot be uploaded because " +
+                "the PlayFabId is missing."
+            );
+
+            onFinished?.Invoke(false);
+            return;
+        }
+
+        bool profileActivated =
+            HoteliaSQLiteManager.UsePlayFabProfile(
+                PlayfabManager.CurrentPlayFabId
+            );
+
+        if (!profileActivated)
+        {
+            Debug.LogError(
+                "Progress cannot be uploaded because " +
+                "the SQLite profile could not be activated."
+            );
+
             onFinished?.Invoke(false);
             return;
         }

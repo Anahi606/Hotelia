@@ -1,4 +1,6 @@
+using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 public class RestaurantInteractable : MonoBehaviour
@@ -10,6 +12,9 @@ public class RestaurantInteractable : MonoBehaviour
     [Tooltip("Objeto 2D con SpriteRenderer que muestra la tecla E.")]
     [SerializeField] private GameObject interactionPrompt;
 
+    [Tooltip("Texto TextMeshPro que acompaña al indicador de la tecla E.")]
+    [SerializeField] private TMP_Text interactionPromptText;
+
     private bool playerInside;
     private bool restaurantOpen;
 
@@ -20,8 +25,25 @@ public class RestaurantInteractable : MonoBehaviour
 
     private void Update()
     {
-        if (!playerInside || restaurantOpen)
+        if (IsInteractionBlocked())
+        {
+            HideInteractionPrompt();
             return;
+        }
+
+        if (!playerInside || restaurantOpen)
+        {
+            HideInteractionPrompt();
+            return;
+        }
+
+        if (restaurantOrderManager == null)
+        {
+            HideInteractionPrompt();
+            return;
+        }
+
+        ShowInteractionPrompt();
 
         if (Keyboard.current == null)
             return;
@@ -29,21 +51,71 @@ public class RestaurantInteractable : MonoBehaviour
         if (!Keyboard.current.eKey.wasPressedThisFrame)
             return;
 
+        OpenRestaurant();
+    }
+
+    private bool IsInteractionBlocked()
+    {
+
+        if (Ollama_Handler.Instance != null &&
+            Ollama_Handler.Instance.IsOpen)
+        {
+            return true;
+        }
+
+        if (EventSystem.current != null)
+        {
+            GameObject selectedObject =
+                EventSystem.current.currentSelectedGameObject;
+
+            if (selectedObject != null)
+            {
+                TMP_InputField selectedInput =
+                    selectedObject.GetComponent<TMP_InputField>();
+
+                if (selectedInput == null)
+                {
+                    selectedInput =
+                        selectedObject.GetComponentInParent<TMP_InputField>();
+                }
+
+                if (selectedInput != null &&
+                    selectedInput.isFocused)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private void OpenRestaurant()
+    {
         if (restaurantOrderManager == null)
         {
             Debug.LogWarning(
-                "RestaurantOrderManager no está asignado en RestaurantInteractable."
+                "RestaurantOrderManager no está asignado " +
+                "en RestaurantInteractable."
+            );
+
+            return;
+        }
+        if (IsInteractionBlocked())
+        {
+            Debug.Log(
+                "La interacción del restaurante fue bloqueada " +
+                "porque el jugador está escribiendo o hablando con un NPC."
             );
 
             return;
         }
 
-        OpenRestaurant();
-    }
+        if (restaurantOpen)
+            return;
 
-    private void OpenRestaurant()
-    {
         restaurantOpen = true;
+
         HideInteractionPrompt();
 
         restaurantOrderManager.OpenRestaurant();
@@ -58,10 +130,18 @@ public class RestaurantInteractable : MonoBehaviour
 
         playerInside = true;
 
-        if (!restaurantOpen)
+        if (CanShowInteractionPrompt())
+        {
             ShowInteractionPrompt();
+        }
+        else
+        {
+            HideInteractionPrompt();
+        }
 
-        Debug.Log("Jugador dentro del trigger del restaurante.");
+        Debug.Log(
+            "Jugador dentro del trigger del restaurante."
+        );
     }
 
     private void OnTriggerExit2D(Collider2D other)
@@ -70,45 +150,91 @@ public class RestaurantInteractable : MonoBehaviour
             return;
 
         playerInside = false;
+
         HideInteractionPrompt();
 
-        Debug.Log("Jugador salió del trigger del restaurante.");
+        Debug.Log(
+            "Jugador salió del trigger del restaurante."
+        );
     }
 
     public void NotifyRestaurantClosed()
     {
         restaurantOpen = false;
 
-        if (playerInside)
+        if (CanShowInteractionPrompt())
+        {
             ShowInteractionPrompt();
+        }
         else
+        {
             HideInteractionPrompt();
+        }
 
         Debug.Log("Restaurante cerrado.");
     }
 
+    private bool CanShowInteractionPrompt()
+    {
+        if (!playerInside)
+            return false;
+
+        if (restaurantOpen)
+            return false;
+
+        if (restaurantOrderManager == null)
+            return false;
+
+        if (IsInteractionBlocked())
+            return false;
+
+        return true;
+    }
+
     private void ShowInteractionPrompt()
     {
-        if (interactionPrompt != null)
+        if (interactionPrompt != null &&
+            !interactionPrompt.activeSelf)
         {
             interactionPrompt.SetActive(true);
         }
-        else
+
+        if (interactionPromptText != null &&
+            !interactionPromptText.gameObject.activeSelf)
         {
-            Debug.LogWarning(
-                "Interaction Prompt no está asignado en RestaurantInteractable."
-            );
+            interactionPromptText.gameObject.SetActive(true);
         }
     }
 
     private void HideInteractionPrompt()
     {
-        if (interactionPrompt != null)
+        if (interactionPrompt != null &&
+            interactionPrompt.activeSelf)
+        {
             interactionPrompt.SetActive(false);
+        }
+
+        if (interactionPromptText != null &&
+            interactionPromptText.gameObject.activeSelf)
+        {
+            interactionPromptText.gameObject.SetActive(false);
+        }
     }
 
     private void OnDisable()
     {
         HideInteractionPrompt();
+    }
+
+    public void RefreshInteractionPrompt()
+    {
+        if (CanShowInteractionPrompt())
+        {
+            ShowInteractionPrompt();
+        }
+        else
+        {
+            HideInteractionPrompt();
+        }
     }
 }

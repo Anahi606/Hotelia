@@ -5,13 +5,37 @@ using UnityEngine;
 
 public static class HoteliaSQLiteManager
 {
+    private const string GuestProfileId = "guest";
+
     private static SQLiteConnection connection;
+    private static string activeProfileId = GuestProfileId;
+
+    public static string ActiveProfileId
+    {
+        get
+        {
+            return activeProfileId;
+        }
+    }
+
+    public static string CurrentDatabasePath
+    {
+        get
+        {
+            return DatabasePath;
+        }
+    }
 
     private static string DatabasePath
     {
         get
         {
-            return Path.Combine(Application.persistentDataPath, "hotelia_save.db");
+            string safeProfileId = SanitizeFileName(activeProfileId);
+
+            return Path.Combine(
+                Application.persistentDataPath,
+                "hotelia_save_" + safeProfileId + ".db"
+            );
         }
     }
 
@@ -40,7 +64,100 @@ public static class HoteliaSQLiteManager
         connection.CreateTable<DailyResultEntity>();
         connection.CreateTable<NpcSaveEntity>();
 
-        Debug.Log("SQLite inicializado en: " + DatabasePath);
+        Debug.Log(
+            "[HoteliaSQLiteManager] SQLite initialized." +
+            "\nProfile: " + activeProfileId +
+            "\nPath: " + DatabasePath
+        );
+    }
+
+    public static void UseGuestProfile()
+    {
+        SwitchProfile(GuestProfileId);
+    }
+
+    public static bool UsePlayFabProfile(string playFabId)
+    {
+        if (string.IsNullOrWhiteSpace(playFabId))
+        {
+            Debug.LogError(
+                "[HoteliaSQLiteManager] The PlayFab profile could not be activated " +
+                "because the PlayFabId is empty."
+            );
+
+            return false;
+        }
+
+        SwitchProfile("user_" + playFabId);
+
+        return true;
+    }
+
+    private static void SwitchProfile(string newProfileId)
+    {
+        if (string.IsNullOrWhiteSpace(newProfileId))
+        {
+            newProfileId = GuestProfileId;
+        }
+
+        newProfileId = SanitizeFileName(newProfileId);
+
+        if (connection != null && activeProfileId == newProfileId)
+        {
+            return;
+        }
+
+        CloseConnection();
+
+        activeProfileId = newProfileId;
+
+        Initialize();
+
+        Debug.Log(
+            "[HoteliaSQLiteManager] SQLite profile changed." +
+            "\nProfile: " + activeProfileId +
+            "\nPath: " + DatabasePath
+        );
+    }
+
+    private static void CloseConnection()
+    {
+        if (connection == null)
+            return;
+
+        try
+        {
+            connection.Close();
+        }
+        catch (System.Exception exception)
+        {
+            Debug.LogWarning(
+                "[HoteliaSQLiteManager] The previous SQLite connection " +
+                "could not be closed correctly: " +
+                exception.Message
+            );
+        }
+        finally
+        {
+            connection = null;
+        }
+    }
+
+    private static string SanitizeFileName(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return GuestProfileId;
+        }
+
+        char[] invalidCharacters = Path.GetInvalidFileNameChars();
+
+        foreach (char invalidCharacter in invalidCharacters)
+        {
+            value = value.Replace(invalidCharacter, '_');
+        }
+
+        return value.Trim();
     }
 
     public static bool HasGameState()
@@ -114,32 +231,48 @@ public static class HoteliaSQLiteManager
     {
         Initialize();
 
-        List<RoomSaveEntity> entities = connection.Table<RoomSaveEntity>().ToList();
-        List<RoomRuntimeData> rooms = new List<RoomRuntimeData>();
+        List<RoomSaveEntity> entities =
+            connection.Table<RoomSaveEntity>().ToList();
+
+        List<RoomRuntimeData> rooms =
+            new List<RoomRuntimeData>();
 
         foreach (RoomSaveEntity entity in entities)
         {
-            RoomRuntimeData room = new RoomRuntimeData();
+            RoomRuntimeData room = new RoomRuntimeData
+            {
+                roomId = entity.RoomId,
 
-            room.roomId = entity.RoomId;
+                isAccessible = entity.IsAccessible,
 
-            room.isAccessible = entity.IsAccessible;
+                bedType = (BedType)entity.BedType,
+                bedCount = entity.BedCount,
 
-            room.bedType = (BedType)entity.BedType;
-            room.bedCount = entity.BedCount;
+                state = (RoomState)entity.State,
+                needsCleaning = entity.NeedsCleaning,
+                reservedUntilDay = entity.ReservedUntilDay,
 
-            room.state = (RoomState)entity.State;
-            room.needsCleaning = entity.NeedsCleaning;
-            room.reservedUntilDay = entity.ReservedUntilDay;
+                currentGuestSegment =
+                    (GuestSegment)entity.CurrentGuestSegment,
 
-            room.currentGuestSegment = (GuestSegment)entity.CurrentGuestSegment;
-            room.currentOffer = (OfferType)entity.CurrentOffer;
-            room.currentMealPlan = (MealPlan)entity.CurrentMealPlan;
-            room.currentGuestCount = entity.CurrentGuestCount;
-            room.hasGuestData = entity.HasGuestData;
+                currentOffer =
+                    (OfferType)entity.CurrentOffer,
 
-            room.hotelDoorSpawnId = entity.HotelDoorSpawnId;
-            room.guestSpriteName = entity.GuestSpriteName;
+                currentMealPlan =
+                    (MealPlan)entity.CurrentMealPlan,
+
+                currentGuestCount =
+                    entity.CurrentGuestCount,
+
+                hasGuestData =
+                    entity.HasGuestData,
+
+                hotelDoorSpawnId =
+                    entity.HotelDoorSpawnId,
+
+                guestSpriteName =
+                    entity.GuestSpriteName
+            };
 
             rooms.Add(room);
         }
@@ -147,7 +280,9 @@ public static class HoteliaSQLiteManager
         return rooms;
     }
 
-    public static void SaveDailyResults(List<MiniGameResultData> results)
+    public static void SaveDailyResults(
+        List<MiniGameResultData> results
+    )
     {
         Initialize();
 
@@ -176,9 +311,14 @@ public static class HoteliaSQLiteManager
                 ClientBudget = result.clientBudget,
                 PackageCost = result.packageCost,
 
-                SelectedSegment = (int)result.selectedSegment,
-                SelectedOffer = (int)result.selectedOffer,
-                SelectedTourismExtra = (int)result.selectedTourismExtra
+                SelectedSegment =
+                    (int)result.selectedSegment,
+
+                SelectedOffer =
+                    (int)result.selectedOffer,
+
+                SelectedTourismExtra =
+                    (int)result.selectedTourismExtra
             };
 
             connection.Insert(entity);
@@ -189,31 +329,40 @@ public static class HoteliaSQLiteManager
     {
         Initialize();
 
-        List<DailyResultEntity> entities = connection.Table<DailyResultEntity>().ToList();
-        List<MiniGameResultData> results = new List<MiniGameResultData>();
+        List<DailyResultEntity> entities =
+            connection.Table<DailyResultEntity>().ToList();
+
+        List<MiniGameResultData> results =
+            new List<MiniGameResultData>();
 
         foreach (DailyResultEntity entity in entities)
         {
-            MiniGameResultData result = new MiniGameResultData();
+            MiniGameResultData result = new MiniGameResultData
+            {
+                day = entity.Day,
+                minigameName = entity.MinigameName,
 
-            result.day = entity.Day;
-            result.minigameName = entity.MinigameName;
+                finalScore = entity.FinalScore,
+                satisfaction = entity.Satisfaction,
+                revenue = entity.Revenue,
+                errors = entity.Errors,
+                timeScore = entity.TimeScore,
 
-            result.finalScore = entity.FinalScore;
-            result.satisfaction = entity.Satisfaction;
-            result.revenue = entity.Revenue;
-            result.errors = entity.Errors;
-            result.timeScore = entity.TimeScore;
+                stpSummary = entity.StpSummary,
+                feedback = entity.Feedback,
 
-            result.stpSummary = entity.StpSummary;
-            result.feedback = entity.Feedback;
+                clientBudget = entity.ClientBudget,
+                packageCost = entity.PackageCost,
 
-            result.clientBudget = entity.ClientBudget;
-            result.packageCost = entity.PackageCost;
+                selectedSegment =
+                    (GuestSegment)entity.SelectedSegment,
 
-            result.selectedSegment = (GuestSegment)entity.SelectedSegment;
-            result.selectedOffer = (OfferType)entity.SelectedOffer;
-            result.selectedTourismExtra = (TourismExtraType)entity.SelectedTourismExtra;
+                selectedOffer =
+                    (OfferType)entity.SelectedOffer,
+
+                selectedTourismExtra =
+                    (TourismExtraType)entity.SelectedTourismExtra
+            };
 
             results.Add(result);
         }
@@ -225,7 +374,10 @@ public static class HoteliaSQLiteManager
     {
         Initialize();
 
-        GuestNPC[] visibleGuests = Object.FindObjectsByType<GuestNPC>(FindObjectsSortMode.None);
+        GuestNPC[] visibleGuests =
+            Object.FindObjectsByType<GuestNPC>(
+                FindObjectsSortMode.None
+            );
 
         foreach (GuestNPC guest in visibleGuests)
         {
@@ -239,7 +391,13 @@ public static class HoteliaSQLiteManager
             {
                 NpcId = guest.npcId,
                 AssignedRoomId = guest.assignedRoomId,
-                SceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name,
+
+                SceneName =
+                    UnityEngine.SceneManagement
+                        .SceneManager
+                        .GetActiveScene()
+                        .name,
+
                 Area = (int)guest.currentArea,
 
                 PositionX = guest.transform.position.x,
@@ -255,7 +413,9 @@ public static class HoteliaSQLiteManager
         }
     }
 
-    public static void SaveNpcStates(List<NpcSaveEntity> npcs)
+    public static void SaveNpcStates(
+        List<NpcSaveEntity> npcs
+    )
     {
         Initialize();
 
@@ -275,7 +435,9 @@ public static class HoteliaSQLiteManager
     {
         Initialize();
 
-        return connection.Table<NpcSaveEntity>().ToList();
+        return connection
+            .Table<NpcSaveEntity>()
+            .ToList();
     }
 
     public static void DeleteNpcState(string npcId)
@@ -297,8 +459,26 @@ public static class HoteliaSQLiteManager
         connection.DeleteAll<DailyResultEntity>();
         connection.DeleteAll<NpcSaveEntity>();
 
-        connection.Execute("DELETE FROM sqlite_sequence WHERE name = ?", "DailyResults");
+        try
+        {
+            connection.Execute(
+                "DELETE FROM sqlite_sequence WHERE name = ?",
+                "DailyResults"
+            );
+        }
+        catch (System.Exception exception)
+        {
+            Debug.LogWarning(
+                "[HoteliaSQLiteManager] DailyResults sequence " +
+                "could not be reset: " +
+                exception.Message
+            );
+        }
 
-        Debug.Log("Base SQLite limpiada completamente.");
+        Debug.Log(
+            "[HoteliaSQLiteManager] SQLite save deleted." +
+            "\nProfile: " + activeProfileId +
+            "\nPath: " + DatabasePath
+        );
     }
 }

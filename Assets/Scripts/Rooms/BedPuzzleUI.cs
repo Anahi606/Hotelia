@@ -19,20 +19,33 @@ public class BedPuzzleUI : MonoBehaviour
     [Header("Cameras")]
     [SerializeField] private Camera worldCamera;
 
+    [Header("Player")]
+    [SerializeField] private PlayerMovement playerMovement;
+
     private BedSpot currentBed;
     private BedPieceType expectedPiece;
+    private bool panelOpen;
 
     public Camera WorldCamera => worldCamera;
     public BedSpot CurrentBed => currentBed;
+    public bool IsOpen => panelOpen;
 
     private void Awake()
     {
         if (Instance == null)
+        {
             Instance = this;
+        }
         else
         {
             Destroy(gameObject);
             return;
+        }
+
+        if (playerMovement == null)
+        {
+            playerMovement =
+                FindFirstObjectByType<PlayerMovement>();
         }
 
         if (panel != null)
@@ -41,17 +54,34 @@ public class BedPuzzleUI : MonoBehaviour
 
     public void OpenForBed(BedSpot bed)
     {
-        if (bed == null) return;
-        if (bed.IsCompleted) return;
+        if (bed == null)
+            return;
 
-        if (RoomCleaningKPIManager.Instance == null || !RoomCleaningKPIManager.Instance.IsRoomDirty)
+        if (panelOpen)
+            return;
+
+        if (TrashItem.IsPlayerNearAnyTrash)
+            return;
+
+        if (bed.IsCompleted)
+            return;
+
+        if (RoomCleaningKPIManager.Instance == null ||
+            !RoomCleaningKPIManager.Instance.IsRoomDirty)
         {
-            Debug.Log("La habitación no está sucia, no se puede tender la cama.");
+            Debug.Log(
+                "La habitación no está sucia, " +
+                "no se puede tender la cama."
+            );
+
             return;
         }
 
         currentBed = bed;
         expectedPiece = BedPieceType.Sheets;
+        panelOpen = true;
+
+        SetPlayerMovement(false);
 
         if (panel != null)
             panel.SetActive(true);
@@ -62,24 +92,39 @@ public class BedPuzzleUI : MonoBehaviour
 
     public void ClosePanel()
     {
-        ResetPieces();
-
         if (panel != null)
             panel.SetActive(false);
 
         currentBed = null;
+        expectedPiece = BedPieceType.Sheets;
+        panelOpen = false;
+
+        SetPlayerMovement(true);
     }
 
-    public bool TryPlacePiece(DraggableBedPiece piece, Vector2 screenPosition)
+    public bool TryPlacePiece(
+        DraggableBedPiece piece,
+        Vector2 screenPosition
+    )
     {
-        if (piece == null) return false;
-        if (currentBed == null) return false;
+        if (!panelOpen)
+            return false;
+
+        if (piece == null)
+            return false;
+
+        if (currentBed == null)
+            return false;
 
         if (piece.PieceType != expectedPiece)
             return false;
 
-        if (!currentBed.IsScreenPointOverDropTarget(screenPosition, worldCamera))
+        if (!currentBed.IsScreenPointOverDropTarget(
+                screenPosition,
+                worldCamera))
+        {
             return false;
+        }
 
         currentBed.PlacePiece(piece.PieceType);
         piece.HidePiece();
@@ -101,13 +146,36 @@ public class BedPuzzleUI : MonoBehaviour
         if (expectedPiece == BedPieceType.Cover)
         {
             if (RoomCleaningKPIManager.Instance != null)
-                RoomCleaningKPIManager.Instance.RegisterBedMade();
+            {
+                RoomCleaningKPIManager.Instance
+                    .RegisterBedMade();
+            }
 
             ClosePanel();
             return true;
         }
 
         return false;
+    }
+
+    private void SetPlayerMovement(bool canMove)
+    {
+        if (playerMovement == null)
+        {
+            playerMovement =
+                FindFirstObjectByType<PlayerMovement>();
+        }
+
+        if (playerMovement == null)
+        {
+            Debug.LogWarning(
+                "No se encontró PlayerMovement en la escena."
+            );
+
+            return;
+        }
+
+        playerMovement.SetMovementEnabled(canMove);
     }
 
     private void ResetPieces()
@@ -124,21 +192,34 @@ public class BedPuzzleUI : MonoBehaviour
 
     private void UpdateText()
     {
-        if (instructionText == null) return;
+        if (instructionText == null)
+            return;
 
         switch (expectedPiece)
         {
             case BedPieceType.Sheets:
-                instructionText.text = "Drag the sheets onto the bed";
+                instructionText.text =
+                    "Drag the sheets onto the bed";
                 break;
 
             case BedPieceType.Pillows:
-                instructionText.text = "Drag the pillows onto the bed";
+                instructionText.text =
+                    "Drag the pillows onto the bed";
                 break;
 
             case BedPieceType.Cover:
-                instructionText.text = "Drag the cover onto the bed";
+                instructionText.text =
+                    "Drag the cover onto the bed";
                 break;
         }
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
+
+        if (playerMovement != null)
+            playerMovement.enabled = true;
     }
 }
