@@ -33,7 +33,7 @@ public class RoomSaveEntity
     public int CurrentMealPlan { get; set; }
     public int CurrentGuestCount { get; set; }
     public bool HasGuestData { get; set; }
-
+    public int LastRestaurantOrderCompletedDay { get; set; }
     public string HotelDoorSpawnId { get; set; }
     public string GuestSpriteName { get; set; }
 }

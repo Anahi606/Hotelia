@@ -38,10 +38,21 @@ public class TeacherStudentsPanelUI : MonoBehaviour
 
     private StudentProfileData selectedStudent;
     private string editingStudentPlayFabId = "";
+    private bool hasStarted;
 
     private void Start()
     {
+        hasStarted = true;
+
         CloseAssignStudentPanel();
+        LoadTeacherData();
+    }
+    private void OnEnable()
+    {
+        if (!hasStarted)
+            return;
+
+        Debug.Log("[Students] Panel enabled. Reloading data.");
         LoadTeacherData();
     }
 
@@ -127,10 +138,22 @@ public class TeacherStudentsPanelUI : MonoBehaviour
                         assignedStudents.AddRange(studentData.students);
                 }
 
+                bool assignmentsChanged = SynchronizeAssignedStudentsWithCourses();
+
                 PopulateCourseDropdown();
                 RefreshAssignedStudentsList();
 
                 SetMessage("Students loaded.");
+
+                if (assignmentsChanged)
+                {
+                    SaveAssignedStudentsToPlayFab(() =>
+                    {
+                        Debug.Log(
+                            "Student course information synchronized with current courses."
+                        );
+                    });
+                }
 
                 onSuccess?.Invoke();
             },
@@ -1101,6 +1124,72 @@ public class TeacherStudentsPanelUI : MonoBehaviour
         existing.courseName = GetCourseName(selectedCourse);
         existing.courseCode = GetClassCode(selectedCourse);
         existing.status = "ACTIVE";
+    }
+
+    private bool SynchronizeAssignedStudentsWithCourses()
+    {
+        bool changed = false;
+
+        foreach (AssignedStudentData student in assignedStudents)
+        {
+            if (student == null)
+                continue;
+
+            TeacherCourseData currentCourse = FindCourseById(student.courseId);
+
+            // Compatibilidad con registros antiguos o cursos cuyo courseId cambió.
+            if (currentCourse == null &&
+                !string.IsNullOrWhiteSpace(student.courseCode))
+            {
+                currentCourse = FindCourseByClassCode(student.courseCode);
+            }
+
+            if (currentCourse == null)
+                continue;
+
+            string currentCourseName = GetCourseName(currentCourse);
+            string currentCourseCode = GetClassCode(currentCourse);
+
+            if (student.courseId != currentCourse.courseId)
+            {
+                student.courseId = currentCourse.courseId;
+                changed = true;
+            }
+
+            if (student.courseName != currentCourseName)
+            {
+                student.courseName = currentCourseName;
+                changed = true;
+            }
+
+            if (student.courseCode != currentCourseCode)
+            {
+                student.courseCode = currentCourseCode;
+                changed = true;
+            }
+        }
+
+        return changed;
+    }
+
+    private TeacherCourseData FindCourseById(string courseId)
+    {
+        if (string.IsNullOrWhiteSpace(courseId))
+            return null;
+
+        foreach (TeacherCourseData course in courses)
+        {
+            if (course != null && course.courseId == courseId)
+                return course;
+        }
+
+        return null;
+    }
+
+    public void RefreshStudentsPanel()
+    {
+        Debug.Log("[Students] RefreshStudentsPanel was called.");
+        LoadTeacherData();
     }
 }
 

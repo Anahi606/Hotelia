@@ -65,11 +65,24 @@ public class PlayfabManager : MonoBehaviour
         }
         else
         {
-            HoteliaSQLiteManager.UseGuestProfile();
+            bool restoredLastStudent =
+                HoteliaSQLiteManager.TryUseLastPlayFabProfile();
+
+            if (!restoredLastStudent)
+            {
+                HoteliaSQLiteManager.UseGuestProfile();
+            }
         }
+
+        HotelSaveSystem.ReloadActiveProfileIntoRuntime();
 
         if (settingsPanel != null)
             settingsPanel.SetActive(false);
+
+        Debug.Log(
+            "[PlayfabManager] Perfil SQLite activo: " +
+            HoteliaSQLiteManager.ActiveProfileId
+        );
 
         UpdateLoginUI();
     }
@@ -122,9 +135,6 @@ public class PlayfabManager : MonoBehaviour
         CurrentPlayFabId = result.PlayFabId;
         CurrentSessionTicket = result.SessionTicket;
         CurrentRole = pendingRegisterRole;
-        HoteliaSQLiteManager.UsePlayFabProfile(
-            CurrentPlayFabId
-        );
 
         string displayName = GetNameFromEmail(CurrentEmail);
 
@@ -160,7 +170,6 @@ public class PlayfabManager : MonoBehaviour
         CurrentRole = "";
         pendingRegisterRole = StudentRole;
 
-        HoteliaSQLiteManager.UseGuestProfile();
         ClearLoginFields();
 
         if (registerPanelDialogue != null)
@@ -265,12 +274,13 @@ public class PlayfabManager : MonoBehaviour
             CurrentSessionTicket = "";
             CurrentRole = "";
 
-            HoteliaSQLiteManager.UseGuestProfile();
+            HotelSaveSystem.ReloadActiveProfileIntoRuntime();
 
             UpdateLoginUI();
             return;
         }
 
+        HotelSaveSystem.ReloadActiveProfileIntoRuntime();
         SetMessage("Logged in. Checking account role...");
 
         Debug.Log(
@@ -408,6 +418,9 @@ public class PlayfabManager : MonoBehaviour
 
     public void LogoutButton()
     {
+        string offlineProfile =
+            HoteliaSQLiteManager.ActiveProfileId;
+
         PlayFabClientAPI.ForgetAllCredentials();
 
         IsLoggedInWithEmail = false;
@@ -417,13 +430,13 @@ public class PlayfabManager : MonoBehaviour
         CurrentRole = "";
         pendingRegisterRole = StudentRole;
 
-        HoteliaSQLiteManager.UseGuestProfile();
-
         ClearLoginFields();
 
         Debug.Log(
-            "Player logged out from PlayFab. " +
-            "Guest SQLite profile activated."
+            "Sesión de PlayFab cerrada." +
+            "\nEl progreso local continúa disponible offline." +
+            "\nPerfil SQLite activo: " +
+            offlineProfile
         );
 
         if (buttonsPanel != null)

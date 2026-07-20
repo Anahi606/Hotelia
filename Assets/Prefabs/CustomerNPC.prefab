@@ -362,9 +362,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   minCheckDelay: 5
   maxCheckDelay: 10
-  talkChance: 1
-  minTimeBetweenTalks: 20
-  maxTimeBetweenTalks: 40
+  talkChance: 0.451
+  minTimeBetweenTalks: 10
+  maxTimeBetweenTalks: 20
   maxDistanceToPlayer: 8
   talkDistance: 1.3
   npcPortraitSprite: {fileID: 0}
