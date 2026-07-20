@@ -38,6 +38,10 @@ public class Ollama_Handler : MonoBehaviour
     [Header("Teacher AI Parameters")]
     [SerializeField] private bool useTeacherAIParameters = true;
 
+    [Tooltip("Maximum time the NPC waits for the student's teacher parameters to load.")]
+    [Min(1f)]
+    [SerializeField] private float teacherParametersLoadTimeout = 15f;
+
     private AIQuestionParametersData currentAIParameters;
 
     [Header("Azure Function")]
@@ -623,15 +627,34 @@ public class Ollama_Handler : MonoBehaviour
 
         conversationHistory.Clear();
 
+        // The loader uses an Azure coroutine. The NPC must wait for it before
+        // deciding whether to use teacher parameters or the local tourism bank.
+        await WaitForTeacherParametersIfNeeded();
+
         currentAIParameters = AIQuestionParametersRuntime.Instance != null
             ? AIQuestionParametersRuntime.Instance.CurrentParameters
             : null;
 
-        if (IsUsingTeacherAIParameters() && CanUseOnlineAI())
+        if (IsUsingTeacherAIParameters())
         {
+            Debug.Log(
+                "Ollama_Handler: using teacher AI parameters. " +
+                "Subject=" + currentAIParameters.subjectName +
+                ", ClassCode=" + currentAIParameters.classCode +
+                ", Goal=" + currentAIParameters.questionGoal
+            );
+
+            // StartTeacherAIConversation calls GenerateText(). GenerateText()
+            // already decides whether Azure/OpenAI is available and, if not,
+            // returns an empty value so the teacher-based local fallback is used.
             await StartTeacherAIConversation();
             return;
         }
+
+        Debug.LogWarning(
+            "Ollama_Handler: no active teacher AI parameters are available. " +
+            "The default tourism question bank will be used."
+        );
 
         currentTourismItem = GetRandomTourismItem();
 
@@ -917,11 +940,103 @@ Rules:
         }
     }
 
+    private async Task WaitForTeacherParametersIfNeeded()
+    {
+        if (!useTeacherAIParameters)
+            return;
+
+        if (!PlayfabManager.IsLoggedInWithEmail ||
+            !PlayfabManager.IsStudent ||
+            PlayfabManager.IsTeacher)
+        {
+            return;
+        }
+
+        AIQuestionParametersRuntime runtime =
+            AIQuestionParametersRuntime.Instance;
+
+        bool alreadyHasActiveParameters =
+            runtime != null &&
+            runtime.CurrentParameters != null &&
+            string.Equals(
+                runtime.CurrentParameters.status,
+                "ACTIVE",
+                StringComparison.OrdinalIgnoreCase
+            );
+
+        if (alreadyHasActiveParameters)
+            return;
+
+        StudentAIQuestionParametersLoader loader =
+            StudentAIQuestionParametersLoader.Instance;
+
+        if (loader == null)
+        {
+            Debug.LogWarning(
+                "Ollama_Handler: StudentAIQuestionParametersLoader was not found. " +
+                "Add it to a persistent GameObject and assign its Azure URL."
+            );
+
+            return;
+        }
+
+        if (!loader.IsLoading)
+        {
+            Debug.Log(
+                "Ollama_Handler: teacher parameters are not ready. " +
+                "Starting a load for the current student."
+            );
+
+            loader.LoadForCurrentStudent();
+        }
+
+        float deadline =
+            Time.realtimeSinceStartup + teacherParametersLoadTimeout;
+
+        while (loader.IsLoading &&
+               Time.realtimeSinceStartup < deadline)
+        {
+            await Task.Yield();
+        }
+
+        if (loader.IsLoading)
+        {
+            Debug.LogWarning(
+                "Ollama_Handler: timed out while waiting for teacher AI parameters."
+            );
+
+            return;
+        }
+
+        runtime = AIQuestionParametersRuntime.Instance;
+
+        bool loadedActiveParameters =
+            runtime != null &&
+            runtime.CurrentParameters != null &&
+            string.Equals(
+                runtime.CurrentParameters.status,
+                "ACTIVE",
+                StringComparison.OrdinalIgnoreCase
+            );
+
+        if (!loadedActiveParameters)
+        {
+            Debug.LogWarning(
+                "Ollama_Handler: teacher AI parameters were not loaded. " +
+                "Loader message: " + loader.LastMessage
+            );
+        }
+    }
+
     private bool IsUsingTeacherAIParameters()
     {
         return useTeacherAIParameters &&
                currentAIParameters != null &&
-               currentAIParameters.status == "ACTIVE";
+               string.Equals(
+                   currentAIParameters.status,
+                   "ACTIVE",
+                   StringComparison.OrdinalIgnoreCase
+               );
     }
 
     private async Task StartTeacherAIConversation()
