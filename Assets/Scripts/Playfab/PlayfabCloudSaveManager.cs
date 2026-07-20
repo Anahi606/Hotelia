@@ -240,6 +240,60 @@ public static class PlayfabCloudSaveManager
         onFinished?.Invoke(save);
     }
 
+    public static void DeleteCloudGameplaySave(Action<bool> onFinished = null)
+    {
+        if (!PlayfabManager.IsLoggedInWithEmail ||
+            !PlayfabManager.IsStudent ||
+            string.IsNullOrWhiteSpace(
+                PlayfabManager.CurrentPlayFabId
+            ))
+        {
+            Debug.LogError(
+                "[PlayfabCloudSaveManager] Cloud deletion denied. " +
+                "There is no valid logged student."
+            );
+
+            onFinished?.Invoke(false);
+            return;
+        }
+
+        var request = new UpdateUserDataRequest
+        {
+            KeysToRemove = new List<string>
+        {
+            GameStateKey,
+            RoomsKey,
+            DailyResultsKey,
+            NpcStatesKey,
+            LastSyncKey
+        }
+        };
+
+        PlayFabClientAPI.UpdateUserData(
+            request,
+            result =>
+            {
+                Debug.Log(
+                    "[PlayfabCloudSaveManager] Save deleted only " +
+                    "for the currently authenticated student: " +
+                    PlayfabManager.CurrentPlayFabId
+                );
+
+                onFinished?.Invoke(true);
+            },
+            error =>
+            {
+                Debug.LogError(
+                    "[PlayfabCloudSaveManager] The current student's " +
+                    "save could not be deleted: " +
+                    error.GenerateErrorReport()
+                );
+
+                onFinished?.Invoke(false);
+            }
+        );
+    }
+
     public static void UploadLocalSQLiteSaveToPlayFab(Action<bool> onFinished = null)
     {
         if (!PlayfabManager.IsLoggedInWithEmail)
