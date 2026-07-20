@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class AIQuestionParametersRuntime : MonoBehaviour
@@ -11,7 +12,11 @@ public class AIQuestionParametersRuntime : MonoBehaviour
         get
         {
             return CurrentParameters != null &&
-                   CurrentParameters.status == "ACTIVE";
+                   string.Equals(
+                       CurrentParameters.status,
+                       "ACTIVE",
+                       StringComparison.OrdinalIgnoreCase
+                   );
         }
     }
 
@@ -31,20 +36,29 @@ public class AIQuestionParametersRuntime : MonoBehaviour
     {
         CurrentParameters = parameters;
 
-        if (CurrentParameters != null)
+        if (parameters == null)
         {
-            Debug.Log(
-                "AI parameters loaded: " +
-                CurrentParameters.subjectName +
-                " - Class " +
-                CurrentParameters.classCode
-            );
+            Debug.LogWarning("AIQuestionParametersRuntime received null parameters.");
+            return;
         }
+
+        Debug.Log(
+            "AIQuestionParametersRuntime updated. " +
+            "Subject=" + parameters.subjectName +
+            ", ClassCode=" + parameters.classCode +
+            ", Status=" + parameters.status
+        );
     }
 
     public void ClearCurrentParameters()
     {
         CurrentParameters = null;
-        Debug.Log("AI parameters cleared.");
+        Debug.Log("AIQuestionParametersRuntime parameters cleared.");
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
     }
 }
