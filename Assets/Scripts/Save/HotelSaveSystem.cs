@@ -9,32 +9,76 @@ public static class HotelSaveSystem
         return HoteliaSQLiteManager.HasGameState();
     }
 
-    public static void SaveNewCharacter(PlayerCharacterType characterType, string firstGameSceneName)
+    public static void SaveNewCharacter(PlayerCharacterType characterType,string firstGameSceneName)
     {
-        GameStateEntity gameState = new GameStateEntity
-        {
-            Id = 1,
-            HasStartedGame = true,
-            SelectedCharacter = (int)characterType,
-            CurrentDay = 1,
-            SavedSceneName = firstGameSceneName
-        };
+        GameStateEntity gameState =
+            new GameStateEntity
+            {
+                Id = 1,
+                HasStartedGame = true,
+                SelectedCharacter = (int)characterType,
+                CurrentDay = 1,
+                SavedSceneName = firstGameSceneName
+            };
 
-        HoteliaSQLiteManager.SaveGameState(gameState);
+        HoteliaSQLiteManager.SaveGameState(
+            gameState
+        );
 
         if (HotelGameData.Instance != null)
         {
-            HotelGameData.Instance.selectedCharacter = characterType;
-            HoteliaSQLiteManager.SaveRooms(HotelGameData.Instance.rooms);
+            HotelGameData.Instance.selectedCharacter =
+                characterType;
+
+            HoteliaSQLiteManager.SaveRooms(
+                HotelGameData.Instance.rooms
+            );
         }
 
         if (DailyResultsManager.Instance != null)
         {
-            DailyResultsManager.Instance.ClearTodayResults();
-            DailyResultsManager.Instance.allResults.Clear();
+            DailyResultsManager.Instance
+                .ClearTodayResults();
+
+            DailyResultsManager.Instance
+                .allResults.Clear();
         }
 
-        Debug.Log("Nuevo personaje guardado en SQLite: " + characterType);
+        Debug.Log(
+            "[HotelSaveSystem] Nuevo personaje guardado." +
+            "\nPersonaje: " + characterType +
+            "\nDía: 1" +
+            "\nEscena: " + firstGameSceneName +
+            "\nPerfil SQLite: " +
+            HoteliaSQLiteManager.ActiveProfileId
+        );
+
+        if (PlayfabManager.IsLoggedInWithEmail &&
+            PlayfabManager.IsStudent)
+        {
+            PlayfabCloudSaveManager
+                .UploadLocalSQLiteSaveToPlayFab(
+                    success =>
+                    {
+                        if (success)
+                        {
+                            Debug.Log(
+                                "[HotelSaveSystem] La nueva partida " +
+                                "del día 1 reemplazó correctamente " +
+                                "la partida anterior en PlayFab."
+                            );
+                        }
+                        else
+                        {
+                            Debug.LogWarning(
+                                "[HotelSaveSystem] La nueva partida " +
+                                "se guardó localmente, pero no pudo " +
+                                "subirse todavía a PlayFab."
+                            );
+                        }
+                    }
+                );
+        }
     }
 
     public static void SaveEndOfDay()

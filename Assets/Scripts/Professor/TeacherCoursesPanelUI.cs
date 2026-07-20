@@ -22,7 +22,11 @@ public class TeacherCoursesPanelUI : MonoBehaviour
     [SerializeField] private GameObject courseRowPrefab;
 
     [Header("Messages")]
-    [SerializeField] private TMP_Text messageText;
+    [Tooltip("Mensajes mostrados dentro del formulario de creación o edición.")]
+    [SerializeField] private TMP_Text courseFormMessageText;
+
+    [Tooltip("Mensajes generales mostrados en el panel principal de cursos.")]
+    [SerializeField] private TMP_Text coursePanelMessageText;
 
     [Header("Related Panels")]
     [SerializeField] private TeacherStudentsPanelUI studentsPanelUI;
@@ -48,7 +52,7 @@ public class TeacherCoursesPanelUI : MonoBehaviour
 
     private void LoadSubjectCatalogFromPlayFab()
     {
-        SetMessage("Loading subject catalog...");
+        SetCoursePanelMessage("Loading subject catalog...");
 
         var request = new GetTitleDataRequest
         {
@@ -61,9 +65,13 @@ public class TeacherCoursesPanelUI : MonoBehaviour
             {
                 subjectCatalog.Clear();
 
-                if (result.Data == null || !result.Data.ContainsKey(SubjectCatalogKey))
+                if (result.Data == null ||
+                    !result.Data.ContainsKey(SubjectCatalogKey))
                 {
-                    SetMessage("Subject catalog not found in PlayFab Title Data.");
+                    SetCoursePanelMessage(
+                        "Subject catalog not found in PlayFab Title Data."
+                    );
+
                     return;
                 }
 
@@ -72,9 +80,14 @@ public class TeacherCoursesPanelUI : MonoBehaviour
                 TeacherSubjectCatalogListData catalogData =
                     JsonUtility.FromJson<TeacherSubjectCatalogListData>(json);
 
-                if (catalogData == null || catalogData.subjects == null || catalogData.subjects.Count == 0)
+                if (catalogData == null ||
+                    catalogData.subjects == null ||
+                    catalogData.subjects.Count == 0)
                 {
-                    SetMessage("Subject catalog is empty or invalid.");
+                    SetCoursePanelMessage(
+                        "Subject catalog is empty or invalid."
+                    );
+
                     return;
                 }
 
@@ -88,12 +101,18 @@ public class TeacherCoursesPanelUI : MonoBehaviour
 
                 PopulateSubjectDropdown();
 
-                SetMessage("Subject catalog loaded.");
+                SetCoursePanelMessage("Subject catalog loaded.");
             },
             error =>
             {
-                SetMessage("Could not load subject catalog.");
-                Debug.LogError("Error loading subject catalog: " + error.GenerateErrorReport());
+                SetCoursePanelMessage(
+                    "Could not load subject catalog."
+                );
+
+                Debug.LogError(
+                    "Error loading subject catalog: " +
+                    error.GenerateErrorReport()
+                );
             }
         );
     }
@@ -149,13 +168,11 @@ public class TeacherCoursesPanelUI : MonoBehaviour
         if (courseFormPanel != null)
             courseFormPanel.SetActive(true);
 
-        SetMessage("");
+        SetFormMessage("");
     }
 
     public void HideCourseForm()
     {
-        Debug.Log("CLICK EN CANCEL");
-
         editingCourseId = "";
 
         ClearCourseInputs();
@@ -163,7 +180,7 @@ public class TeacherCoursesPanelUI : MonoBehaviour
         if (courseFormPanel != null)
             courseFormPanel.SetActive(false);
 
-        SetMessage("");
+        SetFormMessage("");
     }
 
     public void SaveCourseButton()
@@ -176,26 +193,20 @@ public class TeacherCoursesPanelUI : MonoBehaviour
         if (!PlayfabManager.IsLoggedInWithEmail ||
             !PlayfabManager.IsTeacher)
         {
-            SetMessage("Only teacher accounts can create courses.");
+            SetFormMessage("Only teacher accounts can create courses.");
             return;
         }
 
         if (string.IsNullOrWhiteSpace(
             PlayfabManager.CurrentSessionTicket))
         {
-            SetMessage(
-                "Missing PlayFab session. Please log in again."
-            );
-
+            SetFormMessage("Missing PlayFab session. Please log in again.");
             return;
         }
 
         if (subjectCatalog.Count == 0)
         {
-            SetMessage(
-                "Subject catalog has not loaded yet."
-            );
-
+            SetFormMessage("Subject catalog has not loaded yet.");
             return;
         }
 
@@ -204,7 +215,7 @@ public class TeacherCoursesPanelUI : MonoBehaviour
 
         if (selectedSubject == null)
         {
-            SetMessage("Select a valid subject.");
+            SetFormMessage("Select a valid subject.");
             return;
         }
 
@@ -215,10 +226,7 @@ public class TeacherCoursesPanelUI : MonoBehaviour
 
         if (!IsValidClassCode(classCode))
         {
-            SetMessage(
-                "NCR must have exactly 4 numbers."
-            );
-
+            SetFormMessage("NCR must have exactly 4 numbers.");
             return;
         }
 
@@ -226,10 +234,7 @@ public class TeacherCoursesPanelUI : MonoBehaviour
             classCode,
             editingCourseId))
         {
-            SetMessage(
-                "A course with this NCR already exists."
-            );
-
+            SetFormMessage("A course with this NCR already exists.");
             return;
         }
 
@@ -321,7 +326,7 @@ public class TeacherCoursesPanelUI : MonoBehaviour
 
         if (course == null)
         {
-            SetMessage("Course not found.");
+            SetCoursePanelMessage("Course not found.");
             return;
         }
 
@@ -340,7 +345,7 @@ public class TeacherCoursesPanelUI : MonoBehaviour
         if (courseFormPanel != null)
             courseFormPanel.SetActive(true);
 
-        SetMessage("Editing course: " + GetCourseName(course));
+        SetFormMessage("Editing course: " + GetCourseName(course));
     }
 
     public void DeleteCourse(string courseId)
@@ -348,19 +353,18 @@ public class TeacherCoursesPanelUI : MonoBehaviour
         if (isManagingCourse)
             return;
 
-        TeacherCourseData course =
-            FindCourseById(courseId);
+        TeacherCourseData course = FindCourseById(courseId);
 
         if (course == null)
         {
-            SetMessage("Course not found.");
+            SetCoursePanelMessage("Course not found.");
             return;
         }
 
         if (string.IsNullOrWhiteSpace(
             PlayfabManager.CurrentSessionTicket))
         {
-            SetMessage(
+            SetCoursePanelMessage(
                 "Missing PlayFab session. Please log in again."
             );
 
@@ -383,23 +387,38 @@ public class TeacherCoursesPanelUI : MonoBehaviour
     string subjectCode,
     string classCode)
     {
-        if (string.IsNullOrWhiteSpace(
-            manageTeacherCourseUrl))
+        bool isDeleteAction = action == "delete";
+
+        if (string.IsNullOrWhiteSpace(manageTeacherCourseUrl))
         {
-            SetMessage(
-                "Missing manage teacher course URL."
-            );
+            if (isDeleteAction)
+            {
+                SetCoursePanelMessage(
+                    "Missing manage teacher course URL."
+                );
+            }
+            else
+            {
+                SetFormMessage(
+                    "Missing manage teacher course URL."
+                );
+            }
 
             yield break;
         }
 
         isManagingCourse = true;
 
-        SetMessage(
-            action == "delete"
-                ? "Deleting course..."
-                : "Validating NCR and saving course..."
-        );
+        if (isDeleteAction)
+        {
+            SetCoursePanelMessage("Deleting course...");
+        }
+        else
+        {
+            SetFormMessage(
+                "Validating NCR and saving course..."
+            );
+        }
 
         ManageTeacherCourseRequestData requestData =
             new ManageTeacherCourseRequestData
@@ -413,11 +432,9 @@ public class TeacherCoursesPanelUI : MonoBehaviour
                 classCode = classCode ?? ""
             };
 
-        string json =
-            JsonUtility.ToJson(requestData);
+        string json = JsonUtility.ToJson(requestData);
 
-        byte[] bodyRaw =
-            Encoding.UTF8.GetBytes(json);
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
 
         using (UnityWebRequest request =
             new UnityWebRequest(
@@ -445,26 +462,25 @@ public class TeacherCoursesPanelUI : MonoBehaviour
                     : "";
 
             ManageTeacherCourseResponseData response =
-                ParseManageCourseResponse(
-                    responseText
-                );
+                ParseManageCourseResponse(responseText);
 
             isManagingCourse = false;
 
-            /*
-             * Por ejemplo, si Azure responde HTTP 409 porque
-             * el NCR pertenece a otro profesor, se muestra
-             * el mensaje específico que envió el backend.
-             */
-            if (response != null &&
-                !response.success)
+            if (response != null && !response.success)
             {
-                SetMessage(
-                    string.IsNullOrWhiteSpace(
-                        response.message)
+                string backendMessage =
+                    string.IsNullOrWhiteSpace(response.message)
                         ? "Could not manage course."
-                        : response.message
-                );
+                        : response.message;
+
+                if (isDeleteAction)
+                {
+                    SetCoursePanelMessage(backendMessage);
+                }
+                else
+                {
+                    SetFormMessage(backendMessage);
+                }
 
                 Debug.LogWarning(
                     "Manage course rejected. HTTP " +
@@ -479,9 +495,21 @@ public class TeacherCoursesPanelUI : MonoBehaviour
             if (request.result !=
                 UnityWebRequest.Result.Success)
             {
-                SetMessage(
-                    "Could not connect to the course service."
-                );
+                string connectionMessage =
+                    "Could not connect to the course service.";
+
+                if (isDeleteAction)
+                {
+                    SetCoursePanelMessage(
+                        connectionMessage
+                    );
+                }
+                else
+                {
+                    SetFormMessage(
+                        connectionMessage
+                    );
+                }
 
                 Debug.LogError(
                     "Manage course request failed. HTTP " +
@@ -498,12 +526,23 @@ public class TeacherCoursesPanelUI : MonoBehaviour
                 yield break;
             }
 
-            if (response == null ||
-                !response.success)
+            if (response == null || !response.success)
             {
-                SetMessage(
-                    "Invalid response from Azure Function."
-                );
+                string invalidResponseMessage =
+                    "Invalid response from Azure Function.";
+
+                if (isDeleteAction)
+                {
+                    SetCoursePanelMessage(
+                        invalidResponseMessage
+                    );
+                }
+                else
+                {
+                    SetFormMessage(
+                        invalidResponseMessage
+                    );
+                }
 
                 Debug.LogError(
                     "Invalid manage course response: " +
@@ -513,7 +552,7 @@ public class TeacherCoursesPanelUI : MonoBehaviour
                 yield break;
             }
 
-            if (action == "delete")
+            if (isDeleteAction)
             {
                 courses.RemoveAll(
                     item =>
@@ -530,7 +569,7 @@ public class TeacherCoursesPanelUI : MonoBehaviour
                 RefreshCourseList();
                 RefreshStudentsAfterCourseChange();
 
-                SetMessage(
+                SetCoursePanelMessage(
                     string.IsNullOrWhiteSpace(
                         response.message)
                         ? "Course deleted successfully."
@@ -544,32 +583,29 @@ public class TeacherCoursesPanelUI : MonoBehaviour
                 string.IsNullOrWhiteSpace(
                     response.course.courseId))
             {
-                SetMessage(
+                SetFormMessage(
                     "The backend did not return the saved course."
                 );
 
                 yield break;
             }
 
-            NormalizeLoadedCourse(
-                response.course
-            );
+            NormalizeLoadedCourse(response.course);
 
-            UpsertLocalCourse(
-                response.course
-            );
+            UpsertLocalCourse(response.course);
 
             editingCourseId = "";
 
             ClearCourseInputs();
+
+            SetFormMessage("");
 
             if (courseFormPanel != null)
                 courseFormPanel.SetActive(false);
 
             RefreshCourseList();
             RefreshStudentsAfterCourseChange();
-
-            SetMessage(
+            SetCoursePanelMessage(
                 string.IsNullOrWhiteSpace(
                     response.message)
                     ? "Course saved successfully."
@@ -657,13 +693,15 @@ public class TeacherCoursesPanelUI : MonoBehaviour
 
         if (course == null)
         {
-            SetMessage("Course not found.");
+            SetCoursePanelMessage("Course not found.");
             return;
         }
 
         selectedCourseId = course.courseId;
 
-        SetMessage("Selected course: " + GetCourseName(course));
+        SetCoursePanelMessage(
+            "Selected course: " + GetCourseName(course)
+        );
 
         Debug.Log("Selected course id: " + selectedCourseId);
     }
@@ -779,17 +817,24 @@ public class TeacherCoursesPanelUI : MonoBehaviour
 
     private void LoadCoursesFromPlayFab()
     {
-        if (!PlayfabManager.IsLoggedInWithEmail || !PlayfabManager.IsTeacher)
+        if (!PlayfabManager.IsLoggedInWithEmail ||
+            !PlayfabManager.IsTeacher)
         {
-            SetMessage("Only teacher accounts can load courses.");
+            SetCoursePanelMessage(
+                "Only teacher accounts can load courses."
+            );
+
             return;
         }
 
-        SetMessage("Loading courses...");
+        SetCoursePanelMessage("Loading courses...");
 
         var request = new GetUserDataRequest
         {
-            Keys = new List<string> { TeacherCoursesKey }
+            Keys = new List<string>
+        {
+            TeacherCoursesKey
+        }
         };
 
         PlayFabClientAPI.GetUserData(
@@ -798,28 +843,54 @@ public class TeacherCoursesPanelUI : MonoBehaviour
             {
                 courses.Clear();
 
-                if (result.Data != null && result.Data.ContainsKey(TeacherCoursesKey))
+                if (result.Data != null &&
+                    result.Data.ContainsKey(
+                        TeacherCoursesKey))
                 {
-                    string json = result.Data[TeacherCoursesKey].Value;
+                    string json =
+                        result.Data[
+                            TeacherCoursesKey
+                        ].Value;
 
-                    TeacherCourseListData savedData = JsonUtility.FromJson<TeacherCourseListData>(json);
+                    TeacherCourseListData savedData =
+                        JsonUtility.FromJson<
+                            TeacherCourseListData
+                        >(json);
 
-                    if (savedData != null && savedData.courses != null)
+                    if (savedData != null &&
+                        savedData.courses != null)
                     {
-                        courses.AddRange(savedData.courses);
+                        courses.AddRange(
+                            savedData.courses
+                        );
 
-                        foreach (TeacherCourseData course in courses)
-                            NormalizeLoadedCourse(course);
+                        foreach (
+                            TeacherCourseData course
+                            in courses)
+                        {
+                            NormalizeLoadedCourse(
+                                course
+                            );
+                        }
                     }
                 }
 
                 RefreshCourseList();
-                SetMessage("Courses loaded.");
+
+                SetCoursePanelMessage(
+                    "Courses loaded."
+                );
             },
             error =>
             {
-                SetMessage("Could not load courses.");
-                Debug.LogError("Error loading teacher courses: " + error.GenerateErrorReport());
+                SetCoursePanelMessage(
+                    "Could not load courses."
+                );
+
+                Debug.LogError(
+                    "Error loading teacher courses: " +
+                    error.GenerateErrorReport()
+                );
             }
         );
     }
@@ -899,12 +970,20 @@ public class TeacherCoursesPanelUI : MonoBehaviour
             classCodeInput.text = "";
     }
 
-    private void SetMessage(string message)
+    private void SetFormMessage(string message)
     {
-        if (messageText != null)
-            messageText.text = message;
+        if (courseFormMessageText != null)
+            courseFormMessageText.text = message;
 
-        Debug.Log("Teacher Courses Panel: " + message);
+        Debug.Log("Course Form: " + message);
+    }
+
+    private void SetCoursePanelMessage(string message)
+    {
+        if (coursePanelMessageText != null)
+            coursePanelMessageText.text = message;
+
+        Debug.Log("Course Panel: " + message);
     }
 }
 
