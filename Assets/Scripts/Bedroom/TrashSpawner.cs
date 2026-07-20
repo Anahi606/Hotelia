@@ -18,50 +18,109 @@ public class TrashSpawner : MonoBehaviour
     [SerializeField] private float minDistanceBetweenTrash = 0.7f;
 
     private readonly List<TrashItem> spawnedTrash = new List<TrashItem>();
+    public int TotalSpawnedTrash { get; private set; }
+
 
     public void SpawnTrash()
     {
         ClearTrash();
 
-        if (trashPrefab == null || trashSprites == null || trashSprites.Length == 0 || spawnAreas == null || spawnAreas.Length == 0)
+        if (trashPrefab == null ||
+            trashSprites == null ||
+            trashSprites.Length == 0 ||
+            spawnAreas == null ||
+            spawnAreas.Length == 0)
         {
-            Debug.LogWarning("TrashSpawner no está bien configurado.");
+            Debug.LogWarning(
+                "TrashSpawner no está bien configurado."
+            );
+
             return;
         }
 
-        int amount = Random.Range(minTrash, maxTrash + 1);
-        List<Vector3> usedPositions = new List<Vector3>();
+        int validMinimum = Mathf.Max(0, minTrash);
+        int validMaximum = Mathf.Max(
+            validMinimum,
+            maxTrash
+        );
 
-        int safety = 0;
-        int maxAttempts = 200;
+        int amount = Random.Range(
+            validMinimum,
+            validMaximum + 1
+        );
 
-        while (spawnedTrash.Count < amount && safety < maxAttempts)
+        List<Vector3> usedPositions =
+            new List<Vector3>();
+
+        const int maxAttempts = 200;
+        int attempts = 0;
+
+        while (
+            spawnedTrash.Count < amount &&
+            attempts < maxAttempts)
         {
-            safety++;
+            attempts++;
 
-            TrashSpawnArea randomArea = spawnAreas[Random.Range(0, spawnAreas.Length)];
-            Vector3 spawnPos = randomArea.GetRandomPosition();
+            TrashSpawnArea randomArea =
+                spawnAreas[Random.Range(0, spawnAreas.Length)];
 
-            if (!IsFarEnoughFromOthers(spawnPos, usedPositions))
+            if (randomArea == null)
                 continue;
 
-            GameObject trashObj = Instantiate(trashPrefab, spawnPos, Quaternion.identity);
+            Vector3 spawnPosition =
+                randomArea.GetRandomPosition();
 
-            SpriteRenderer sr = trashObj.GetComponent<SpriteRenderer>();
-            TrashItem trashItem = trashObj.GetComponent<TrashItem>();
-
-            if (sr != null)
+            if (!IsFarEnoughFromOthers(
+                    spawnPosition,
+                    usedPositions))
             {
-                sr.sprite = trashSprites[Random.Range(0, trashSprites.Length)];
+                continue;
             }
 
-            if (trashItem != null)
+            GameObject trashObject = Instantiate(
+                trashPrefab,
+                spawnPosition,
+                Quaternion.identity
+            );
+
+            TrashItem trashItem =
+                trashObject.GetComponent<TrashItem>();
+
+            if (trashItem == null)
             {
-                trashItem.Setup(this);
-                spawnedTrash.Add(trashItem);
+                Debug.LogError(
+                    "El prefab de basura no contiene TrashItem."
+                );
+
+                Destroy(trashObject);
+                continue;
             }
 
-            usedPositions.Add(spawnPos);
+            SpriteRenderer spriteRenderer =
+                trashObject.GetComponent<SpriteRenderer>();
+
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.sprite =
+                    trashSprites[
+                        Random.Range(0, trashSprites.Length)
+                    ];
+            }
+
+            trashItem.Setup(this);
+            spawnedTrash.Add(trashItem);
+            usedPositions.Add(spawnPosition);
+        }
+
+        TotalSpawnedTrash = spawnedTrash.Count;
+
+        if (TotalSpawnedTrash < amount)
+        {
+            Debug.LogWarning(
+                "No fue posible generar toda la basura solicitada. " +
+                "Generada: " + TotalSpawnedTrash +
+                " / Solicitada: " + amount
+            );
         }
     }
 
@@ -76,12 +135,26 @@ public class TrashSpawner : MonoBehaviour
         return true;
     }
 
-    public void RemoveTrash(TrashItem trash)
+    public bool RemoveTrash(TrashItem trash)
     {
-        if (spawnedTrash.Contains(trash))
+        if (trash == null)
+            return false;
+
+        bool wasRegistered = spawnedTrash.Remove(trash);
+
+        if (!wasRegistered)
         {
-            spawnedTrash.Remove(trash);
+            Debug.LogError(
+                "El objeto no estaba registrado como basura: " +
+                trash.gameObject.name,
+                trash
+            );
+
+            return false;
         }
+
+        Destroy(trash.gameObject);
+        return true;
     }
 
     public int GetRemainingTrash()
@@ -98,6 +171,7 @@ public class TrashSpawner : MonoBehaviour
         }
 
         spawnedTrash.Clear();
+        TotalSpawnedTrash = 0;
     }
 
     public void SetTrashRange(int min, int max)

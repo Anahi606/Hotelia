@@ -27,6 +27,8 @@ public class CheckInDialogueController : MonoBehaviour
 
     public Action OnDialogueFinished;
 
+    public string SelectedCustomerSpriteName { get; private set; }
+
     private string[] lines;
     private int index;
     private Coroutine typingCo;
@@ -34,7 +36,8 @@ public class CheckInDialogueController : MonoBehaviour
 
     void Awake()
     {
-        if (checkInScreen == null) checkInScreen = gameObject;
+        if (checkInScreen == null)
+            checkInScreen = gameObject;
     }
 
     void Update()
@@ -53,16 +56,40 @@ public class CheckInDialogueController : MonoBehaviour
         checkInScreen.SetActive(true);
 
         Sprite sprite = GetRandomCustomerSprite();
+
         if (sprite != null)
         {
-            if (customerImage != null) customerImage.sprite = sprite;
-            if (customerPortrait != null) customerPortrait.sprite = sprite;
+            SelectedCustomerSpriteName = sprite.name;
+
+            if (customerImage != null)
+                customerImage.sprite = sprite;
+
+            if (customerPortrait != null)
+                customerPortrait.sprite = sprite;
+
+            Debug.Log("Customer elegido: " + SelectedCustomerSpriteName);
+        }
+        else
+        {
+            SelectedCustomerSpriteName = "";
         }
 
         lines = dialogueLines;
         dialogueBox.SetActive(true);
         IsDialogueActive = true;
         index = 0;
+        ShowLine();
+    }
+
+    public void StartFollowUpDialogue(string[] dialogueLines)
+    {
+        checkInScreen.SetActive(true);
+
+        lines = dialogueLines;
+        dialogueBox.SetActive(true);
+        IsDialogueActive = true;
+        index = 0;
+
         ShowLine();
     }
 
@@ -100,7 +127,9 @@ public class CheckInDialogueController : MonoBehaviour
 
         Debug.Log("Mostrando linea: " + currentLineFull);
 
-        if (typingCo != null) StopCoroutine(typingCo);
+        if (typingCo != null)
+            StopCoroutine(typingCo);
+
         typingCo = StartCoroutine(TypeLine(currentLineFull));
     }
 
@@ -111,7 +140,7 @@ public class CheckInDialogueController : MonoBehaviour
         foreach (char c in line)
         {
             dialogueText.text += c;
-            yield return new WaitForSeconds(delay);
+            yield return new WaitForSecondsRealtime(delay);
         }
 
         typingCo = null;

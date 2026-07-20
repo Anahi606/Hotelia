@@ -1,11 +1,19 @@
+using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 public class EndDayBoardInteractable : MonoBehaviour
 {
     [Header("UI")]
     [SerializeField] private GameObject endDayPanel;
-    [SerializeField] private GameObject interactText;
+
+    [Header("Interaction Prompt")]
+    [Tooltip("Objeto 2D con SpriteRenderer que muestra la tecla E.")]
+    [SerializeField] private GameObject interactionPrompt;
+
+    [Tooltip("Texto TextMeshPro que acompaña al indicador de la tecla E.")]
+    [SerializeField] private TMP_Text interactionPromptText;
 
     private bool playerInside;
     private bool panelOpen;
@@ -13,43 +21,124 @@ public class EndDayBoardInteractable : MonoBehaviour
     private void Start()
     {
         if (endDayPanel != null)
+        {
             endDayPanel.SetActive(false);
+        }
+        else
+        {
+            Debug.LogWarning(
+                "EndDayPanel no está asignado en EndDayBoardInteractable."
+            );
+        }
 
-        if (interactText != null)
-            interactText.SetActive(false);
+        HideInteractionPrompt();
     }
 
     private void Update()
     {
-        if (playerInside && !panelOpen && Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
+        if (IsInteractionBlocked())
         {
+            HideInteractionPrompt();
+            return;
+        }
+
+        if (!playerInside || panelOpen)
+        {
+            HideInteractionPrompt();
+            return;
+        }
+
+        ShowInteractionPrompt();
+
+        if (Keyboard.current != null &&
+            Keyboard.current.eKey.wasPressedThisFrame)
+        {
+            Debug.Log(
+                "E presionada dentro del trigger de fin de día."
+            );
+
             OpenPanel();
         }
     }
 
+    private bool IsInteractionBlocked()
+    {
+        if (Ollama_Handler.Instance != null &&
+            Ollama_Handler.Instance.IsOpen)
+        {
+            return true;
+        }
+
+        if (EventSystem.current != null)
+        {
+            GameObject selectedObject =
+                EventSystem.current.currentSelectedGameObject;
+
+            if (selectedObject != null)
+            {
+                TMP_InputField selectedInput =
+                    selectedObject.GetComponent<TMP_InputField>();
+
+                if (selectedInput == null)
+                {
+                    selectedInput =
+                        selectedObject.GetComponentInParent<TMP_InputField>();
+                }
+
+                if (selectedInput != null &&
+                    selectedInput.isFocused)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     private void OpenPanel()
     {
-        if (endDayPanel != null)
-            endDayPanel.SetActive(true);
+        if (endDayPanel == null)
+        {
+            Debug.LogWarning(
+                "No se puede abrir EndDayPanel porque no está asignado."
+            );
 
-        if (interactText != null)
-            interactText.SetActive(false);
+            return;
+        }
 
+        if (IsInteractionBlocked())
+        {
+            Debug.Log(
+                "La interacción de fin de día fue bloqueada " +
+                "porque el jugador está escribiendo o hablando con un NPC."
+            );
+
+            return;
+        }
+
+        HideInteractionPrompt();
+
+        endDayPanel.SetActive(true);
         panelOpen = true;
+
+        Debug.Log("EndDayPanel abierto.");
     }
 
     public void ConfirmEndDay()
     {
-        if (DayManager.Instance != null)
+        ClosePanel();
+
+        if (DailySummaryUI.Instance != null)
         {
-            DayManager.Instance.EndDay();
+            DailySummaryUI.Instance.OpenSummary();
         }
         else
         {
-            Debug.LogWarning("No se encontró una instancia de DayManager en la escena.");
+            Debug.LogWarning(
+                "No se encontró DailySummaryUI en la escena."
+            );
         }
-
-        ClosePanel();
     }
 
     public void CancelEndDay()
@@ -60,33 +149,89 @@ public class EndDayBoardInteractable : MonoBehaviour
     private void ClosePanel()
     {
         if (endDayPanel != null)
+        {
             endDayPanel.SetActive(false);
-
-        if (interactText != null && playerInside)
-            interactText.SetActive(true);
+        }
 
         panelOpen = false;
+
+        if (playerInside && !IsInteractionBlocked())
+        {
+            ShowInteractionPrompt();
+        }
+        else
+        {
+            HideInteractionPrompt();
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Player"))
-        {
-            playerInside = true;
+        if (!other.CompareTag("Player"))
+            return;
 
-            if (interactText != null && !panelOpen)
-                interactText.SetActive(true);
+        playerInside = true;
+
+        if (!panelOpen && !IsInteractionBlocked())
+        {
+            ShowInteractionPrompt();
         }
+        else
+        {
+            HideInteractionPrompt();
+        }
+
+        Debug.Log(
+            "Player dentro del trigger de fin de día."
+        );
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        if (other.CompareTag("Player"))
-        {
-            playerInside = false;
+        if (!other.CompareTag("Player"))
+            return;
 
-            if (interactText != null)
-                interactText.SetActive(false);
+        playerInside = false;
+
+        HideInteractionPrompt();
+
+        Debug.Log(
+            "Player salió del trigger de fin de día."
+        );
+    }
+
+    private void ShowInteractionPrompt()
+    {
+        if (interactionPrompt != null &&
+            !interactionPrompt.activeSelf)
+        {
+            interactionPrompt.SetActive(true);
         }
+
+        if (interactionPromptText != null &&
+            !interactionPromptText.gameObject.activeSelf)
+        {
+            interactionPromptText.gameObject.SetActive(true);
+        }
+    }
+
+    private void HideInteractionPrompt()
+    {
+        if (interactionPrompt != null &&
+            interactionPrompt.activeSelf)
+        {
+            interactionPrompt.SetActive(false);
+        }
+
+        if (interactionPromptText != null &&
+            interactionPromptText.gameObject.activeSelf)
+        {
+            interactionPromptText.gameObject.SetActive(false);
+        }
+    }
+
+    private void OnDisable()
+    {
+        HideInteractionPrompt();
     }
 }

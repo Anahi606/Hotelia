@@ -1,0 +1,168 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+public class HotelGameData : MonoBehaviour
+{
+    public static HotelGameData Instance { get; private set; }
+
+    [Header("Player")]
+    public PlayerCharacterType selectedCharacter = PlayerCharacterType.None;
+
+    [Header("Runtime Rooms")]
+    public List<RoomRuntimeData> rooms = new List<RoomRuntimeData>();
+
+    [Header("Current Room Scene")]
+    public string currentRoomId = "01";
+
+    public void SetCurrentRoom(string roomId)
+    {
+        currentRoomId = roomId;
+    }
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+
+            LoadSavedGameDataIfExists();
+
+            InitializeRoomsIfEmpty();
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    private void LoadSavedGameDataIfExists()
+    {
+        HotelSaveData saveData = HotelSaveSystem.LoadGame();
+
+        if (saveData == null)
+            return;
+
+        selectedCharacter = saveData.selectedCharacter;
+
+        if (saveData.rooms != null && saveData.rooms.Count > 0)
+        {
+            rooms = saveData.rooms;
+        }
+
+        Debug.Log("HotelGameData cargado. Personaje: " + selectedCharacter);
+    }
+
+    private void InitializeRoomsIfEmpty()
+    {
+        if (rooms.Count > 0) return;
+
+        for (int i = 1; i <= 6; i++)
+        {
+            RoomRuntimeData room = new RoomRuntimeData();
+
+            room.roomId = i.ToString("00");
+            room.isAccessible = false;
+            room.bedType = BedType.Double;
+            room.bedCount = 0;
+
+            room.state = RoomState.Available;
+            room.needsCleaning = false;
+            room.reservedUntilDay = -1;
+
+            //room.currentOffer = OfferType.None;
+            room.currentMealPlan = MealPlan.AccommodationOnly;
+            room.currentGuestCount = 0;
+            room.hasGuestData = false;
+
+            room.hotelDoorSpawnId = "";
+            room.guestSpriteName = "";
+
+            room.lastRestaurantOrderCompletedDay = -1;
+
+            rooms.Add(room);
+        }
+    }
+
+    public RoomRuntimeData GetRoomById(string roomId)
+    {
+        foreach (RoomRuntimeData room in rooms)
+        {
+            if (room.roomId == roomId)
+                return room;
+        }
+
+        return null;
+    }
+
+    public void SaveRoomFromRoomData(RoomData roomData)
+    {
+        if (roomData == null) return;
+
+        RoomRuntimeData runtimeRoom = GetRoomById(roomData.roomId);
+
+        if (runtimeRoom == null)
+        {
+            runtimeRoom = new RoomRuntimeData();
+            runtimeRoom.roomId = roomData.roomId;
+            rooms.Add(runtimeRoom);
+        }
+
+        runtimeRoom.isAccessible = roomData.isAccessible;
+        runtimeRoom.bedType = roomData.bedType;
+        runtimeRoom.bedCount = roomData.bedCount;
+
+        runtimeRoom.state = roomData.state;
+        runtimeRoom.needsCleaning = roomData.needsCleaning;
+        runtimeRoom.reservedUntilDay = roomData.reservedUntilDay;
+
+        runtimeRoom.currentGuestSegment = roomData.currentGuestSegment;
+        runtimeRoom.currentOffer = roomData.currentOffer;
+        runtimeRoom.currentMealPlan = roomData.currentMealPlan;
+        runtimeRoom.currentGuestCount = roomData.currentGuestCount;
+        runtimeRoom.hasGuestData = roomData.hasGuestData;
+
+        runtimeRoom.hotelDoorSpawnId = roomData.hotelDoorSpawnId;
+        runtimeRoom.guestSpriteName = roomData.guestSpriteName;
+    }
+
+    public void LoadRoomIntoRoomData(RoomData roomData)
+    {
+        if (roomData == null) return;
+
+        RoomRuntimeData runtimeRoom = GetRoomById(roomData.roomId);
+
+        if (runtimeRoom == null)
+        {
+            runtimeRoom = new RoomRuntimeData();
+            runtimeRoom.roomId = roomData.roomId;
+            rooms.Add(runtimeRoom);
+        }
+
+        if (runtimeRoom.bedCount <= 0)
+        {
+            runtimeRoom.isAccessible = roomData.isAccessible;
+            runtimeRoom.bedType = roomData.bedType;
+            runtimeRoom.bedCount = roomData.bedCount;
+        }
+        else
+        {
+            roomData.isAccessible = runtimeRoom.isAccessible;
+            roomData.bedType = runtimeRoom.bedType;
+            roomData.bedCount = runtimeRoom.bedCount;
+        }
+
+        roomData.state = runtimeRoom.state;
+        roomData.needsCleaning = runtimeRoom.needsCleaning;
+        roomData.reservedUntilDay = runtimeRoom.reservedUntilDay;
+
+        roomData.currentGuestSegment = runtimeRoom.currentGuestSegment;
+        roomData.currentOffer = runtimeRoom.currentOffer;
+        roomData.currentMealPlan = runtimeRoom.currentMealPlan;
+        roomData.currentGuestCount = runtimeRoom.currentGuestCount;
+        roomData.hasGuestData = runtimeRoom.hasGuestData;
+
+        roomData.hotelDoorSpawnId = runtimeRoom.hotelDoorSpawnId;
+        roomData.guestSpriteName = runtimeRoom.guestSpriteName;
+    }
+}

@@ -28,7 +28,7 @@ public class RoomButtonUI : MonoBehaviour
             return;
         }
 
-        bool isFree = roomData.state == RoomState.Libre;
+        bool isFree = roomData.state == RoomState.Available;
         Debug.Log($"{gameObject.name} -> Room {roomData.roomId} estado: {roomData.state}, visible: {isFree}");
         gameObject.SetActive(isFree);
 
@@ -42,7 +42,7 @@ public class RoomButtonUI : MonoBehaviour
     public void OnClickRoom()
     {
         if (roomData == null || flowController == null) return;
-        if (roomData.state != RoomState.Libre) return;
+        if (roomData.state != RoomState.Available) return;
         Debug.Log("Click en habitación: " + roomData.roomId);
         flowController.ShowRoomInfo(roomData);
     }

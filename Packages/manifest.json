@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.monitor1394.xcharts": "file:Packages/XCharts",
     "com.unity.cinemachine": "3.1.5",
     "com.unity.collab-proxy": "2.11.3",
     "com.unity.feature.2d": "2.0.2",

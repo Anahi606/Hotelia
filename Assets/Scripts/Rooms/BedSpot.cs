@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[DefaultExecutionOrder(100)]
 public class BedSpot : MonoBehaviour
 {
     [Header("Placed Visuals")]
@@ -16,23 +17,38 @@ public class BedSpot : MonoBehaviour
 
     public bool IsCompleted => completed;
 
-    private void Start()
-    {
-        if (sheetsPlaced != null) sheetsPlaced.SetActive(false);
-        if (pillowsPlaced != null) pillowsPlaced.SetActive(false);
-        if (coverPlaced != null) coverPlaced.SetActive(false);
-    }
-
     private void Update()
     {
-        if (!playerInside || completed) return;
-        if (BedPuzzleUI.Instance == null) return;
+        if (completed)
+            return;
 
-        if (Keyboard.current != null &&
-            Keyboard.current.eKey.wasPressedThisFrame)
+        if (!playerInside)
+            return;
+
+        if (BedPuzzleUI.Instance == null)
+            return;
+
+        if (Keyboard.current == null)
+            return;
+
+        if (!Keyboard.current.eKey.wasPressedThisFrame)
+            return;
+
+        if (TrashItem.IsPlayerNearAnyTrash ||
+            TrashItem.ConsumedInteractionThisFrame)
         {
-            BedPuzzleUI.Instance.OpenForBed(this);
+            return;
         }
+
+        BedPuzzleUI.Instance.OpenForBed(this);
+    }
+
+    private void LateUpdate()
+    {
+        if (!completed)
+            return;
+
+        EnsureCompletedVisuals();
     }
 
     public void PlacePiece(BedPieceType pieceType)
@@ -40,29 +56,90 @@ public class BedSpot : MonoBehaviour
         switch (pieceType)
         {
             case BedPieceType.Sheets:
-                if (sheetsPlaced != null) sheetsPlaced.SetActive(true);
+                SetVisualActive(sheetsPlaced, true);
                 break;
 
             case BedPieceType.Pillows:
-                if (pillowsPlaced != null) pillowsPlaced.SetActive(true);
+                SetVisualActive(pillowsPlaced, true);
                 break;
 
             case BedPieceType.Cover:
-                if (coverPlaced != null) coverPlaced.SetActive(true);
                 completed = true;
-
-                if (dropTarget != null)
-                    dropTarget.enabled = false;
+                EnsureCompletedVisuals();
                 break;
         }
     }
 
-    public bool IsScreenPointOverDropTarget(Vector2 screenPoint, Camera cam)
+    public void SetBedCompletedVisual(bool isCompleted)
     {
-        if (dropTarget == null || cam == null) return false;
-        if (!dropTarget.enabled) return false;
+        if (completed && !isCompleted)
+        {
+            EnsureCompletedVisuals();
+            return;
+        }
 
-        float distanceToScene = Mathf.Abs(cam.transform.position.z - dropTarget.transform.position.z);
+        completed = isCompleted;
+
+        SetVisualActive(sheetsPlaced, isCompleted);
+        SetVisualActive(pillowsPlaced, isCompleted);
+        SetVisualActive(coverPlaced, isCompleted);
+
+        if (dropTarget != null)
+            dropTarget.enabled = !isCompleted;
+    }
+
+    public void EnsureCompletedVisuals()
+    {
+        if (!completed)
+            return;
+
+        SetVisualActive(sheetsPlaced, true);
+        SetVisualActive(pillowsPlaced, true);
+        SetVisualActive(coverPlaced, true);
+
+        if (dropTarget != null)
+            dropTarget.enabled = false;
+    }
+
+    private void SetVisualActive(
+        GameObject visual,
+        bool active
+    )
+    {
+        if (visual == null)
+            return;
+
+        if (visual.activeSelf != active)
+            visual.SetActive(active);
+
+        if (!active)
+            return;
+
+        SpriteRenderer spriteRenderer =
+            visual.GetComponent<SpriteRenderer>();
+
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.enabled = true;
+            spriteRenderer.forceRenderingOff = false;
+        }
+    }
+
+    public bool IsScreenPointOverDropTarget(
+        Vector2 screenPoint,
+        Camera cam
+    )
+    {
+        if (dropTarget == null || cam == null)
+            return false;
+
+        if (!dropTarget.enabled)
+            return false;
+
+        float distanceToScene = Mathf.Abs(
+            cam.transform.position.z -
+            dropTarget.transform.position.z
+        );
 
         Vector3 screenPointWithDepth = new Vector3(
             screenPoint.x,
@@ -70,7 +147,9 @@ public class BedSpot : MonoBehaviour
             distanceToScene
         );
 
-        Vector3 worldPoint = cam.ScreenToWorldPoint(screenPointWithDepth);
+        Vector3 worldPoint =
+            cam.ScreenToWorldPoint(screenPointWithDepth);
+
         return dropTarget.OverlapPoint(worldPoint);
     }
 

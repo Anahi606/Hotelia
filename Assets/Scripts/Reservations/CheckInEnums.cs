@@ -1,19 +1,51 @@
 public enum BedType
 {
-    Matrimonial,
-    Separadas
+    Double,
+    Separate
 }
 
 public enum RoomState
 {
-    Libre,
-    Ocupada,
-    Sucia,
-    Limpiando
+    Available,
+    Occupied,
+    Dirty,
+    Cleaning
 }
 
 public enum MealPlan
 {
-    SoloAlojamiento,
-    Completo
+    AccommodationOnly,
+    Full
+}
+
+public enum GuestSegment
+{
+    Couple,
+    Family,
+    Executive,
+    CulturalTourist,
+    AdventureTourist,
+    BudgetTraveler
+}
+
+public enum OfferType
+{
+    Romantic,
+    Family,
+    Executive,
+    Cultural,
+    Adventure,
+    Budget
+}
+
+public enum TourismExtraType
+{
+    None,
+    CulturalTour,
+    NatureActivity,
+    CityTransport,
+    RomanticDinner,
+    FamilyActivity,
+    BusinessTransport,
+    LocalSouvenir
 }

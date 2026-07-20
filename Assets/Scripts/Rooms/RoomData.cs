@@ -13,8 +13,70 @@ public class RoomData : MonoBehaviour
     public bool needsCleaning;
     public int reservedUntilDay = -1;
 
+    [Header("Guest Data")]
+    public GuestSegment currentGuestSegment;
+    public OfferType currentOffer;
+    public MealPlan currentMealPlan;
+    public int currentGuestCount;
+    public bool hasGuestData;
+
+    [Header("Guest NPC")]
+    public bool hasGuest;
+    public GameObject guestPrefab;
+    public GuestArea guestCurrentArea;
+    public string hotelDoorSpawnId;
+    public string guestSpriteName;
+
+    private void Start()
+    {
+        if (HotelGameData.Instance != null)
+        {
+            HotelGameData.Instance.LoadRoomIntoRoomData(this);
+        }
+    }
+
     public bool IsReservationActive(int currentDay)
     {
         return currentDay <= reservedUntilDay;
+    }
+
+    public void AssignGuest(CheckInRequest request, int currentDay)
+    {
+        state = RoomState.Occupied;
+        needsCleaning = false;
+        reservedUntilDay = currentDay + request.stayDays - 1;
+
+        currentGuestSegment = request.correctSegment;
+        currentOffer = request.bestOffer;
+        currentMealPlan = request.mealPlan;
+        currentGuestCount = request.guestCount;
+        hasGuestData = true;
+
+        SaveToGameData();
+    }
+
+    public void ClearGuest()
+    {
+        currentGuestSegment = default;
+        //currentOffer = OfferType.None;
+        currentMealPlan = MealPlan.AccommodationOnly;
+        currentGuestCount = 0;
+        hasGuestData = false;
+
+        hasGuest = false;
+        guestPrefab = null;
+        guestCurrentArea = default;
+        hotelDoorSpawnId = "";
+        guestSpriteName = "";
+
+        SaveToGameData();
+    }
+
+    public void SaveToGameData()
+    {
+        if (HotelGameData.Instance != null)
+        {
+            HotelGameData.Instance.SaveRoomFromRoomData(this);
+        }
     }
 }
