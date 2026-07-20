@@ -15,6 +15,7 @@ public class TeacherPerformancePanelUI : MonoBehaviour
     private const string TeacherCoursesKey = "Hotelia_TeacherCourses";
     private const string TeacherStudentsKey = "Hotelia_TeacherStudents";
     private const string SubjectCatalogKey = "Hotelia_SubjectCatalog";
+    private const int TeacherVisibleDayLimit = 30;
 
     [Header("Filters")]
     [SerializeField] private TMP_Dropdown courseDropdown;
@@ -242,6 +243,11 @@ public class TeacherPerformancePanelUI : MonoBehaviour
             count++;
         }
 
+    }
+
+    private int GetTeacherVisibleCurrentDay(int realCurrentDay)
+    {
+        return Mathf.Clamp(realCurrentDay, 1, TeacherVisibleDayLimit);
     }
 
     private List<AssignedStudentData> GetStudentsForSelectedCourse()
@@ -524,9 +530,17 @@ public class TeacherPerformancePanelUI : MonoBehaviour
                 if (response == null || !response.success)
                     continue;
 
-                studentSummary.currentDay = Mathf.Max(1, response.currentDay);
-                courseSummary.currentDay = Mathf.Max(courseSummary.currentDay, studentSummary.currentDay);
-                currentSubjectCurrentDay = Mathf.Max(currentSubjectCurrentDay, studentSummary.currentDay);
+                studentSummary.currentDay = GetTeacherVisibleCurrentDay(response.currentDay);
+
+                courseSummary.currentDay = Mathf.Max(
+                    courseSummary.currentDay,
+                    studentSummary.currentDay
+                );
+
+                currentSubjectCurrentDay = Mathf.Max(
+                    currentSubjectCurrentDay,
+                    studentSummary.currentDay
+                );
 
                 List<CloudDailyResultData> rawResults = new List<CloudDailyResultData>();
 
@@ -682,8 +696,12 @@ public class TeacherPerformancePanelUI : MonoBehaviour
             if (response == null || !response.success)
                 continue;
 
-            studentSummary.currentDay = Mathf.Max(1, response.currentDay);
-            currentCourseCurrentDay = Mathf.Max(currentCourseCurrentDay, studentSummary.currentDay);
+            studentSummary.currentDay = GetTeacherVisibleCurrentDay(response.currentDay);
+
+            currentCourseCurrentDay = Mathf.Max(
+                currentCourseCurrentDay,
+                studentSummary.currentDay
+            );
 
             List<CloudDailyResultData> rawResults = new List<CloudDailyResultData>();
 
@@ -826,7 +844,7 @@ public class TeacherPerformancePanelUI : MonoBehaviour
             yield break;
         }
 
-        currentStudentCurrentDay = Mathf.Max(1, response.currentDay);
+        currentStudentCurrentDay = GetTeacherVisibleCurrentDay(response.currentDay);
 
         currentStudentResults.Clear();
 
@@ -965,13 +983,26 @@ public class TeacherPerformancePanelUI : MonoBehaviour
         int activeCurrentDay = 1;
 
         if (isViewingSubjectSummary)
-            activeCurrentDay = Mathf.Max(1, currentSubjectCurrentDay);
+        {
+            activeCurrentDay =
+                Mathf.Max(1, currentSubjectCurrentDay);
+        }
         else if (isViewingCourseSummary)
-            activeCurrentDay = Mathf.Max(1, currentCourseCurrentDay);
+        {
+            activeCurrentDay =
+                Mathf.Max(1, currentCourseCurrentDay);
+        }
         else
-            activeCurrentDay = Mathf.Max(1, currentStudentCurrentDay);
+        {
+            activeCurrentDay =
+                Mathf.Max(1, currentStudentCurrentDay);
+        }
 
-        int lastDay = activeCurrentDay;
+        int lastDay = Mathf.Clamp(
+            activeCurrentDay,
+            1,
+            TeacherVisibleDayLimit
+        );
 
         if (sourceResults != null)
         {
@@ -980,9 +1011,20 @@ public class TeacherPerformancePanelUI : MonoBehaviour
                 if (result == null)
                     continue;
 
+                if (result.day < 1 ||
+                    result.day > TeacherVisibleDayLimit)
+                {
+                    continue;
+                }
+
                 lastDay = Mathf.Max(lastDay, result.day);
             }
         }
+
+        lastDay = Mathf.Min(
+            lastDay,
+            TeacherVisibleDayLimit
+        );
 
         List<int> days = new List<int>();
 
@@ -1955,11 +1997,14 @@ public class TeacherPerformancePanelUI : MonoBehaviour
         return GetResultsRelatedToSelectedCourse(currentStudentResults);
     }
 
-    private List<CloudDailyResultData> GetResultsRelatedToSelectedCourse(List<CloudDailyResultData> sourceResults)
+    private List<CloudDailyResultData> GetResultsRelatedToSelectedCourse(
+    List<CloudDailyResultData> sourceResults)
     {
-        List<CloudDailyResultData> filtered = new List<CloudDailyResultData>();
+        List<CloudDailyResultData> filtered =
+            new List<CloudDailyResultData>();
 
-        List<string> relatedMinigames = GetRelatedMinigamesForSelectedCourse();
+        List<string> relatedMinigames =
+            GetRelatedMinigamesForSelectedCourse();
 
         if (relatedMinigames.Count == 0 || sourceResults == null)
             return filtered;
@@ -1969,8 +2014,15 @@ public class TeacherPerformancePanelUI : MonoBehaviour
             if (result == null)
                 continue;
 
-            if (IsMinigameRelated(result.minigameName, relatedMinigames))
+            if (result.day < 1 || result.day > TeacherVisibleDayLimit)
+                continue;
+
+            if (IsMinigameRelated(
+                result.minigameName,
+                relatedMinigames))
+            {
                 filtered.Add(result);
+            }
         }
 
         return filtered;

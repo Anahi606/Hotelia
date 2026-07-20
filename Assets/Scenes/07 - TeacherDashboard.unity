@@ -21234,7 +21234,7 @@ MonoBehaviour:
   allowedTopicsInput: {fileID: 1189267271}
   correctKeywordsInput: {fileID: 1534000763}
   wrongKeywordsInput: {fileID: 447511500}
-  saveAIQuestionParametersUrl: https://hotelia-teacher-registration-ctajh3a9e5d2effc.brazilsouth-01.azurewebsites.net/api/saveAIQuestionParameters
+  saveAIQuestionParametersUrl: https://func-hotelia-dev-teacher-api-sc.azurewebsites.net/api/saveAIQuestionParameters
   messageText: {fileID: 1039883565}
 --- !u!1 &741668434
 GameObject:
@@ -27276,6 +27276,9 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1178369944}
+  - {fileID: 1738815912}
+  - {fileID: 1967136062}
   - {fileID: 1991954760}
   m_Father: {fileID: 1459592889}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -36083,16 +36086,16 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1178369943}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1459592889}
+  m_Father: {fileID: 969997665}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -410.4839, y: 328.1555}
+  m_AnchoredPosition: {x: -407.9853, y: 366.55447}
   m_SizeDelta: {x: 446.6254, y: 54.251}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1178369945
@@ -41234,8 +41237,8 @@ MonoBehaviour:
   searchResultsContainer: {fileID: 554692934}
   searchStudentRowPrefab: {fileID: 3975868300267827476, guid: 06fc76b75a6946041b67d3c40efcc142, type: 3}
   messageText: {fileID: 1989187606}
-  searchStudentsUrl: https://hotelia-teacher-registration-ctajh3a9e5d2effc.brazilsouth-01.azurewebsites.net/api/searchStudents
-  bulkCreateStudentsUrl: https://hotelia-teacher-registration-ctajh3a9e5d2effc.brazilsouth-01.azurewebsites.net/api/bulkCreateStudents
+  searchStudentsUrl: https://func-hotelia-dev-teacher-api-sc.azurewebsites.net/api/searchStudents
+  bulkCreateStudentsUrl: https://func-hotelia-dev-teacher-api-sc.azurewebsites.net/api/bulkCreateStudents
 --- !u!1 &1361485098
 GameObject:
   m_ObjectHideFlags: 0
@@ -43983,9 +43986,6 @@ RectTransform:
   - {fileID: 813734463}
   - {fileID: 969997665}
   - {fileID: 1294645644}
-  - {fileID: 1178369944}
-  - {fileID: 1738815912}
-  - {fileID: 1967136062}
   m_Father: {fileID: 170300084}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -44049,6 +44049,8 @@ MonoBehaviour:
   courseListContainer: {fileID: 602590943}
   courseRowPrefab: {fileID: 3975868300267827476, guid: 54d541135a9b60b4eb4d3735440862ed, type: 3}
   messageText: {fileID: 1591790262}
+  studentsPanelUI: {fileID: 1361315898}
+  manageTeacherCourseUrl: https://func-hotelia-dev-teacher-api-sc.azurewebsites.net/api/manageTeacherCourse
 --- !u!1 &1464237097
 GameObject:
   m_ObjectHideFlags: 0
@@ -51524,16 +51526,16 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1738815911}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1459592889}
+  m_Father: {fileID: 969997665}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -112.20566, y: 328.1555}
+  m_AnchoredPosition: {x: -109.70706, y: 366.55447}
   m_SizeDelta: {x: 92.8384, y: 54.251}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1738815913
@@ -58437,16 +58439,16 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1967136061}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1459592889}
+  m_Father: {fileID: 969997665}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 160.57, y: 328.15}
+  m_AnchoredPosition: {x: 163.06854, y: 366.54898}
   m_SizeDelta: {x: 321.14, y: 54.251}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1967136063
@@ -61331,7 +61333,7 @@ MonoBehaviour:
   - {fileID: 834840167}
   objectsToHideWhileExporting: []
   pdfReportsFolderName: HoteliaReports
-  getStudentPerformanceUrl: https://hotelia-teacher-registration-ctajh3a9e5d2effc.brazilsouth-01.azurewebsites.net/api/getStudentPerformance
+  getStudentPerformanceUrl: https://func-hotelia-dev-teacher-api-sc.azurewebsites.net/api/getStudentPerformance
 --- !u!1 &2065385286
 GameObject:
   m_ObjectHideFlags: 0

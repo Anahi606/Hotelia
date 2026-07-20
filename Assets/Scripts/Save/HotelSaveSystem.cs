@@ -106,10 +106,8 @@ public static class HotelSaveSystem
         return data;
     }
 
-    public static void DeleteSave()
+    public static void ClearRuntimeData()
     {
-        HoteliaSQLiteManager.DeleteAllSaveData();
-
         if (DailyResultsManager.Instance != null)
         {
             DailyResultsManager.Instance.ClearTodayResults();
@@ -118,10 +116,97 @@ public static class HotelSaveSystem
 
         if (HotelGameData.Instance != null)
         {
-            HotelGameData.Instance.selectedCharacter = PlayerCharacterType.None;
+            HotelGameData.Instance.selectedCharacter =
+                PlayerCharacterType.None;
+
             HotelGameData.Instance.rooms.Clear();
         }
 
-        Debug.Log("Partida eliminada completamente desde SQLite.");
+        if (DayManager.Instance != null)
+        {
+            DayManager.Instance.SetCurrentDayFromSave(1);
+        }
+
+        Debug.Log(
+            "[HotelSaveSystem] Datos anteriores eliminados de memoria."
+        );
+    }
+
+    public static void ApplyLoadedDataToRuntime(HotelSaveData data)
+    {
+        ClearRuntimeData();
+
+        if (data == null || !data.hasStartedGame)
+        {
+            Debug.Log(
+                "[HotelSaveSystem] El perfil activo no tiene partida."
+            );
+
+            return;
+        }
+
+        if (HotelGameData.Instance != null)
+        {
+            HotelGameData.Instance.selectedCharacter =
+                data.selectedCharacter;
+
+            HotelGameData.Instance.rooms.Clear();
+
+            if (data.rooms != null)
+            {
+                HotelGameData.Instance.rooms.AddRange(
+                    data.rooms
+                );
+            }
+        }
+
+        if (DailyResultsManager.Instance != null)
+        {
+            DailyResultsManager.Instance.ClearTodayResults();
+            DailyResultsManager.Instance.allResults.Clear();
+
+            if (data.allResults != null)
+            {
+                DailyResultsManager.Instance.allResults.AddRange(
+                    data.allResults
+                );
+            }
+        }
+
+        if (DayManager.Instance != null)
+        {
+            DayManager.Instance.SetCurrentDayFromSave(
+                data.currentDay
+            );
+        }
+
+        Debug.Log(
+            "[HotelSaveSystem] Perfil cargado en memoria." +
+            "\nPerfil SQLite: " +
+            HoteliaSQLiteManager.ActiveProfileId +
+            "\nDía: " +
+            data.currentDay +
+            "\nResultados: " +
+            (data.allResults != null
+                ? data.allResults.Count
+                : 0)
+        );
+    }
+
+    public static void ReloadActiveProfileIntoRuntime()
+    {
+        HotelSaveData data = LoadGame();
+
+        ApplyLoadedDataToRuntime(data);
+    }
+    public static void DeleteSave()
+    {
+        HoteliaSQLiteManager.DeleteAllSaveData();
+
+        ClearRuntimeData();
+
+        Debug.Log(
+            "Partida eliminada completamente desde SQLite."
+        );
     }
 }

@@ -12,94 +12,119 @@ public static class PlayfabCloudSaveManager
     private const string NpcStatesKey = "Hotelia_NpcStates";
     private const string LastSyncKey = "Hotelia_LastSyncUtc";
 
-    public static void SyncBestSaveBetweenLocalAndPlayFab(Action<HotelSaveData> onFinished)
+    public static void SyncBestSaveBetweenLocalAndPlayFab(
+    Action<HotelSaveData> onFinished
+)
     {
         if (!PlayfabManager.IsLoggedInWithEmail)
         {
-            HotelSaveData localOnlySave = HotelSaveSystem.LoadGame();
-            onFinished?.Invoke(localOnlySave);
+            HotelSaveData localOnlySave =
+                HotelSaveSystem.LoadGame();
+
+            FinishSync(
+                onFinished,
+                localOnlySave
+            );
+
             return;
         }
 
         if (PlayfabManager.IsTeacher)
         {
-            Debug.Log("Teacher accounts do not sync gameplay progress.");
-            onFinished?.Invoke(null);
+            Debug.Log(
+                "Teacher accounts do not sync gameplay progress."
+            );
+
+            FinishSync(
+                onFinished,
+                null
+            );
+
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(PlayfabManager.CurrentPlayFabId))
-        {
-            Debug.LogError(
-                "Cloud synchronization was cancelled because " +
-                "the current PlayFabId is missing."
-            );
-
-            onFinished?.Invoke(null);
-            return;
-        }
-
-        bool profileActivated =
-            HoteliaSQLiteManager.UsePlayFabProfile(
-                PlayfabManager.CurrentPlayFabId
-            );
-
-        if (!profileActivated)
-        {
-            Debug.LogError(
-                "Cloud synchronization was cancelled because " +
-                "the SQLite profile could not be activated."
-            );
-
-            onFinished?.Invoke(null);
-            return;
-        }
-
-        HotelSaveData localSave = HotelSaveSystem.LoadGame();
+        HotelSaveData localSave =
+            HotelSaveSystem.LoadGame();
 
         var request = new GetUserDataRequest
         {
             Keys = new List<string>
-            {
-                GameStateKey,
-                RoomsKey,
-                DailyResultsKey,
-                NpcStatesKey,
-                LastSyncKey
-            }
+        {
+            GameStateKey,
+            RoomsKey,
+            DailyResultsKey,
+            NpcStatesKey,
+            LastSyncKey
+        }
         };
 
         PlayFabClientAPI.GetUserData(
             request,
             result =>
             {
-                HotelSaveData cloudSave = BuildHotelSaveDataFromCloud(result.Data);
+                HotelSaveData cloudSave =
+                    BuildHotelSaveDataFromCloud(
+                        result.Data
+                    );
 
-                bool hasLocal = localSave != null && localSave.hasStartedGame;
-                bool hasCloud = cloudSave != null && cloudSave.hasStartedGame;
+                bool hasLocal =
+                    localSave != null &&
+                    localSave.hasStartedGame;
+
+                bool hasCloud =
+                    cloudSave != null &&
+                    cloudSave.hasStartedGame;
 
                 if (!hasLocal && !hasCloud)
                 {
-                    Debug.Log("No local save and no cloud save found.");
-                    onFinished?.Invoke(null);
+                    Debug.Log(
+                        "No local save and no cloud save found."
+                    );
+
+                    FinishSync(
+                        onFinished,
+                        null
+                    );
+
                     return;
                 }
 
                 if (hasLocal && !hasCloud)
                 {
-                    Debug.Log("Only local save exists. Uploading local save to PlayFab.");
-                    UploadLocalSQLiteSaveToPlayFab(success =>
-                    {
-                        onFinished?.Invoke(localSave);
-                    });
+                    Debug.Log(
+                        "Only local save exists. " +
+                        "Uploading local save to PlayFab."
+                    );
+
+                    UploadLocalSQLiteSaveToPlayFab(
+                        success =>
+                        {
+                            FinishSync(
+                                onFinished,
+                                localSave
+                            );
+                        }
+                    );
+
                     return;
                 }
 
                 if (!hasLocal && hasCloud)
                 {
-                    Debug.Log("Only cloud save exists. Downloading cloud save to SQLite.");
-                    SaveCloudSaveToSQLite(result.Data);
-                    onFinished?.Invoke(HotelSaveSystem.LoadGame());
+                    Debug.Log(
+                        "Only cloud save exists. " +
+                        "Downloading cloud save to SQLite."
+                    );
+
+                    SaveCloudSaveToSQLite(
+                        result.Data
+                    );
+
+                    FinishSync(
+                        onFinished,
+                        HotelSaveSystem.LoadGame()
+                    );
+
                     return;
                 }
 
@@ -108,47 +133,111 @@ public static class PlayfabCloudSaveManager
 
                 if (localDay > cloudDay)
                 {
-                    Debug.Log("Local save is ahead. Uploading local save to PlayFab.");
-                    UploadLocalSQLiteSaveToPlayFab(success =>
-                    {
-                        onFinished?.Invoke(localSave);
-                    });
+                    Debug.Log(
+                        "Local save is ahead. " +
+                        "Uploading local save to PlayFab."
+                    );
+
+                    UploadLocalSQLiteSaveToPlayFab(
+                        success =>
+                        {
+                            FinishSync(
+                                onFinished,
+                                localSave
+                            );
+                        }
+                    );
+
                     return;
                 }
 
                 if (cloudDay > localDay)
                 {
-                    Debug.Log("Cloud save is ahead. Downloading cloud save to SQLite.");
-                    SaveCloudSaveToSQLite(result.Data);
-                    onFinished?.Invoke(HotelSaveSystem.LoadGame());
+                    Debug.Log(
+                        "Cloud save is ahead. " +
+                        "Downloading cloud save to SQLite."
+                    );
+
+                    SaveCloudSaveToSQLite(
+                        result.Data
+                    );
+
+                    FinishSync(
+                        onFinished,
+                        HotelSaveSystem.LoadGame()
+                    );
+
                     return;
                 }
 
-                int localResultsCount = localSave.allResults != null ? localSave.allResults.Count : 0;
-                int cloudResultsCount = cloudSave.allResults != null ? cloudSave.allResults.Count : 0;
+                int localResultsCount =
+                    localSave.allResults != null
+                        ? localSave.allResults.Count
+                        : 0;
+
+                int cloudResultsCount =
+                    cloudSave.allResults != null
+                        ? cloudSave.allResults.Count
+                        : 0;
 
                 if (cloudResultsCount > localResultsCount)
                 {
-                    Debug.Log("Same day, but cloud has more results. Downloading cloud save.");
-                    SaveCloudSaveToSQLite(result.Data);
-                    onFinished?.Invoke(HotelSaveSystem.LoadGame());
+                    Debug.Log(
+                        "Same day, but cloud has more results. " +
+                        "Downloading cloud save."
+                    );
+
+                    SaveCloudSaveToSQLite(
+                        result.Data
+                    );
+
+                    FinishSync(
+                        onFinished,
+                        HotelSaveSystem.LoadGame()
+                    );
+
                     return;
                 }
 
-                Debug.Log("Local save is equal or better. Keeping local save and uploading it to PlayFab.");
-                UploadLocalSQLiteSaveToPlayFab(success =>
-                {
-                    onFinished?.Invoke(localSave);
-                });
+                Debug.Log(
+                    "Local save is equal or better. " +
+                    "Keeping local save and uploading it to PlayFab."
+                );
+
+                UploadLocalSQLiteSaveToPlayFab(
+                    success =>
+                    {
+                        FinishSync(
+                            onFinished,
+                            localSave
+                        );
+                    }
+                );
             },
             error =>
             {
-                Debug.LogError("Could not read PlayFab cloud save: " + error.GenerateErrorReport());
+                Debug.LogError(
+                    "Could not read PlayFab cloud save: " +
+                    error.GenerateErrorReport()
+                );
 
-                HotelSaveData fallbackLocalSave = HotelSaveSystem.LoadGame();
-                onFinished?.Invoke(fallbackLocalSave);
+                HotelSaveData fallbackLocalSave =
+                    HotelSaveSystem.LoadGame();
+
+                FinishSync(
+                    onFinished,
+                    fallbackLocalSave
+                );
             }
         );
+    }
+    private static void FinishSync(
+    Action<HotelSaveData> onFinished,
+    HotelSaveData save)
+    {
+        HotelSaveSystem.ApplyLoadedDataToRuntime(save);
+
+        onFinished?.Invoke(save);
     }
 
     public static void UploadLocalSQLiteSaveToPlayFab(Action<bool> onFinished = null)
@@ -184,16 +273,20 @@ public static class PlayfabCloudSaveManager
             return;
         }
 
-        bool profileActivated =
-            HoteliaSQLiteManager.UsePlayFabProfile(
-                PlayfabManager.CurrentPlayFabId
-            );
+        bool correctLocalProfile =
+        HoteliaSQLiteManager.IsUsingPlayFabProfile(
+            PlayfabManager.CurrentPlayFabId
+        );
 
-        if (!profileActivated)
+        if (!correctLocalProfile)
         {
             Debug.LogError(
-                "Progress cannot be uploaded because " +
-                "the SQLite profile could not be activated."
+                "El progreso no se puede subir porque el perfil " +
+                "SQLite activo no pertenece a la cuenta conectada." +
+                "\nCuenta PlayFab: " +
+                PlayfabManager.CurrentPlayFabId +
+                "\nPerfil SQLite activo: " +
+                HoteliaSQLiteManager.ActiveProfileId
             );
 
             onFinished?.Invoke(false);

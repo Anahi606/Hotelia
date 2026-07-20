@@ -171,9 +171,26 @@ public class DayManager : MonoBehaviour
 
     public void ResetDays()
     {
-        CurrentDay = 1;
+        SetCurrentDayFromSave(1);
+
+        Debug.Log(
+            "Días reiniciados para una nueva partida."
+        );
+    }
+
+    public void SetCurrentDayFromSave(int savedDay)
+    {
+        CurrentDay = Mathf.Max(1, savedDay);
+
         DayTextUI.UpdateAllDayTexts();
 
-        Debug.Log("Días reiniciados para una nueva partida.");
+        Debug.Log(
+            "[DayManager] Día cargado en memoria: " +
+            CurrentDay
+        );
+    }
+    public void LoadDayFromSave(int savedDay)
+    {
+        SetCurrentDayFromSave(savedDay);
     }
 }

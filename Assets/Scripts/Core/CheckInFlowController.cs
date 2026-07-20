@@ -183,7 +183,7 @@ public class CheckInFlowController : MonoBehaviour
         if (computerButton != null)
             computerButton.interactable = false;
 
-        currentRequest = CheckInRequestGenerator.GenerateRequest(allRooms);
+        currentRequest = GenerateRequestRespectingFullMealPlanCapacity();
 
         if (currentRequest == null)
         {
@@ -1451,6 +1451,83 @@ public class CheckInFlowController : MonoBehaviour
 
         // Usa el meal plan real de la solicitud
         return request.mealPlan == MealPlan.Full;
+    }
+
+    private CheckInRequest GenerateRequestRespectingFullMealPlanCapacity()
+    {
+        int currentFullMealPlanGuests =
+            GetCurrentFullMealPlanGuestCount();
+
+        bool mustForceFullMealPlan =
+            currentFullMealPlanGuests == 0;
+
+        const int maxAttempts = 50;
+
+        for (int attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            CheckInRequest request =
+                CheckInRequestGenerator.GenerateRequest(allRooms);
+
+            if (request == null)
+                return null;
+
+            if (mustForceFullMealPlan)
+            {
+                request.mealPlan = MealPlan.Full;
+            }
+
+            if (request.mealPlan != MealPlan.Full)
+            {
+                Debug.Log(
+                    "Generated request without Full Meal Plan. " +
+                    "Current Full Meal Plan guests: " +
+                    currentFullMealPlanGuests
+                );
+
+                return request;
+            }
+
+            int newGuestCount =
+                Mathf.Max(1, request.guestCount);
+
+            bool hasAvailableCapacity =
+                currentFullMealPlanGuests + newGuestCount
+                <= MaxFullMealPlanGuests;
+
+            if (hasAvailableCapacity)
+            {
+                Debug.Log(
+                    "Generated Full Meal Plan request. " +
+                    "Current guests: " +
+                    currentFullMealPlanGuests +
+                    " / New guests: " +
+                    newGuestCount +
+                    " / Maximum: " +
+                    MaxFullMealPlanGuests +
+                    " / Forced because empty: " +
+                    mustForceFullMealPlan
+                );
+
+                return request;
+            }
+
+            Debug.Log(
+                "Generated Full Meal Plan request did not fit. " +
+                "Generating another request. Attempt: " +
+                attempt +
+                " / " +
+                maxAttempts
+            );
+        }
+
+        Debug.LogWarning(
+            "Could not generate a request respecting " +
+            "the Full Meal Plan capacity after " +
+            maxAttempts +
+            " attempts."
+        );
+
+        return null;
     }
 
     private int GetCurrentFullMealPlanGuestCount()

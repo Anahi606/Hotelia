@@ -29606,7 +29606,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &279702267
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -47627,6 +47627,7 @@ GameObject:
   - component: {fileID: 746585812}
   - component: {fileID: 746585814}
   - component: {fileID: 746585813}
+  - component: {fileID: 746585815}
   m_Layer: 5
   m_Name: RestaurantTutorialPanel
   m_TagString: Untagged
@@ -47697,6 +47698,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 746585811}
   m_CullTransparentMesh: 1
+--- !u!114 &746585815
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 746585811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bef8471aa43da204aa2177470281f297, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PauseWhilePanelActive
 --- !u!1 &748606238
 GameObject:
   m_ObjectHideFlags: 0
@@ -51776,7 +51789,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d37fc51b1431bca479bcc92fdc6e33a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StudentAIQuestionParametersLoader
-  getAIQuestionParametersForStudentUrl: https://hotelia-teacher-registration-ctajh3a9e5d2effc.brazilsouth-01.azurewebsites.net/api/getAIQuestionParametersForStudent
+  getAIQuestionParametersForStudentUrl: https://func-hotelia-dev-teacher-api-sc.azurewebsites.net/api/getAIQuestionParametersForStudent
   loadOnStart: 1
   messageText: {fileID: 0}
 --- !u!4 &869516732
@@ -69415,7 +69428,7 @@ MonoBehaviour:
   InputText: {fileID: 373607129}
   OutputText: {fileID: 2056810200}
   useTeacherAIParameters: 1
-  azureFunctionUrl: https://hotelia-teacher-registration-ctajh3a9e5d2effc.brazilsouth-01.azurewebsites.net/api/generateNpcDialogue
+  azureFunctionUrl: https://func-hotelia-dev-teacher-api-sc.azurewebsites.net/api/generateNpcDialogue
   playerMovement: {fileID: 894998815}
   playerInput: {fileID: 0}
   interactActionName: Interact
@@ -75971,7 +75984,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1389490692
 RectTransform:
   m_ObjectHideFlags: 0

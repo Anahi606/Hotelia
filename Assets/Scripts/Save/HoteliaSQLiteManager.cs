@@ -7,6 +7,8 @@ public static class HoteliaSQLiteManager
 {
     private const string GuestProfileId = "guest";
 
+    private const string LastLocalPlayFabIdKey = "Hotelia_LastLocalPlayFabId";
+
     private static SQLiteConnection connection;
     private static string activeProfileId = GuestProfileId;
 
@@ -76,21 +78,114 @@ public static class HoteliaSQLiteManager
         SwitchProfile(GuestProfileId);
     }
 
-    public static bool UsePlayFabProfile(string playFabId)
+    public static bool UsePlayFabProfile(
+    string playFabId,
+    bool rememberAsLastProfile = true
+)
     {
         if (string.IsNullOrWhiteSpace(playFabId))
         {
             Debug.LogError(
-                "[HoteliaSQLiteManager] The PlayFab profile could not be activated " +
-                "because the PlayFabId is empty."
+                "[HoteliaSQLiteManager] The PlayFab profile could not " +
+                "be activated because the PlayFabId is empty."
             );
 
             return false;
         }
 
-        SwitchProfile("user_" + playFabId);
+        playFabId = playFabId.Trim();
+
+        SwitchProfile(
+            GetPlayFabProfileId(playFabId)
+        );
+
+        if (rememberAsLastProfile)
+        {
+            PlayerPrefs.SetString(
+                LastLocalPlayFabIdKey,
+                playFabId
+            );
+
+            PlayerPrefs.Save();
+
+            Debug.Log(
+                "[HoteliaSQLiteManager] Last local student remembered: " +
+                playFabId
+            );
+        }
 
         return true;
+    }
+
+    public static bool TryUseLastPlayFabProfile()
+    {
+        string lastPlayFabId = PlayerPrefs.GetString(
+            LastLocalPlayFabIdKey,
+            ""
+        );
+
+        if (string.IsNullOrWhiteSpace(lastPlayFabId))
+        {
+            Debug.Log(
+                "[HoteliaSQLiteManager] There is no remembered " +
+                "student profile on this device."
+            );
+
+            return false;
+        }
+
+        bool activated = UsePlayFabProfile(
+            lastPlayFabId,
+            false
+        );
+
+        if (activated)
+        {
+            Debug.Log(
+                "[HoteliaSQLiteManager] Remembered offline profile activated: " +
+                ActiveProfileId
+            );
+        }
+
+        return activated;
+    }
+
+    public static bool IsUsingPlayFabProfile(string playFabId)
+    {
+        if (string.IsNullOrWhiteSpace(playFabId))
+            return false;
+
+        string expectedProfileId =
+            GetPlayFabProfileId(playFabId.Trim());
+
+        return string.Equals(
+            activeProfileId,
+            expectedProfileId,
+            System.StringComparison.Ordinal
+        );
+    }
+
+    public static void ForgetLastPlayFabProfile()
+    {
+        PlayerPrefs.DeleteKey(
+            LastLocalPlayFabIdKey
+        );
+
+        PlayerPrefs.Save();
+
+        UseGuestProfile();
+
+        Debug.Log(
+            "[HoteliaSQLiteManager] The remembered student profile " +
+            "was removed. Guest profile activated."
+        );
+    }
+
+    private static string GetPlayFabProfileId(string playFabId)
+    {
+        return SanitizeFileName(
+            "user_" + playFabId
+        );
     }
 
     private static void SwitchProfile(string newProfileId)
@@ -219,6 +314,8 @@ public static class HoteliaSQLiteManager
                 CurrentGuestCount = room.currentGuestCount,
                 HasGuestData = room.hasGuestData,
 
+                LastRestaurantOrderCompletedDay = room.lastRestaurantOrderCompletedDay,
+
                 HotelDoorSpawnId = room.hotelDoorSpawnId,
                 GuestSpriteName = room.guestSpriteName
             };
@@ -261,17 +358,15 @@ public static class HoteliaSQLiteManager
                 currentMealPlan =
                     (MealPlan)entity.CurrentMealPlan,
 
-                currentGuestCount =
-                    entity.CurrentGuestCount,
+                currentGuestCount = entity.CurrentGuestCount,
 
-                hasGuestData =
-                    entity.HasGuestData,
+                hasGuestData = entity.HasGuestData,
 
-                hotelDoorSpawnId =
-                    entity.HotelDoorSpawnId,
+                lastRestaurantOrderCompletedDay = entity.LastRestaurantOrderCompletedDay,
 
-                guestSpriteName =
-                    entity.GuestSpriteName
+                hotelDoorSpawnId = entity.HotelDoorSpawnId,
+
+                guestSpriteName = entity.GuestSpriteName
             };
 
             rooms.Add(room);

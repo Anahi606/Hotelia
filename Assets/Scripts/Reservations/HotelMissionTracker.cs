@@ -5,20 +5,28 @@ public static class HotelMissionTracker
 {
     public static List<HotelMissionData> BuildMissions()
     {
-        List<HotelMissionData> missions = new List<HotelMissionData>();
+        List<HotelMissionData> missions =
+            new List<HotelMissionData>();
 
         List<string> dirtyRooms = GetDirtyRoomIds();
-        List<string> pendingFoodRooms = GetPendingFoodOrderRoomIds();
+        List<string> pendingFoodRooms =
+            GetPendingFoodOrderRoomIds();
         List<string> freeRooms = GetFreeRoomIds();
 
         if (dirtyRooms.Count > 0)
-            missions.Add(CreateCleanRoomsMission(dirtyRooms));
+            missions.Add(
+                CreateCleanRoomsMission(dirtyRooms)
+            );
 
         if (pendingFoodRooms.Count > 0)
-            missions.Add(CreateFoodOrdersMission(pendingFoodRooms));
+            missions.Add(
+                CreateFoodOrdersMission(pendingFoodRooms)
+            );
 
         if (freeRooms.Count > 0)
-            missions.Add(CreateFreeRoomsMission(freeRooms));
+            missions.Add(
+                CreateFreeRoomsMission(freeRooms)
+            );
 
         return missions;
     }
@@ -104,6 +112,7 @@ public static class HotelMissionTracker
         return mission;
     }
 
+
     private static List<string> GetDirtyRoomIds()
     {
         List<string> ids = new List<string>();
@@ -158,13 +167,22 @@ public static class HotelMissionTracker
 
     public static bool IsFoodOrderPending(RoomRuntimeData room)
     {
-        if (room == null) return false;
+        if (room == null)
+            return false;
 
-        if (room.state != RoomState.Occupied) return false;
-        if (!room.hasGuestData) return false;
-        if (room.currentMealPlan != MealPlan.Full) return false;
+        if (room.state != RoomState.Occupied)
+            return false;
 
-        int currentDay = GetCurrentDay();
+        if (!room.hasGuestData)
+            return false;
+
+        if (room.currentMealPlan != MealPlan.Full)
+            return false;
+
+        int currentDay =
+            DayManager.Instance != null
+                ? DayManager.Instance.CurrentDay
+                : 1;
 
         return room.lastRestaurantOrderCompletedDay != currentDay;
     }
