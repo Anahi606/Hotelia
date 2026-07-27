@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class AIQuestionParametersRuntime : MonoBehaviour
@@ -11,8 +12,30 @@ public class AIQuestionParametersRuntime : MonoBehaviour
         get
         {
             return CurrentParameters != null &&
-                   CurrentParameters.status == "ACTIVE";
+                   string.Equals(
+                       CurrentParameters.status,
+                       "ACTIVE",
+                       StringComparison.OrdinalIgnoreCase
+                   );
         }
+    }
+
+    public bool HasParametersForClass(string classCode)
+    {
+        if (!HasActiveParameters)
+            return false;
+
+        if (string.IsNullOrWhiteSpace(classCode))
+            return false;
+
+        if (string.IsNullOrWhiteSpace(CurrentParameters.classCode))
+            return false;
+
+        return string.Equals(
+            CurrentParameters.classCode.Trim(),
+            classCode.Trim(),
+            StringComparison.OrdinalIgnoreCase
+        );
     }
 
     private void Awake()
@@ -29,22 +52,68 @@ public class AIQuestionParametersRuntime : MonoBehaviour
 
     public void SetCurrentParameters(AIQuestionParametersData parameters)
     {
-        CurrentParameters = parameters;
-
-        if (CurrentParameters != null)
+        if (parameters == null)
         {
+            CurrentParameters = null;
+
+            Debug.LogWarning(
+                "AIQuestionParametersRuntime received null parameters."
+            );
+
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(parameters.classCode))
+        {
+            parameters.classCode =
+                parameters.classCode.Trim();
+
+            StudentClassRuntime.SetClassCode(
+                parameters.classCode
+            );
+
             Debug.Log(
-                "AI parameters loaded: " +
-                CurrentParameters.subjectName +
-                " - Class " +
-                CurrentParameters.classCode
+                "AIQuestionParametersRuntime: NRC received " +
+                "from Azure and saved: " +
+                parameters.classCode
             );
         }
+        else
+        {
+            Debug.LogWarning(
+                "AIQuestionParametersRuntime: the parameters " +
+                "do not contain a classCode/NRC."
+            );
+        }
+
+        if (!string.IsNullOrWhiteSpace(parameters.status))
+        {
+            parameters.status =
+                parameters.status.Trim().ToUpperInvariant();
+        }
+
+        CurrentParameters = parameters;
+
+        Debug.Log(
+            "AIQuestionParametersRuntime updated." +
+            "\nParameterId=" + parameters.parameterId +
+            "\nSubject=" + parameters.subjectName +
+            "\nClassCode=" + parameters.classCode +
+            "\nCourseId=" + parameters.courseId +
+            "\nStatus=" + parameters.status +
+            "\nGoal=" + parameters.questionGoal
+        );
     }
 
     public void ClearCurrentParameters()
     {
         CurrentParameters = null;
-        Debug.Log("AI parameters cleared.");
+        Debug.Log("AIQuestionParametersRuntime parameters cleared.");
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
     }
 }

@@ -22,6 +22,7 @@ public class PlayfabManager : MonoBehaviour
     private const string StudentRole = "student";
     private const string TeacherRole = "teacher";
     private const string RoleKey = "Role";
+    private const string UdlaEmailDomain = "udla.edu.ec";
     private const string TeacherAccessCodeTitleDataKey = "TeacherAccessCode";
 
     [Header("Login UI")]
@@ -89,29 +90,59 @@ public class PlayfabManager : MonoBehaviour
 
     public void RegisterButton()
     {
-        string email = registerEmailInput != null ? registerEmailInput.text.Trim() : "";
-        string password = registerPasswordInput != null ? registerPasswordInput.text : "";
-        string teacherCode = registerTeacherCodeInput != null ? registerTeacherCodeInput.text.Trim() : "";
+        string email = registerEmailInput != null
+            ? registerEmailInput.text.Trim().ToLowerInvariant()
+            : "";
 
-        if (string.IsNullOrEmpty(email))
+        string password = registerPasswordInput != null
+            ? registerPasswordInput.text
+            : "";
+
+        string teacherCode = registerTeacherCodeInput != null
+            ? registerTeacherCodeInput.text.Trim()
+            : "";
+
+        if (string.IsNullOrWhiteSpace(email))
         {
             SetMessage("Enter an email address.");
             return;
         }
 
+        if (!IsValidUdlaEmail(email))
+        {
+            SetMessage(
+                "Only institutional email addresses ending in " +
+                "@udla.edu.ec are allowed."
+            );
+
+            return;
+        }
+
         if (password.Length < 6)
         {
-            SetMessage("Password must be at least 6 characters long.");
+            SetMessage(
+                "Password must be at least 6 characters long."
+            );
+
             return;
         }
 
-        if (string.IsNullOrEmpty(teacherCode))
+        if (string.IsNullOrWhiteSpace(teacherCode))
         {
-            RegisterAccount(StudentRole, email, password);
+            RegisterAccount(
+                StudentRole,
+                email,
+                password
+            );
+
             return;
         }
 
-        RegisterTeacherThroughBackend(email, password, teacherCode);
+        RegisterTeacherThroughBackend(
+            email,
+            password,
+            teacherCode
+        );
     }
 
     private void RegisterAccount(string role, string email, string password)
@@ -298,12 +329,30 @@ public class PlayfabManager : MonoBehaviour
             if (IsStudent)
             {
                 SetMessage(
-                    "Student logged in. Press Continue to sync your progress."
+                    "Student logged in. Loading assigned class..."
                 );
 
-                Debug.Log(
-                    "Student logged in. Progress will sync when pressing Continue."
-                );
+                if (StudentAIQuestionParametersLoader.Instance != null)
+                {
+                    StudentAIQuestionParametersLoader.Instance
+                        .LoadForCurrentStudent();
+
+                    Debug.Log(
+                        "Student logged in. Starting automatic " +
+                        "class and AI parameters resolution."
+                    );
+                }
+                else
+                {
+                    Debug.LogWarning(
+                        "StudentAIQuestionParametersLoader was not found. " +
+                        "The class will be resolved when the NPC opens."
+                    );
+
+                    SetMessage(
+                        "Student logged in. Press Continue to start."
+                    );
+                }
             }
             else if (IsTeacher)
             {
@@ -601,6 +650,36 @@ public class PlayfabManager : MonoBehaviour
             {
                 Debug.LogWarning("Could not update display name: " + error.ErrorMessage);
             }
+        );
+    }
+
+    private bool IsValidUdlaEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return false;
+
+        email = email.Trim();
+
+        if (email.Contains(" "))
+            return false;
+
+        int firstAtIndex = email.IndexOf('@');
+        int lastAtIndex = email.LastIndexOf('@');
+
+        if (firstAtIndex <= 0 ||
+            firstAtIndex != lastAtIndex)
+        {
+            return false;
+        }
+
+        string domain =
+            email.Substring(firstAtIndex + 1)
+                 .Trim();
+
+        return string.Equals(
+            domain,
+            UdlaEmailDomain,
+            StringComparison.OrdinalIgnoreCase
         );
     }
 

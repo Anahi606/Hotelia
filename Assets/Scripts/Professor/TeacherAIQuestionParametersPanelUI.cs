@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using System.IO;
@@ -560,20 +561,53 @@ public class TeacherAIQuestionParametersPanelUI : MonoBehaviour
 
         if (courseListContent == null || courseRowPrefab == null)
         {
-            Debug.LogWarning("Course list content or course row prefab is not assigned.");
+            Debug.LogWarning(
+                "Course list content or course row prefab is not assigned."
+            );
+
             return;
         }
 
-        foreach (AIQuestionParametersData parameter in parameters)
-        {
-            if (parameter == null || parameter.status != "ACTIVE")
-                continue;
+        List<AIQuestionParametersData> orderedParameters =
+            parameters
+                .Where(parameter =>
+                    parameter != null &&
+                    string.Equals(
+                        parameter.status,
+                        "ACTIVE",
+                        StringComparison.OrdinalIgnoreCase
+                    )
+                )
+                .OrderBy(parameter =>
+                    GetNrcSortValue(parameter.classCode)
+                )
+                .ThenBy(
+                    parameter => parameter.classCode ?? "",
+                    StringComparer.OrdinalIgnoreCase
+                )
+                .ToList();
 
+        foreach (AIQuestionParametersData parameter in orderedParameters)
+        {
             TeacherAIQuestionParameterCourseRowUI row =
-                Instantiate(courseRowPrefab, courseListContent);
+                Instantiate(
+                    courseRowPrefab,
+                    courseListContent
+                );
 
             row.Setup(parameter, this);
         }
+    }
+
+    private int GetNrcSortValue(string classCode)
+    {
+        if (string.IsNullOrWhiteSpace(classCode))
+            return int.MaxValue;
+
+        if (int.TryParse(classCode.Trim(), out int nrc))
+            return nrc;
+
+        return int.MaxValue;
     }
 
     private void ClearCourseRows()
