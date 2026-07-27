@@ -2,65 +2,103 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TeacherAIQuestionParameterCourseRowUI : MonoBehaviour
+public class TeacherAIQuestionParameterCourseRowUI :
+    MonoBehaviour
 {
     [Header("Texts")]
-    [SerializeField] private TMP_Text courseNameText;
-    [SerializeField] private TMP_Text courseCodeText;
-    [SerializeField] private TMP_Text assignedStatusText;
+    [SerializeField]
+    private TMP_Text courseNameText;
+
+    [SerializeField]
+    private TMP_Text courseCodeText;
+
+    [SerializeField]
+    private TMP_Text assignedStatusText;
 
     [Header("Buttons")]
-    [SerializeField] private Button editButton;
-    [SerializeField] private Button deleteButton;
+    [SerializeField]
+    private Button editButton;
 
-    private string courseId = "";
+    [SerializeField]
+    private Button deleteButton;
+
+    private string parameterId = "";
+
     private TeacherAIQuestionParametersPanelUI owner;
 
     public void Setup(
         AIQuestionParametersData parameterData,
-        TeacherAIQuestionParametersPanelUI panelOwner
+        TeacherAIQuestionParametersPanelUI panelOwner,
+        bool courseStillExists
     )
     {
         owner = panelOwner;
 
         if (parameterData == null)
         {
-            Debug.LogWarning("Parameter row received null data.");
+            Debug.LogWarning(
+                "Parameter row received null data."
+            );
+
             gameObject.SetActive(false);
             return;
         }
 
-        courseId = parameterData.courseId;
+        /*
+         * Editar y eliminar se hacen por parameterId.
+         */
+        parameterId =
+            parameterData.parameterId;
 
         if (courseNameText != null)
         {
-            if (!string.IsNullOrWhiteSpace(parameterData.subjectName))
-                courseNameText.text = parameterData.subjectName;
-            else
-                courseNameText.text = "Unnamed course";
+            courseNameText.text =
+                !string.IsNullOrWhiteSpace(
+                    parameterData.subjectName
+                )
+                    ? parameterData.subjectName
+                    : "Unnamed course";
         }
 
         if (courseCodeText != null)
         {
-            courseCodeText.text = !string.IsNullOrWhiteSpace(parameterData.classCode)
-                ? parameterData.classCode
-                : "No class code";
+
+            courseCodeText.text =
+                courseStillExists &&
+                !string.IsNullOrWhiteSpace(
+                    parameterData.classCode
+                )
+                    ? parameterData.classCode
+                    : "N/A";
         }
 
         if (assignedStatusText != null)
-            assignedStatusText.text = "Parameters assigned";
+        {
+            assignedStatusText.text =
+                courseStillExists
+                    ? "Active"
+                    : "Pending";
+        }
 
         if (editButton != null)
         {
             editButton.onClick.RemoveAllListeners();
-            editButton.onClick.AddListener(EditButtonClicked);
+
+            editButton.onClick.AddListener(
+                EditButtonClicked
+            );
+
             editButton.gameObject.SetActive(true);
         }
 
         if (deleteButton != null)
         {
             deleteButton.onClick.RemoveAllListeners();
-            deleteButton.onClick.AddListener(DeleteButtonClicked);
+
+            deleteButton.onClick.AddListener(
+                DeleteButtonClicked
+            );
+
             deleteButton.gameObject.SetActive(true);
         }
     }
@@ -69,33 +107,45 @@ public class TeacherAIQuestionParameterCourseRowUI : MonoBehaviour
     {
         if (owner == null)
         {
-            Debug.LogWarning("Cannot edit because owner panel is missing.");
+            Debug.LogWarning(
+                "Cannot edit because owner panel is missing."
+            );
+
             return;
         }
 
-        if (string.IsNullOrEmpty(courseId))
+        if (string.IsNullOrWhiteSpace(parameterId))
         {
-            Debug.LogWarning("Cannot edit because courseId is empty.");
+            Debug.LogWarning(
+                "Cannot edit because parameterId is empty."
+            );
+
             return;
         }
 
-        owner.EditParametersForCourse(courseId);
+        owner.EditParameters(parameterId);
     }
 
     private void DeleteButtonClicked()
     {
         if (owner == null)
         {
-            Debug.LogWarning("Cannot delete because owner panel is missing.");
+            Debug.LogWarning(
+                "Cannot delete because owner panel is missing."
+            );
+
             return;
         }
 
-        if (string.IsNullOrEmpty(courseId))
+        if (string.IsNullOrWhiteSpace(parameterId))
         {
-            Debug.LogWarning("Cannot delete because courseId is empty.");
+            Debug.LogWarning(
+                "Cannot delete because parameterId is empty."
+            );
+
             return;
         }
 
-        owner.DeleteParametersForCourse(courseId);
+        owner.DeleteParameters(parameterId);
     }
 }

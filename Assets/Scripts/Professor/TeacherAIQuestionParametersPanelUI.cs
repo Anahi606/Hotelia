@@ -39,17 +39,22 @@ public class TeacherAIQuestionParametersPanelUI : MonoBehaviour
 
     [Header("Azure Functions")]
     [SerializeField] private string saveAIQuestionParametersUrl;
+    [SerializeField] private string deleteAIQuestionParametersUrl;
 
     [Header("Messages")]
     [SerializeField] private TMP_Text messageText;
 
     private readonly List<TeacherCourseData> courses = new List<TeacherCourseData>();
     private readonly List<AIQuestionParametersData> parameters = new List<AIQuestionParametersData>();
+    private readonly List<TeacherCourseData> dropdownCourses = new List<TeacherCourseData>();
+
+    private string editingParameterId = "";
 
     private bool isLoadingDropdown = false;
     private bool isSaving = false;
     private bool dataLoaded = false;
     private bool openCreateFormAfterLoad = false;
+    private bool isDeleting = false;
 
     private void Start()
     {
@@ -67,6 +72,8 @@ public class TeacherAIQuestionParametersPanelUI : MonoBehaviour
 
     public void HidePanel()
     {
+        editingParameterId = "";
+
         if (panel != null)
             panel.SetActive(false);
 
@@ -75,6 +82,8 @@ public class TeacherAIQuestionParametersPanelUI : MonoBehaviour
 
     public void CloseWithoutSavingButton()
     {
+        editingParameterId = "";
+
         ClearForm();
 
         if (parametersFormPanel != null)
@@ -104,6 +113,8 @@ public class TeacherAIQuestionParametersPanelUI : MonoBehaviour
 
     private void OpenCreateFormNow()
     {
+        editingParameterId = "";
+
         if (GetActiveCourseCount() == 0)
         {
             SetMessage("No active courses found. Create a course first.");
@@ -123,9 +134,11 @@ public class TeacherAIQuestionParametersPanelUI : MonoBehaviour
         if (parametersFormPanel != null)
             parametersFormPanel.SetActive(true);
         else
-            Debug.LogError("Parameters Form Panel is not assigned in the Inspector.");
+            Debug.LogError(
+                "Parameters Form Panel is not assigned in the Inspector."
+            );
 
-        SetMessage("");
+        SetMessage("Select an active course.");
     }
 
     public void LoadAllData()
@@ -248,30 +261,55 @@ public class TeacherAIQuestionParametersPanelUI : MonoBehaviour
     {
         if (courseDropdown == null)
         {
-            Debug.LogWarning("Course dropdown is not assigned.");
+            Debug.LogWarning(
+                "Course dropdown is not assigned."
+            );
+
             return;
         }
 
         isLoadingDropdown = true;
 
         courseDropdown.ClearOptions();
+        dropdownCourses.Clear();
 
-        List<TMP_Dropdown.OptionData> options = new List<TMP_Dropdown.OptionData>();
+        List<TMP_Dropdown.OptionData> options =
+            new List<TMP_Dropdown.OptionData>();
+
+        options.Add(
+            new TMP_Dropdown.OptionData(
+                "Select an active course"
+            )
+        );
 
         foreach (TeacherCourseData course in courses)
         {
-            if (course == null || course.status != "ACTIVE")
+            if (
+                course == null ||
+                !string.Equals(
+                    course.status,
+                    "ACTIVE",
+                    StringComparison.OrdinalIgnoreCase
+                )
+            )
+            {
                 continue;
+            }
 
-            string optionText = GetCourseName(course) + " - Class " + GetClassCode(course);
-            options.Add(new TMP_Dropdown.OptionData(optionText));
+            dropdownCourses.Add(course);
+
+            string optionText =
+                GetCourseName(course) +
+                " - Class " +
+                GetClassCode(course);
+
+            options.Add(
+                new TMP_Dropdown.OptionData(optionText)
+            );
         }
 
         courseDropdown.AddOptions(options);
-
-        if (courseDropdown.options.Count > 0)
-            courseDropdown.value = 0;
-
+        courseDropdown.value = 0;
         courseDropdown.RefreshShownValue();
 
         isLoadingDropdown = false;
@@ -282,45 +320,273 @@ public class TeacherAIQuestionParametersPanelUI : MonoBehaviour
         if (isLoadingDropdown)
             return;
 
-        if (parametersFormPanel == null || !parametersFormPanel.activeSelf)
-            return;
-
-        FillFormFromSelectedCourse();
-    }
-
-    public void EditParametersForCourse(string courseId)
-    {
-        if (string.IsNullOrEmpty(courseId))
-            return;
-
-        bool found = SetDropdownToCourse(courseId);
-
-        if (!found)
+        if (
+            parametersFormPanel == null ||
+            !parametersFormPanel.activeSelf
+        )
         {
-            SetMessage("Course not found.");
+            return;
+        }
+
+        TeacherCourseData selectedCourse =
+            GetSelectedCourse();
+
+        if (selectedCourse == null)
+        {
+            SetMessage("Select an active course.");
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(editingParameterId))
+        {
+            SetMessage(
+                "The parameters will be assigned to: " +
+                GetCourseName(selectedCourse) +
+                " - Class " +
+                GetClassCode(selectedCourse)
+            );
+
             return;
         }
 
         FillFormFromSelectedCourse();
-        ShowParametersFormView();
     }
 
-    public void DeleteParametersForCourse(string courseId)
+    public void EditParameters(string parameterId)
     {
-        AIQuestionParametersData parameter = FindParametersByCourseId(courseId);
+        if (string.IsNullOrWhiteSpace(parameterId))
+        {
+            SetMessage(
+                "Invalid AI question parameter."
+            );
+
+            return;
+        }
+
+        AIQuestionParametersData parameter =
+            FindParametersByParameterId(parameterId);
 
         if (parameter == null)
         {
-            SetMessage("This course has no AI parameters to delete.");
+            SetMessage(
+                "AI question parameters were not found."
+            );
+
             return;
         }
 
-        parameter.status = "DELETED";
-        parameter.updatedUtc = DateTime.UtcNow.ToString("o");
+        editingParameterId = parameter.parameterId;
 
-        RefreshCourseRows();
+        PopulateCourseDropdown();
 
-        SetMessage("Parameters deleted locally. Backend delete can be added later.");
+        /*
+         * Si el curso todavía existe, se selecciona.
+         * Si fue eliminado, queda seleccionada la opción 0.
+         */
+        bool courseStillExists =
+            SetDropdownToCourse(parameter.courseId);
+
+        FillFormFromParameter(parameter);
+        ShowParametersFormView();
+
+        if (dropdownCourses.Count == 0)
+        {
+            SetMessage(
+                "The original course no longer exists and there are no active courses available."
+            );
+
+            return;
+        }
+
+        if (courseStillExists)
+        {
+            SetMessage(
+                "Editing AI parameters for: " +
+                parameter.subjectName
+            );
+        }
+        else
+        {
+            SetMessage(
+                "The original course no longer exists. " +
+                "Select an active course to reassign these parameters."
+            );
+        }
+    }
+
+    public void DeleteParameters(string parameterId)
+    {
+        if (isDeleting || isSaving)
+            return;
+
+        if (!PlayfabManager.IsLoggedInWithEmail || !PlayfabManager.IsTeacher)
+        {
+            SetMessage("Only teacher accounts can delete AI question parameters.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(PlayfabManager.CurrentSessionTicket))
+        {
+            SetMessage("Missing PlayFab session. Please log in again.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(parameterId))
+        {
+            SetMessage("Invalid AI parameter.");
+            return;
+        }
+
+        AIQuestionParametersData parameter =
+            FindParametersByParameterId(parameterId);
+
+        if (parameter == null)
+        {
+            SetMessage("The AI question parameters were not found.");
+            return;
+        }
+
+        StartCoroutine(DeleteAIQuestionParametersRequest(parameter));
+    }
+
+    private IEnumerator DeleteAIQuestionParametersRequest(
+    AIQuestionParametersData parameter
+)
+    {
+        if (parameter == null)
+            yield break;
+
+        if (string.IsNullOrWhiteSpace(deleteAIQuestionParametersUrl))
+        {
+            SetMessage("Missing delete Azure Function URL.");
+            yield break;
+        }
+
+        isDeleting = true;
+        SetMessage("Deleting AI question parameters...");
+
+        DeleteAIQuestionParametersRequestData requestData =
+            new DeleteAIQuestionParametersRequestData
+            {
+                sessionTicket = PlayfabManager.CurrentSessionTicket,
+                parameterId = parameter.parameterId
+            };
+
+        string json = JsonUtility.ToJson(requestData);
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
+
+        using (
+            UnityWebRequest request =
+                new UnityWebRequest(
+                    deleteAIQuestionParametersUrl,
+                    UnityWebRequest.kHttpVerbPOST
+                )
+        )
+        {
+            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            request.downloadHandler = new DownloadHandlerBuffer();
+
+            request.SetRequestHeader(
+                "Content-Type",
+                "application/json"
+            );
+
+            yield return request.SendWebRequest();
+
+            string responseText =
+                request.downloadHandler != null
+                    ? request.downloadHandler.text
+                    : "";
+
+            isDeleting = false;
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                SetMessage("Could not delete AI question parameters.");
+
+                Debug.LogError(
+                    "Delete AI parameters request failed: " +
+                    request.error
+                );
+
+                Debug.LogError(
+                    "Backend response: " +
+                    responseText
+                );
+
+                yield break;
+            }
+
+            DeleteAIQuestionParametersResponseData response =
+                JsonUtility.FromJson<
+                    DeleteAIQuestionParametersResponseData
+                >(responseText);
+
+            if (response == null)
+            {
+                SetMessage("Invalid response from Azure Function.");
+
+                Debug.LogError(
+                    "Invalid delete response: " +
+                    responseText
+                );
+
+                yield break;
+            }
+
+            if (!response.success)
+            {
+                string errorMessage =
+                    string.IsNullOrWhiteSpace(response.message)
+                        ? "Could not delete AI question parameters."
+                        : response.message;
+
+                SetMessage(errorMessage);
+
+                Debug.LogWarning(
+                    "Azure delete failed: " +
+                    responseText
+                );
+
+                yield break;
+            }
+
+            parameter.status = "DELETED";
+            parameter.updatedUtc = DateTime.UtcNow.ToString("o");
+
+            RefreshCourseRows();
+
+            SetMessage(
+                string.IsNullOrWhiteSpace(response.message)
+                    ? "AI question parameters deleted successfully."
+                    : response.message
+            );
+        }
+    }
+
+    private AIQuestionParametersData FindParametersByParameterId(
+    string parameterId
+)
+    {
+        if (string.IsNullOrWhiteSpace(parameterId))
+            return null;
+
+        foreach (AIQuestionParametersData item in parameters)
+        {
+            if (
+                item != null &&
+                string.Equals(
+                    item.parameterId,
+                    parameterId,
+                    StringComparison.Ordinal
+                )
+            )
+            {
+                return item;
+            }
+        }
+
+        return null;
     }
 
     public void CreateParametersButton()
@@ -385,16 +651,28 @@ public class TeacherAIQuestionParametersPanelUI : MonoBehaviour
             return;
         }
 
-        AIQuestionParametersData parameter = FindParametersByCourseId(selectedCourse.courseId);
+        AIQuestionParametersData parameter;
 
-        if (parameter == null)
+        if (!string.IsNullOrWhiteSpace(editingParameterId))
         {
-            parameter = new AIQuestionParametersData
-            {
-                parameterId = "ai_params_" + DateTime.UtcNow.Ticks
-            };
+            parameter =
+                FindParametersByParameterId(
+                    editingParameterId
+                );
 
-            parameters.Add(parameter);
+            if (parameter == null)
+            {
+                SetMessage(
+                    "The parameter being edited was not found."
+                );
+
+                return;
+            }
+        }
+        else
+        {
+            parameter =
+                new AIQuestionParametersData();
         }
 
         parameter.courseId = selectedCourse.courseId;
@@ -439,6 +717,7 @@ public class TeacherAIQuestionParametersPanelUI : MonoBehaviour
             new SaveAIQuestionParametersRequestData
             {
                 sessionTicket = PlayfabManager.CurrentSessionTicket,
+                parameterId = parameter.parameterId,
 
                 courseId = parameter.courseId,
                 subjectCode = parameter.subjectCode,
@@ -508,6 +787,8 @@ public class TeacherAIQuestionParametersPanelUI : MonoBehaviour
 
         UpsertLocalParameter(finalParameter);
 
+        editingParameterId = "";
+
         if (AIQuestionParametersRuntime.Instance != null)
             AIQuestionParametersRuntime.Instance.SetCurrentParameters(finalParameter);
 
@@ -521,12 +802,24 @@ public class TeacherAIQuestionParametersPanelUI : MonoBehaviour
         SetMessage("AI question parameters saved successfully.");
     }
 
-    private void UpsertLocalParameter(AIQuestionParametersData parameter)
+    private void UpsertLocalParameter(
+    AIQuestionParametersData parameter
+)
     {
-        if (parameter == null || string.IsNullOrEmpty(parameter.courseId))
+        if (
+            parameter == null ||
+            string.IsNullOrWhiteSpace(
+                parameter.parameterId
+            )
+        )
+        {
             return;
+        }
 
-        AIQuestionParametersData existing = FindParametersByCourseId(parameter.courseId);
+        AIQuestionParametersData existing =
+            FindParametersByParameterId(
+                parameter.parameterId
+            );
 
         if (existing == null)
         {
@@ -534,25 +827,53 @@ public class TeacherAIQuestionParametersPanelUI : MonoBehaviour
             return;
         }
 
-        existing.parameterId = parameter.parameterId;
-        existing.courseId = parameter.courseId;
-        existing.subjectCode = parameter.subjectCode;
-        existing.subjectName = parameter.subjectName;
-        existing.classCode = parameter.classCode;
-        existing.teacherPlayFabId = parameter.teacherPlayFabId;
+        existing.parameterId =
+            parameter.parameterId;
 
-        existing.scenarioParameters = parameter.scenarioParameters;
-        existing.focusInstructions = parameter.focusInstructions;
-        existing.questionGoal = parameter.questionGoal;
-        existing.allowedTopicsCsv = parameter.allowedTopicsCsv;
-        existing.correctKeywordsCsv = parameter.correctKeywordsCsv;
-        existing.wrongKeywordsCsv = parameter.wrongKeywordsCsv;
+        existing.courseId =
+            parameter.courseId;
 
-        existing.npcRole = parameter.npcRole;
-        existing.answerLanguage = parameter.answerLanguage;
+        existing.subjectCode =
+            parameter.subjectCode;
 
-        existing.status = parameter.status;
-        existing.updatedUtc = parameter.updatedUtc;
+        existing.subjectName =
+            parameter.subjectName;
+
+        existing.classCode =
+            parameter.classCode;
+
+        existing.teacherPlayFabId =
+            parameter.teacherPlayFabId;
+
+        existing.scenarioParameters =
+            parameter.scenarioParameters;
+
+        existing.focusInstructions =
+            parameter.focusInstructions;
+
+        existing.questionGoal =
+            parameter.questionGoal;
+
+        existing.allowedTopicsCsv =
+            parameter.allowedTopicsCsv;
+
+        existing.correctKeywordsCsv =
+            parameter.correctKeywordsCsv;
+
+        existing.wrongKeywordsCsv =
+            parameter.wrongKeywordsCsv;
+
+        existing.npcRole =
+            parameter.npcRole;
+
+        existing.answerLanguage =
+            parameter.answerLanguage;
+
+        existing.status =
+            parameter.status;
+
+        existing.updatedUtc =
+            parameter.updatedUtc;
     }
 
     private void RefreshCourseRows()
@@ -587,15 +908,38 @@ public class TeacherAIQuestionParametersPanelUI : MonoBehaviour
                 )
                 .ToList();
 
-        foreach (AIQuestionParametersData parameter in orderedParameters)
+        foreach (
+            AIQuestionParametersData parameter
+            in orderedParameters
+        )
         {
+            bool courseStillExists =
+                courses.Any(
+                    course =>
+                        course != null &&
+                        string.Equals(
+                            course.status,
+                            "ACTIVE",
+                            StringComparison.OrdinalIgnoreCase
+                        ) &&
+                        string.Equals(
+                            course.courseId,
+                            parameter.courseId,
+                            StringComparison.Ordinal
+                        )
+                );
+
             TeacherAIQuestionParameterCourseRowUI row =
                 Instantiate(
                     courseRowPrefab,
                     courseListContent
                 );
 
-            row.Setup(parameter, this);
+            row.Setup(
+                parameter,
+                this,
+                courseStillExists
+            );
         }
     }
 
@@ -643,45 +987,101 @@ public class TeacherAIQuestionParametersPanelUI : MonoBehaviour
         Debug.Log("Parameters form panel activated.");
     }
 
-    private void FillFormFromSelectedCourse()
+    private void FillFormFromParameter(
+    AIQuestionParametersData parameter
+)
     {
-        TeacherCourseData selectedCourse = GetSelectedCourse();
-
-        if (selectedCourse == null)
+        if (parameter == null)
         {
             ClearForm();
-            return;
-        }
-
-        AIQuestionParametersData savedParameters =
-            FindParametersByCourseId(selectedCourse.courseId);
-
-        if (savedParameters == null || savedParameters.status != "ACTIVE")
-        {
-            ClearForm();
-            SetMessage("Creating AI parameters for: " + GetCourseName(selectedCourse));
             return;
         }
 
         if (scenarioParametersInput != null)
-            scenarioParametersInput.text = savedParameters.scenarioParameters;
+        {
+            scenarioParametersInput.text =
+                parameter.scenarioParameters ?? "";
+        }
 
         if (focusInstructionsInput != null)
-            focusInstructionsInput.text = savedParameters.focusInstructions;
+        {
+            focusInstructionsInput.text =
+                parameter.focusInstructions ?? "";
+        }
 
         if (questionGoalInput != null)
-            questionGoalInput.text = savedParameters.questionGoal;
+        {
+            questionGoalInput.text =
+                parameter.questionGoal ?? "";
+        }
 
         if (allowedTopicsInput != null)
-            allowedTopicsInput.text = savedParameters.allowedTopicsCsv;
+        {
+            allowedTopicsInput.text =
+                parameter.allowedTopicsCsv ?? "";
+        }
 
         if (correctKeywordsInput != null)
-            correctKeywordsInput.text = savedParameters.correctKeywordsCsv;
+        {
+            correctKeywordsInput.text =
+                parameter.correctKeywordsCsv ?? "";
+        }
 
         if (wrongKeywordsInput != null)
-            wrongKeywordsInput.text = savedParameters.wrongKeywordsCsv;
+        {
+            wrongKeywordsInput.text =
+                parameter.wrongKeywordsCsv ?? "";
+        }
+    }
 
-        SetMessage("Editing AI parameters for: " + GetCourseName(selectedCourse));
+    private void FillFormFromSelectedCourse()
+    {
+        TeacherCourseData selectedCourse =
+            GetSelectedCourse();
+
+        if (selectedCourse == null)
+        {
+            editingParameterId = "";
+            ClearForm();
+            SetMessage("Select an active course.");
+            return;
+        }
+
+        AIQuestionParametersData savedParameters =
+            FindParametersByCourseId(
+                selectedCourse.courseId
+            );
+
+        if (
+            savedParameters == null ||
+            !string.Equals(
+                savedParameters.status,
+                "ACTIVE",
+                StringComparison.OrdinalIgnoreCase
+            )
+        )
+        {
+            editingParameterId = "";
+
+            ClearForm();
+
+            SetMessage(
+                "Creating AI parameters for: " +
+                GetCourseName(selectedCourse)
+            );
+
+            return;
+        }
+
+        editingParameterId =
+            savedParameters.parameterId;
+
+        FillFormFromParameter(savedParameters);
+
+        SetMessage(
+            "Editing AI parameters for: " +
+            GetCourseName(selectedCourse)
+        );
     }
 
     private void ClearForm()
@@ -705,50 +1105,68 @@ public class TeacherAIQuestionParametersPanelUI : MonoBehaviour
             wrongKeywordsInput.text = "";
     }
 
-    private bool SetDropdownToCourse(string courseId)
+    private bool SetDropdownToCourse(
+    string courseId
+)
     {
         if (courseDropdown == null)
             return false;
 
-        int activeIndex = -1;
-
-        for (int i = 0; i < courses.Count; i++)
+        for (
+            int i = 0;
+            i < dropdownCourses.Count;
+            i++
+        )
         {
-            if (courses[i] == null || courses[i].status != "ACTIVE")
-                continue;
+            TeacherCourseData course =
+                dropdownCourses[i];
 
-            activeIndex++;
-
-            if (courses[i].courseId == courseId)
+            if (
+                course != null &&
+                string.Equals(
+                    course.courseId,
+                    courseId,
+                    StringComparison.Ordinal
+                )
+            )
             {
-                courseDropdown.value = activeIndex;
+
+                courseDropdown.value = i + 1;
                 courseDropdown.RefreshShownValue();
+
                 return true;
             }
         }
+
+
+        courseDropdown.value = 0;
+        courseDropdown.RefreshShownValue();
 
         return false;
     }
 
     private TeacherCourseData GetSelectedCourse()
     {
-        if (courseDropdown == null || courses.Count == 0)
-            return null;
-
-        int activeIndex = -1;
-
-        for (int i = 0; i < courses.Count; i++)
+        if (
+            courseDropdown == null ||
+            dropdownCourses.Count == 0
+        )
         {
-            if (courses[i] == null || courses[i].status != "ACTIVE")
-                continue;
-
-            activeIndex++;
-
-            if (activeIndex == courseDropdown.value)
-                return courses[i];
+            return null;
         }
 
-        return null;
+        int selectedIndex =
+            courseDropdown.value - 1;
+
+        if (
+            selectedIndex < 0 ||
+            selectedIndex >= dropdownCourses.Count
+        )
+        {
+            return null;
+        }
+
+        return dropdownCourses[selectedIndex];
     }
 
     private AIQuestionParametersData FindParametersByCourseId(string courseId)
