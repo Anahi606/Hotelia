@@ -1339,8 +1339,13 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Example: accessibility, wheelchair, matrimonial room, separate beds, meal
-    plan, room assignment, reservation type'
+  m_text: 'Enter only the topics the NPC may ask about. Separate each topic with
+    a comma.
+
+
+
+    Example: check-in, accessible rooms, wheelchair access, room
+    assignment, bed configuration, reservation type, meal plan, housekeeping assistance'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -6461,10 +6466,11 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Example: accessible, wheelchair, two beds, matrimonial, meal plan, accommodation
-    only, correct room
-
-'
+  m_text: "Enter words or natural phrases that indicate a correct answer. Include
+    common variations and separate them with commas. Avoid generic words such as
+    \u201Cyes\u201D by themselves.\r\n\r\nExample: accessible room, wheelchair accessible,
+    suitable room, we can accommodate you, I can assist you, meets your needs, I
+    can show you the room"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -11509,11 +11515,11 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Describe the type of situations OpenAI should create questions about.
-
-    Example:
-    Create hotel check-in situations where guests need a room based on accessibility,
-    number of guests, bed type, or meal plan.'
+  m_text: "Describe the role of the NPC, the hotel situation, and the information
+    that must appear in the question.\r\n\r\nExample: Act as a hotel guest who needs
+    an accessible room. Mention the guest\u2019s mobility needs and ask the student
+    to recommend a suitable option. Ask only one question and do not reveal the expected
+    answer."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -22835,11 +22841,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Write what the student should demonstrate by answering.
-
-    Example:
-    The student must decide which room, service, or option best fits the guest''s
-    needs.'
+  m_text: "Describe what the student must demonstrate in a correct response.\r\n\r\nExample:
+    The student must offer a suitable room or service, explain why it meets the guest\u2019s
+    needs, and respond politely as a hotel employee."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -53358,11 +53362,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Write the main skills or topics the questions should evaluate.
-
-    Example:
-    Focus on choosing the correct room, identifying guest needs, accessibility, reservation
-    type, and hospitality service.'
+  m_text: "Describe the knowledge or hospitality skills the question should evaluate.\r\n\r\nExample:
+    Evaluate whether the student identifies the guest\u2019s needs, recommends an
+    appropriate option, explains the decision clearly, and communicates professionally."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -60336,8 +60338,15 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Example: wrong room, no accessibility, single bed, no meal plan, incorrect
-    reservation'
+  m_text: 'Enter words or phrases that clearly indicate an incorrect or unsuitable
+    answer. Separate them with commas. Do not include words that could also appear
+    in a correct sentence.
+
+
+
+    Example: no accessible room, not wheelchair accessible,
+    unsuitable room, wrong room, occupied room, dirty room, cannot accommodate you,
+    cannot help'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

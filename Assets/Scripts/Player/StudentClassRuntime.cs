@@ -2,35 +2,57 @@ using UnityEngine;
 
 public static class StudentClassRuntime
 {
-    private const string ClassCodePrefsKey = "Hotelia_CurrentStudentClassCode";
+    private const string ClassCodeKey = "Hotelia_CurrentStudentClassCode";
 
-    public static string CurrentClassCode { get; private set; }
+    private static string currentClassCode = "";
 
     public static void SetClassCode(string classCode)
     {
-        CurrentClassCode = string.IsNullOrWhiteSpace(classCode)
+        currentClassCode = string.IsNullOrWhiteSpace(classCode)
             ? ""
             : classCode.Trim();
 
-        PlayerPrefs.SetString(ClassCodePrefsKey, CurrentClassCode);
+        if (string.IsNullOrWhiteSpace(currentClassCode))
+        {
+            Debug.LogWarning(
+                "StudentClassRuntime: se intentó guardar un NRC vacío."
+            );
+
+            return;
+        }
+
+        PlayerPrefs.SetString(ClassCodeKey, currentClassCode);
         PlayerPrefs.Save();
 
-        Debug.Log("Student class code saved: " + CurrentClassCode);
+        Debug.Log(
+            "StudentClassRuntime: NRC guardado correctamente: " +
+            currentClassCode
+        );
     }
 
     public static string GetClassCode()
     {
-        if (!string.IsNullOrWhiteSpace(CurrentClassCode))
-            return CurrentClassCode;
+        if (!string.IsNullOrWhiteSpace(currentClassCode))
+            return currentClassCode;
 
-        CurrentClassCode = PlayerPrefs.GetString(ClassCodePrefsKey, "").Trim();
-        return CurrentClassCode;
+        currentClassCode =
+            PlayerPrefs.GetString(ClassCodeKey, "").Trim();
+
+        return currentClassCode;
+    }
+
+    public static bool HasClassCode()
+    {
+        return !string.IsNullOrWhiteSpace(GetClassCode());
     }
 
     public static void ClearClassCode()
     {
-        CurrentClassCode = "";
-        PlayerPrefs.DeleteKey(ClassCodePrefsKey);
+        currentClassCode = "";
+
+        PlayerPrefs.DeleteKey(ClassCodeKey);
         PlayerPrefs.Save();
+
+        Debug.Log("StudentClassRuntime: NRC eliminado.");
     }
 }

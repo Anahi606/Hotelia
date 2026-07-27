@@ -59,7 +59,34 @@ public class StudentAIQuestionParametersLoader : MonoBehaviour
 
     public void LoadForCurrentStudent()
     {
-        LoadForClassCode(StudentClassRuntime.GetClassCode());
+        string classCode =
+            StudentClassRuntime.GetClassCode();
+
+        LoadForClassCode(classCode);
+    }
+
+    public void SetClassCodeAndLoad(string classCode)
+    {
+        if (string.IsNullOrWhiteSpace(classCode))
+        {
+            SetMessage(
+                "Cannot load AI parameters because the class code/NRC is empty."
+            );
+
+            FinishLoading(false);
+            return;
+        }
+
+        classCode = classCode.Trim();
+
+        StudentClassRuntime.SetClassCode(classCode);
+
+        Debug.Log(
+            "Student AI Parameters Loader: NRC received: " +
+            classCode
+        );
+
+        LoadForClassCode(classCode);
     }
 
     public void LoadForClassCode(string classCode)
@@ -96,12 +123,9 @@ public class StudentAIQuestionParametersLoader : MonoBehaviour
             bool sessionReady =
                 !string.IsNullOrWhiteSpace(PlayfabManager.CurrentSessionTicket);
 
-            bool classReady =
-                !string.IsNullOrWhiteSpace(StudentClassRuntime.GetClassCode());
-
             bool runtimeReady = AIQuestionParametersRuntime.Instance != null;
 
-            if (loginReady && sessionReady && classReady && runtimeReady)
+            if (loginReady && sessionReady && runtimeReady)
             {
                 LoadForCurrentStudent();
 
@@ -116,7 +140,8 @@ public class StudentAIQuestionParametersLoader : MonoBehaviour
 
         SetMessage(
             "AI parameters were not loaded at startup because the student login, " +
-            "session ticket, class code or runtime was not ready. They will be retried when the NPC opens."
+            "session ticket or runtime was not ready. " +
+            "They will be retried when the NPC opens."
         );
 
         FinishLoading(false);
@@ -158,14 +183,28 @@ public class StudentAIQuestionParametersLoader : MonoBehaviour
 
         string classCode = StudentClassRuntime.GetClassCode();
 
-        if (string.IsNullOrWhiteSpace(classCode))
-        {
-            SetMessage("Missing student class code/NRC. AI teacher parameters will not be loaded.");
-            FinishLoading(false);
-            yield break;
-        }
+        classCode =
+            string.IsNullOrWhiteSpace(classCode)
+                ? ""
+                : classCode.Trim();
 
-        classCode = classCode.Trim();
+        Debug.Log(
+            "Student AI Loader diagnostics:" +
+            "\nLoggedInWithEmail=" +
+            PlayfabManager.IsLoggedInWithEmail +
+            "\nIsStudent=" +
+            PlayfabManager.IsStudent +
+            "\nIsTeacher=" +
+            PlayfabManager.IsTeacher +
+            "\nHasSessionTicket=" +
+            !string.IsNullOrWhiteSpace(
+                PlayfabManager.CurrentSessionTicket
+            ) +
+            "\nClassCode=" +
+            (string.IsNullOrWhiteSpace(classCode)
+                ? "[EMPTY - backend will resolve it]"
+                : classCode)
+        );
 
         if (AIQuestionParametersRuntime.Instance == null)
         {
@@ -175,14 +214,40 @@ public class StudentAIQuestionParametersLoader : MonoBehaviour
         }
 
         // Clear only when a real reload is about to begin.
-        AIQuestionParametersRuntime.Instance.ClearCurrentParameters();
+        AIQuestionParametersRuntime runtime = AIQuestionParametersRuntime.Instance;
 
-        GetStudentAIParametersRequestData requestData =
-            new GetStudentAIParametersRequestData
-            {
-                sessionTicket = PlayfabManager.CurrentSessionTicket,
-                classCode = classCode
-            };
+
+        string previousParameterId = "";
+
+        if (runtime.CurrentParameters != null)
+        {
+            previousParameterId =
+                string.IsNullOrWhiteSpace(
+                    runtime.CurrentParameters.parameterId
+                )
+                    ? ""
+                    : runtime.CurrentParameters
+                        .parameterId
+                        .Trim();
+        }
+
+        Debug.Log(
+            "Student AI Parameters Loader: previous question ID=" +
+            (
+                string.IsNullOrWhiteSpace(previousParameterId)
+                    ? "[NONE]"
+                    : previousParameterId
+            )
+        );
+
+        runtime.ClearCurrentParameters();
+
+        GetStudentAIParametersRequestData requestData = new GetStudentAIParametersRequestData
+        {
+            sessionTicket = PlayfabManager.CurrentSessionTicket,
+            classCode = classCode,
+            excludedParameterId = previousParameterId
+        };
 
         string json = JsonUtility.ToJson(requestData);
         byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
@@ -196,7 +261,20 @@ public class StudentAIQuestionParametersLoader : MonoBehaviour
             request.SetRequestHeader("Content-Type", "application/json");
             request.timeout = 15;
 
-            SetMessage("Loading AI parameters for class: " + classCode);
+            if (string.IsNullOrWhiteSpace(classCode))
+            {
+                SetMessage(
+                    "Resolving the student's assigned class " +
+                    "and loading AI parameters."
+                );
+            }
+            else
+            {
+                SetMessage(
+                    "Loading AI parameters for class: " +
+                    classCode
+                );
+            }
 
             yield return request.SendWebRequest();
 
@@ -256,6 +334,31 @@ public class StudentAIQuestionParametersLoader : MonoBehaviour
                 yield break;
             }
 
+            string resolvedClassCode = response.parameters.classCode;
+
+            if (!string.IsNullOrWhiteSpace(resolvedClassCode))
+            {
+                resolvedClassCode =
+                    resolvedClassCode.Trim();
+
+                StudentClassRuntime.SetClassCode(
+                    resolvedClassCode
+                );
+
+                Debug.Log(
+                    "Student AI Parameters Loader: " +
+                    "NRC resolved and saved: " +
+                    resolvedClassCode
+                );
+            }
+            else
+            {
+                Debug.LogWarning(
+                    "The backend loaded AI parameters, " +
+                    "but did not return a classCode/NRC."
+                );
+            }
+
             AIQuestionParametersRuntime.Instance.SetCurrentParameters(response.parameters);
 
             SetMessage(
@@ -299,6 +402,7 @@ public class StudentAIQuestionParametersLoader : MonoBehaviour
     {
         public string sessionTicket;
         public string classCode;
+        public string excludedParameterId;
     }
 
     [Serializable]
