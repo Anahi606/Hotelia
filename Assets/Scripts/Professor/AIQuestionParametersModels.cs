@@ -53,6 +53,7 @@ public class ClassAIRegistryItemData
 public class SaveAIQuestionParametersRequestData
 {
     public string sessionTicket;
+    public string parameterId;
 
     public string courseId;
     public string subjectCode;
@@ -68,6 +69,21 @@ public class SaveAIQuestionParametersRequestData
 
     public string npcRole;
     public string answerLanguage;
+}
+
+[Serializable]
+public class DeleteAIQuestionParametersRequestData
+{
+    public string sessionTicket;
+    public string parameterId;
+}
+
+[Serializable]
+public class DeleteAIQuestionParametersResponseData
+{
+    public bool success;
+    public string message;
+    public string parameterId;
 }
 
 [Serializable]

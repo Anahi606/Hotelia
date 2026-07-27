@@ -21241,6 +21241,7 @@ MonoBehaviour:
   correctKeywordsInput: {fileID: 1534000763}
   wrongKeywordsInput: {fileID: 447511500}
   saveAIQuestionParametersUrl: https://func-hotelia-dev-teacher-api-sc.azurewebsites.net/api/saveAIQuestionParameters
+  deleteAIQuestionParametersUrl: https://func-hotelia-dev-teacher-api-sc.azurewebsites.net/api/deleteAIQuestionParameters
   messageText: {fileID: 1039883565}
 --- !u!1 &741668434
 GameObject:
