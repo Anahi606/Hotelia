@@ -55392,8 +55392,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   roomId: 05
   isAccessible: 0
-  bedType: 0
-  bedCount: 1
+  bedType: 1
+  bedCount: 2
   state: 0
   needsCleaning: 0
   reservedUntilDay: -1
