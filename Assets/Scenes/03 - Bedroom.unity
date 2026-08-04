@@ -28353,6 +28353,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 612530531}
+  - component: {fileID: 612530532}
   m_Layer: 0
   m_Name: TrashSpawnAreas
   m_TagString: Untagged
@@ -28381,6 +28382,38 @@ Transform:
   - {fileID: 1506012662}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &612530532
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 612530530}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c94e275fcc63dd4383dff4f7b43c507, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DeterministicTrashGenerator
+  seed: 12345
+  generateOnStart: 1
+  spawnAreasRoot: {fileID: 612530531}
+  spawnAreas:
+  - {fileID: 613222309}
+  - {fileID: 1650979425}
+  - {fileID: 1799072709}
+  - {fileID: 1506012663}
+  autoCollectSpawnAreas: 1
+  trashPrefabs:
+  - {fileID: 9071495244478789149, guid: cd0d414231eb4d140983971dd48ed3ee, type: 3}
+  amount: 10
+  positionGridSize: 0.05
+  avoidOverlap: 1
+  minimumDistance: 0.35
+  maxPositionAttempts: 100
+  rotationRange: {x: 0, y: 359.9}
+  scaleRange: {x: 0.9, y: 1.1}
+  generatedParent: {fileID: 0}
+  generatedRootName: __DeterministicGeneratedTrash
 --- !u!1 &613222307
 GameObject:
   m_ObjectHideFlags: 0
@@ -40843,6 +40876,52 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1452271214}
   m_CullTransparentMesh: 1
+--- !u!1 &1457577558
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1457577560}
+  - component: {fileID: 1457577559}
+  m_Layer: 0
+  m_Name: ProceduralGeneration
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1457577559
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1457577558}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 904b3e7e535c9a34f89821270691e2bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ProceduralSeedManager
+  masterSeed: 12345
+  persistBetweenScenes: 1
+--- !u!4 &1457577560
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1457577558}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.60814, y: 1.37038, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1457891447
 GameObject:
   m_ObjectHideFlags: 0
@@ -41228,6 +41307,37 @@ Transform:
   - {fileID: 1594600084}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1501675828
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1501675829}
+  m_Layer: 0
+  m_Name: GeneratedTrash
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1501675829
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1501675828}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1532641771}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1506012661
 GameObject:
   m_ObjectHideFlags: 0
@@ -41302,7 +41412,8 @@ Transform:
   m_LocalPosition: {x: -2.65432, y: -2.27894, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1501675829}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1532641772
@@ -41317,6 +41428,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 219713e8b1c45f947ac5a188753697c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+  useMasterSeed: 1
+  seedManager: {fileID: 1457577559}
+  generatorId: Trash
+  roomId: Bedroom_01
+  standaloneSeed: 12345
+  generateOnStart: 0
   trashPrefab: {fileID: 9071495244478789149, guid: cd0d414231eb4d140983971dd48ed3ee, type: 3}
   trashSprites:
   - {fileID: -6530978617562694221, guid: a4af2f103d7da3048a2404f543b01dae, type: 3}
@@ -41325,14 +41442,19 @@ MonoBehaviour:
   - {fileID: -3419425323010237819, guid: a4af2f103d7da3048a2404f543b01dae, type: 3}
   - {fileID: -5919241323973201808, guid: a4af2f103d7da3048a2404f543b01dae, type: 3}
   - {fileID: -911067825615126568, guid: a4af2f103d7da3048a2404f543b01dae, type: 3}
+  spawnAreasRoot: {fileID: 612530531}
   spawnAreas:
   - {fileID: 613222309}
   - {fileID: 1650979425}
   - {fileID: 1799072709}
   - {fileID: 1506012663}
+  autoCollectSpawnAreas: 1
   minTrash: 6
   maxTrash: 10
+  positionGridSize: 0.05
   minDistanceBetweenTrash: 0.7
+  maxPositionAttemptsPerObject: 200
+  spawnedTrashParent: {fileID: 1501675829}
 --- !u!1 &1540566542
 GameObject:
   m_ObjectHideFlags: 0
@@ -54709,3 +54831,4 @@ SceneRoots:
   - {fileID: 1598622171}
   - {fileID: 1116099815}
   - {fileID: 1855306577}
+  - {fileID: 1457577560}
