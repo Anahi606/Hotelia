@@ -79,7 +79,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
-    # La compilación solo se ejecuta cuando EditMode aprueba.
     needs: editmode-tests
 
     steps:
@@ -109,8 +108,9 @@ jobs:
           fetch-depth: 0
           lfs: true
 
-      # No se restaura Library aquí porque ocupa espacio
-      # mientras Docker descarga la imagen de Unity para Windows.
+      # Library no se restaura en este job para evitar
+      # un consumo excesivo de almacenamiento en el runner.
+      # Unity la reconstruirá durante la compilación.
 
       - name: Mostrar espacio antes de compilar
         shell: bash
@@ -120,9 +120,6 @@ jobs:
 
           echo "Tamaño del proyecto:"
           du -sh . || true
-
-          echo "Tamaño de Library:"
-          du -sh Library 2>/dev/null || true
 
       - name: Compilar Hotelia
         uses: game-ci/unity-builder@v4
@@ -143,6 +140,9 @@ jobs:
         run: |
           echo "Espacio disponible después de Unity Builder:"
           df -h
+
+          echo "Tamaño de Library generado:"
+          du -sh Library 2>/dev/null || true
 
           echo "Tamaño de la compilación:"
           du -sh build 2>/dev/null || true
